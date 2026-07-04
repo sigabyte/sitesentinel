@@ -247,6 +247,129 @@ Stability improves execution quality.
 
 ---
 
+# Commit Guidelines
+
+A commit represents a single logical unit of work.
+
+Commit history should communicate the evolution of the product clearly and consistently.
+
+## Commit Format
+
+```
+<scope>: <short summary>
+
+- Change 1
+- Change 2
+- Change 3
+```
+
+### Example
+
+```
+docs: Establish product foundation
+
+- Add Engineering Constitution
+- Add Product Vision
+- Add Engineering Operating System
+```
+
+---
+
+## Scope
+
+The following scopes should be used consistently throughout the project.
+
+```
+docs
+architecture
+core
+crawler
+scanner
+rules
+risk
+trust
+reporting
+alerts
+scheduler
+database
+api
+ui
+security
+tests
+build
+refactor
+release
+```
+
+Additional scopes may be introduced when justified by the architecture.
+
+---
+
+## Commit Principles
+
+Every commit should follow these principles.
+
+### One Logical Change
+
+Each commit should represent a single logical change.
+
+Avoid combining unrelated modifications into one commit.
+
+---
+
+### Meaningful Summary
+
+The first line should briefly describe the purpose of the change.
+
+Good examples:
+
+```
+scanner: Implement HTML crawling pipeline
+
+architecture: Define Trust Engine responsibilities
+
+docs: Add Product Vision
+```
+
+Avoid vague summaries such as:
+
+```
+Update files
+
+Fix stuff
+
+Various improvements
+```
+
+---
+
+### Describe Intent
+
+The bullet list should describe **what changed**, not every edited file.
+
+Focus on the purpose of the change.
+
+---
+
+### Keep Commits Small
+
+Smaller commits improve:
+
+- code review
+- debugging
+- rollback
+- project history
+
+---
+
+### Commit History Should Tell a Story
+
+Reading the commit history should provide a clear understanding of how SiteSentinel evolved over time.
+
+Every commit should answer one simple question:
+
+> **Why was this change made?**
+
 # Closing Statement
 
 Engineering excellence is achieved through discipline, repeatability, transparency, and continuous learning.
