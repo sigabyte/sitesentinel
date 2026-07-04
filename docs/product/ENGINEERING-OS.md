@@ -177,6 +177,37 @@ This protects focus, predictability, and architectural quality.
 
 ---
 
+# Product Identity Check
+
+Before any major feature, architectural change, or implementation decision is approved, it must pass the Product Identity Check.
+
+The following questions must be answered:
+
+1. Does this align with the Product Vision?
+2. Does it comply with the Engineering Constitution?
+3. Does it conflict with any accepted ADR?
+4. Does it require changes to the SSAS?
+5. Does it strengthen or weaken the product identity?
+
+If the change requires an SSAS update, the SSAS must be updated before implementation begins.
+
+---
+
+# Future Backlog
+
+Ideas discovered during an active sprint must not be ignored.
+
+However, they must not disrupt the approved sprint scope.
+
+New ideas should be recorded in the Future Backlog and reviewed during sprint planning or backlog review.
+
+The Future Backlog exists to protect two things:
+
+- valuable ideas
+- sprint discipline
+
+A future idea becomes eligible for implementation only after review, prioritization, and approval by the Product Owner.
+
 # Documentation Hierarchy
 
 SiteSentinel documentation follows the hierarchy below.
