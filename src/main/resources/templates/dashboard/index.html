@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SiteSentinel Dashboard</title>
+</head>
+<body>
+<h1>SiteSentinel</h1>
+
+<p>Core platform foundation for website trust monitoring.</p>
+
+<section>
+  <h2>Dashboard</h2>
+
+  <p>Total websites: <strong th:text="${totalWebsites}">0</strong></p>
+  <p>Active websites: <strong th:text="${activeWebsites}">0</strong></p>
+</section>
+
+<section>
+  <h2>Next action</h2>
+
+  <p>
+    <a href="/websites">View monitored websites</a>
+  </p>
+
+  <p>
+    <a href="/websites/new">Add website</a>
+  </p>
+</section>
+</body>
+</html>

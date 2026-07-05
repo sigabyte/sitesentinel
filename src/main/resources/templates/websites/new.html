@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Website</title>
+</head>
+<body>
+<h1>Add Website</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/websites">Back to websites</a>
+</p>
+
+<div th:if="${errorMessage}">
+    <p th:text="${errorMessage}" style="color: red;">Error message</p>
+</div>
+
+<form th:action="@{/websites}" th:object="${request}" method="post">
+    <div>
+        <label for="name">Website name</label><br>
+        <input id="name" type="text" th:field="*{name}" placeholder="Company website">
+        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;">Name error</p>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="domain">Domain</label><br>
+        <input id="domain" type="text" th:field="*{domain}" placeholder="example.com">
+        <p th:if="${#fields.hasErrors('domain')}" th:errors="*{domain}" style="color: red;">Domain error</p>
+    </div>
+
+    <br>
+
+    <button type="submit">Add website</button>
+</form>
+</body>
+</html>

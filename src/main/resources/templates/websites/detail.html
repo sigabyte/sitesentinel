@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${website.name}">Website Detail</title>
+</head>
+<body>
+<h1 th:text="${website.name}">Website Name</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/websites">Back to websites</a>
+</p>
+
+<section>
+    <h2>Website baseline</h2>
+
+    <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
+    <p>Status: <strong th:text="${website.status}">ACTIVE</strong></p>
+    <p>Created at: <strong th:text="${website.createdAt}">Created</strong></p>
+    <p>Updated at: <strong th:text="${website.updatedAt}">Updated</strong></p>
+</section>
+
+<section>
+    <h2>Monitoring</h2>
+    <p>Monitoring runs will be added in the next Sprint 1 block.</p>
+</section>
+</body>
+</html>

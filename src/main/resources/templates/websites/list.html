@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitored Websites</title>
+</head>
+<body>
+<h1>Monitored Websites</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/websites/new">Add website</a>
+</p>
+
+<section th:if="${#lists.isEmpty(websites)}">
+    <p>No websites added yet.</p>
+    <p>Add your first website to start building the monitoring baseline.</p>
+</section>
+
+<table th:if="${!#lists.isEmpty(websites)}" border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Domain</th>
+        <th>Status</th>
+        <th>Created At</th>
+        <th>Open</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="website : ${websites}">
+        <td th:text="${website.name}">Website Name</td>
+        <td th:text="${website.domain}">example.com</td>
+        <td th:text="${website.status}">ACTIVE</td>
+        <td th:text="${website.createdAt}">Created</td>
+        <td>
+            <a th:href="@{/websites/{id}(id=${website.id})}">Open</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
