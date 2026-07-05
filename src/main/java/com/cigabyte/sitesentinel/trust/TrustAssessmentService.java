@@ -34,4 +34,9 @@ public class TrustAssessmentService {
     public long countByMonitoringRunId(UUID monitoringRunId) {
         return trustAssessmentRepository.countByMonitoringRunId(monitoringRunId);
     }
+
+    @Transactional(readOnly = true)
+    public long countByWebsiteId(UUID websiteId) {
+        return trustAssessmentRepository.countByWebsiteId(websiteId);
+    }
 }

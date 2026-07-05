@@ -10,4 +10,6 @@ public interface RiskRepository extends JpaRepository<Risk, UUID> {
     List<Risk> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
 
     long countByMonitoringRunId(UUID monitoringRunId);
+
+    long countByWebsiteId(UUID websiteId);
 }

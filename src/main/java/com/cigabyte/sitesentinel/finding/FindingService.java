@@ -34,4 +34,9 @@ public class FindingService {
     public long countByMonitoringRunId(UUID monitoringRunId) {
         return findingRepository.countByMonitoringRunId(monitoringRunId);
     }
+
+    @Transactional(readOnly = true)
+    public long countByWebsiteId(UUID websiteId) {
+        return findingRepository.countByWebsiteId(websiteId);
+    }
 }

@@ -22,6 +22,17 @@
 </section>
 
 <section>
+    <h2>Assessment lifecycle summary</h2>
+
+    <p>Monitoring runs: <strong th:text="${monitoringRunCount}">0</strong></p>
+    <p>Collected evidence: <strong th:text="${collectedEvidenceCount}">0</strong></p>
+    <p>Normalized evidence: <strong th:text="${normalizedEvidenceCount}">0</strong></p>
+    <p>Findings: <strong th:text="${findingCount}">0</strong></p>
+    <p>Risks: <strong th:text="${riskCount}">0</strong></p>
+    <p>Trust assessments: <strong th:text="${trustAssessmentCount}">0</strong></p>
+</section>
+
+<section>
     <h2>Monitoring runs</h2>
 
     <form th:action="@{/websites/{websiteId}/monitoring-runs(websiteId=${website.id})}" method="post">

@@ -39,4 +39,14 @@ public class EvidenceService {
     public long countNormalizedEvidence(UUID monitoringRunId) {
         return normalizedEvidenceRepository.countByMonitoringRunId(monitoringRunId);
     }
+
+    @Transactional(readOnly = true)
+    public long countCollectedEvidenceByWebsiteId(UUID websiteId) {
+        return collectedEvidenceRepository.countByWebsiteId(websiteId);
+    }
+
+    @Transactional(readOnly = true)
+    public long countNormalizedEvidenceByWebsiteId(UUID websiteId) {
+        return normalizedEvidenceRepository.countByWebsiteId(websiteId);
+    }
 }

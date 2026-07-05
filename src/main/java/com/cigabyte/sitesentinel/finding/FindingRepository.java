@@ -10,4 +10,6 @@ public interface FindingRepository extends JpaRepository<Finding, UUID> {
     List<Finding> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
 
     long countByMonitoringRunId(UUID monitoringRunId);
+
+    long countByWebsiteId(UUID websiteId);
 }

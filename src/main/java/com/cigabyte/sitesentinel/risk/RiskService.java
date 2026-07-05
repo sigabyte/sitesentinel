@@ -34,4 +34,9 @@ public class RiskService {
     public long countByMonitoringRunId(UUID monitoringRunId) {
         return riskRepository.countByMonitoringRunId(monitoringRunId);
     }
+
+    @Transactional(readOnly = true)
+    public long countByWebsiteId(UUID websiteId) {
+        return riskRepository.countByWebsiteId(websiteId);
+    }
 }

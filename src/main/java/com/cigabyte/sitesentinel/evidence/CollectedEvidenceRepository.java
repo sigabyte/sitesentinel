@@ -10,4 +10,6 @@ public interface CollectedEvidenceRepository extends JpaRepository<CollectedEvid
     List<CollectedEvidence> findByMonitoringRunIdOrderByCollectedAtDesc(UUID monitoringRunId);
 
     long countByMonitoringRunId(UUID monitoringRunId);
+
+    long countByWebsiteId(UUID websiteId);
 }

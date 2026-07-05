@@ -11,5 +11,7 @@ public interface MonitoringRunRepository extends JpaRepository<MonitoringRun, UU
 
     List<MonitoringRun> findTop10ByOrderByCreatedAtDesc();
 
+    long countByWebsiteId(UUID websiteId);
+
     long countByStatus(MonitoringRunStatus status);
 }

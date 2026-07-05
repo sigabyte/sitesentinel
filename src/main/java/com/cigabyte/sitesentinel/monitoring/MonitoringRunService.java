@@ -49,4 +49,9 @@ public class MonitoringRunService {
 
         return monitoringRun;
     }
+
+    @Transactional(readOnly = true)
+    public long countByWebsiteId(UUID websiteId) {
+        return monitoringRunRepository.countByWebsiteId(websiteId);
+    }
 }

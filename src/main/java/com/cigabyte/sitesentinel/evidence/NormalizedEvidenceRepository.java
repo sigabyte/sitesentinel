@@ -10,4 +10,6 @@ public interface NormalizedEvidenceRepository extends JpaRepository<NormalizedEv
     List<NormalizedEvidence> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
 
     long countByMonitoringRunId(UUID monitoringRunId);
+
+    long countByWebsiteId(UUID websiteId);
 }
