@@ -80,5 +80,33 @@
         </tbody>
     </table>
 </section>
+<section>
+    <h2>Findings</h2>
+
+    <div th:if="${#lists.isEmpty(findings)}">
+        <p>No findings recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(findings)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Finding Type</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Confidence</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="finding : ${findings}">
+            <td th:text="${finding.findingType}">Finding type</td>
+            <td th:text="${finding.title}">Finding title</td>
+            <td th:text="${finding.description}">Finding description</td>
+            <td th:text="${finding.confidenceScore}">Confidence</td>
+            <td th:text="${finding.createdAt}">Created at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
 </body>
 </html>
