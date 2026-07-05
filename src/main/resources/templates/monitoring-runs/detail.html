@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Monitoring Run Detail</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <h1>Monitoring Run Detail</h1>
@@ -34,7 +35,7 @@
         <p>No collected evidence recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(collectedEvidence)}" border="1" cellpadding="8">
+    <table th:if="${!#lists.isEmpty(collectedEvidence)}">
         <thead>
         <tr>
             <th>Source Type</th>
@@ -49,7 +50,9 @@
             <td th:text="${evidence.sourceType}">Source type</td>
             <td th:text="${evidence.evidenceType}">Evidence type</td>
             <td th:text="${evidence.sourceUrl}">Source URL</td>
-            <td th:text="${evidence.rawValue}">Raw value</td>
+            <td class="raw-value-cell">
+                <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+            </td>
             <td th:text="${evidence.collectedAt}">Collected at</td>
         </tr>
         </tbody>
@@ -63,7 +66,7 @@
         <p>No normalized evidence recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(normalizedEvidence)}" border="1" cellpadding="8">
+    <table th:if="${!#lists.isEmpty(normalizedEvidence)}">
         <thead>
         <tr>
             <th>Normalized Type</th>
@@ -74,7 +77,9 @@
         <tbody>
         <tr th:each="evidence : ${normalizedEvidence}">
             <td th:text="${evidence.normalizedType}">Normalized type</td>
-            <td th:text="${evidence.normalizedValue}">Normalized value</td>
+            <td class="raw-value-cell">
+                <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
+            </td>
             <td th:text="${evidence.createdAt}">Created at</td>
         </tr>
         </tbody>
@@ -87,7 +92,7 @@
         <p>No findings recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(findings)}" border="1" cellpadding="8">
+    <table th:if="${!#lists.isEmpty(findings)}">
         <thead>
         <tr>
             <th>Finding Type</th>
@@ -115,7 +120,7 @@
         <p>No risks recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(risks)}" border="1" cellpadding="8">
+    <table th:if="${!#lists.isEmpty(risks)}">
         <thead>
         <tr>
             <th>Risk Type</th>
@@ -145,7 +150,7 @@
         <p>No trust assessment recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(trustAssessments)}" border="1" cellpadding="8">
+    <table th:if="${!#lists.isEmpty(trustAssessments)}">
         <thead>
         <tr>
             <th>Status</th>

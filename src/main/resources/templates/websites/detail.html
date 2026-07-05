@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${website.name}">Website Detail</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 <h1 th:text="${website.name}">Website Name</h1>
@@ -36,7 +37,7 @@
     <h2>Monitoring runs</h2>
 
     <form th:action="@{/websites/{websiteId}/monitoring-runs(websiteId=${website.id})}" method="post">
-        <button type="submit">Run baseline assessment</button>
+        <button type="submit">Run website scan</button>
     </form>
 
     <div th:if="${#lists.isEmpty(monitoringRuns)}">

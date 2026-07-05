@@ -49,4 +49,37 @@ public class EvidenceService {
     public long countNormalizedEvidenceByWebsiteId(UUID websiteId) {
         return normalizedEvidenceRepository.countByWebsiteId(websiteId);
     }
+
+    @Transactional
+    public CollectedEvidence recordCollectedEvidence(
+            UUID websiteId,
+            UUID monitoringRunId,
+            String sourceType,
+            String evidenceType,
+            String sourceUrl,
+            String rawValue
+    ) {
+        if (sourceType == null || sourceType.isBlank()) {
+            throw new IllegalArgumentException("Evidence source type is required.");
+        }
+
+        if (evidenceType == null || evidenceType.isBlank()) {
+            throw new IllegalArgumentException("Evidence type is required.");
+        }
+
+        if (rawValue == null || rawValue.isBlank()) {
+            throw new IllegalArgumentException("Evidence raw value is required.");
+        }
+
+        CollectedEvidence evidence = new CollectedEvidence(
+                websiteId,
+                monitoringRunId,
+                sourceType.trim(),
+                evidenceType.trim(),
+                sourceUrl,
+                rawValue
+        );
+
+        return collectedEvidenceRepository.save(evidence);
+    }
 }

@@ -54,4 +54,34 @@ public class MonitoringRunService {
     public long countByWebsiteId(UUID websiteId) {
         return monitoringRunRepository.countByWebsiteId(websiteId);
     }
+
+    @Transactional
+    public MonitoringRun markRunning(UUID runId) {
+        MonitoringRun monitoringRun = monitoringRunRepository.findById(runId)
+                .orElseThrow(() -> new IllegalArgumentException("Monitoring run not found: " + runId));
+
+        monitoringRun.markRunning();
+
+        return monitoringRunRepository.save(monitoringRun);
+    }
+
+    @Transactional
+    public MonitoringRun markCompleted(UUID runId) {
+        MonitoringRun monitoringRun = monitoringRunRepository.findById(runId)
+                .orElseThrow(() -> new IllegalArgumentException("Monitoring run not found: " + runId));
+
+        monitoringRun.markCompleted();
+
+        return monitoringRunRepository.save(monitoringRun);
+    }
+
+    @Transactional
+    public MonitoringRun markFailed(UUID runId, String failureReason) {
+        MonitoringRun monitoringRun = monitoringRunRepository.findById(runId)
+                .orElseThrow(() -> new IllegalArgumentException("Monitoring run not found: " + runId));
+
+        monitoringRun.markFailed(failureReason);
+
+        return monitoringRunRepository.save(monitoringRun);
+    }
 }

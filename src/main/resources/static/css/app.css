@@ -1,0 +1,49 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 24px;
+    line-height: 1.4;
+}
+
+section {
+    margin-bottom: 32px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 12px;
+}
+
+th,
+td {
+    border: 1px solid #cccccc;
+    padding: 8px;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+th {
+    background: #f4f4f4;
+    text-align: left;
+}
+
+.raw-value-cell {
+    max-width: 520px;
+}
+
+.raw-value-preview {
+    max-height: 120px;
+    overflow: auto;
+    white-space: pre-wrap;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    background: #fafafa;
+    padding: 8px;
+    border: 1px solid #dddddd;
+}
+
+.muted {
+    color: #666666;
+}
