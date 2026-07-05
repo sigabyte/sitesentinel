@@ -62,18 +62,31 @@ public class FindingService {
             throw new IllegalArgumentException("Finding description is required.");
         }
 
-        Finding finding = new Finding(
-                websiteId,
-                monitoringRunId,
-                findingType.trim(),
-                title.trim(),
-                description.trim(),
-                confidenceScore
-        );
+        String cleanFindingType = findingType.trim();
 
-        Finding savedFinding = findingRepository.save(finding);
+        Finding savedFinding = findingRepository
+                .findFirstByMonitoringRunIdAndFindingTypeOrderByCreatedAtAsc(
+                        monitoringRunId,
+                        cleanFindingType
+                )
+                .orElseGet(() -> {
+                    Finding finding = new Finding(
+                            websiteId,
+                            monitoringRunId,
+                            cleanFindingType,
+                            title.trim(),
+                            description.trim(),
+                            confidenceScore
+                    );
 
-        if (collectedEvidenceId != null) {
+                    return findingRepository.save(finding);
+                });
+
+        if (collectedEvidenceId != null
+                && !findingEvidenceRepository.existsByFindingIdAndCollectedEvidenceId(
+                savedFinding.getId(),
+                collectedEvidenceId
+        )) {
             FindingEvidence findingEvidence = new FindingEvidence(savedFinding.getId(), collectedEvidenceId);
             findingEvidenceRepository.save(findingEvidence);
         }

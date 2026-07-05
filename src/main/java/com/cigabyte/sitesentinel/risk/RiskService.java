@@ -63,19 +63,32 @@ public class RiskService {
             throw new IllegalArgumentException("Risk rationale is required.");
         }
 
-        Risk risk = new Risk(
-                websiteId,
-                monitoringRunId,
-                riskType.trim(),
-                severity,
-                riskScore,
-                confidenceScore,
-                rationale.trim()
-        );
+        String cleanRiskType = riskType.trim();
 
-        Risk savedRisk = riskRepository.save(risk);
+        Risk savedRisk = riskRepository
+                .findFirstByMonitoringRunIdAndRiskTypeOrderByCreatedAtAsc(
+                        monitoringRunId,
+                        cleanRiskType
+                )
+                .orElseGet(() -> {
+                    Risk risk = new Risk(
+                            websiteId,
+                            monitoringRunId,
+                            cleanRiskType,
+                            severity,
+                            riskScore,
+                            confidenceScore,
+                            rationale.trim()
+                    );
 
-        if (findingId != null) {
+                    return riskRepository.save(risk);
+                });
+
+        if (findingId != null
+                && !riskFindingRepository.existsByRiskIdAndFindingId(
+                savedRisk.getId(),
+                findingId
+        )) {
             RiskFinding riskFinding = new RiskFinding(savedRisk.getId(), findingId);
             riskFindingRepository.save(riskFinding);
         }

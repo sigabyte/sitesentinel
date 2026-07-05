@@ -103,14 +103,23 @@ public class EvidenceService {
             throw new IllegalArgumentException("Normalized evidence value is required.");
         }
 
-        NormalizedEvidence normalizedEvidence = new NormalizedEvidence(
-                websiteId,
-                monitoringRunId,
-                collectedEvidenceId,
-                normalizedType.trim(),
-                normalizedValue.trim()
-        );
+        String cleanNormalizedType = normalizedType.trim();
 
-        return normalizedEvidenceRepository.save(normalizedEvidence);
+        return normalizedEvidenceRepository
+                .findFirstByCollectedEvidenceIdAndNormalizedTypeOrderByCreatedAtAsc(
+                        collectedEvidenceId,
+                        cleanNormalizedType
+                )
+                .orElseGet(() -> {
+                    NormalizedEvidence normalizedEvidence = new NormalizedEvidence(
+                            websiteId,
+                            monitoringRunId,
+                            collectedEvidenceId,
+                            cleanNormalizedType,
+                            normalizedValue.trim()
+                    );
+
+                    return normalizedEvidenceRepository.save(normalizedEvidence);
+                });
     }
 }

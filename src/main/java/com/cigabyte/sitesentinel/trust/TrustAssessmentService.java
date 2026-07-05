@@ -58,23 +58,32 @@ public class TrustAssessmentService {
             throw new IllegalArgumentException("Trust assessment summary is required.");
         }
 
-        TrustAssessment trustAssessment = new TrustAssessment(
-                websiteId,
-                monitoringRunId,
-                trustStatus,
-                trustScore,
-                confidenceScore,
-                summary.trim()
-        );
+        TrustAssessment savedAssessment = trustAssessmentRepository
+                .findFirstByMonitoringRunIdOrderByCreatedAtDesc(monitoringRunId)
+                .orElseGet(() -> {
+                    TrustAssessment trustAssessment = new TrustAssessment(
+                            websiteId,
+                            monitoringRunId,
+                            trustStatus,
+                            trustScore,
+                            confidenceScore,
+                            summary.trim()
+                    );
 
-        TrustAssessment savedAssessment = trustAssessmentRepository.save(trustAssessment);
+                    return trustAssessmentRepository.save(trustAssessment);
+                });
 
         if (riskIds != null) {
             for (UUID riskId : riskIds) {
-                TrustAssessmentRisk assessmentRisk =
-                        new TrustAssessmentRisk(savedAssessment.getId(), riskId);
+                if (!trustAssessmentRiskRepository.existsByTrustAssessmentIdAndRiskId(
+                        savedAssessment.getId(),
+                        riskId
+                )) {
+                    TrustAssessmentRisk assessmentRisk =
+                            new TrustAssessmentRisk(savedAssessment.getId(), riskId);
 
-                trustAssessmentRiskRepository.save(assessmentRisk);
+                    trustAssessmentRiskRepository.save(assessmentRisk);
+                }
             }
         }
 

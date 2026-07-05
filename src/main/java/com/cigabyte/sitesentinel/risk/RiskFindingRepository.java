@@ -9,5 +9,7 @@ public interface RiskFindingRepository extends JpaRepository<RiskFinding, UUID> 
 
     List<RiskFinding> findByRiskId(UUID riskId);
 
+    boolean existsByRiskIdAndFindingId(UUID riskId, UUID findingId);
+
     long countByRiskId(UUID riskId);
 }

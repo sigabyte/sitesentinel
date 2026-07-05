@@ -9,5 +9,7 @@ public interface FindingEvidenceRepository extends JpaRepository<FindingEvidence
 
     List<FindingEvidence> findByFindingId(UUID findingId);
 
+    boolean existsByFindingIdAndCollectedEvidenceId(UUID findingId, UUID collectedEvidenceId);
+
     long countByFindingId(UUID findingId);
 }
