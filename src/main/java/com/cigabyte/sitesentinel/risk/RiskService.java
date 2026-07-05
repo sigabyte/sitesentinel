@@ -39,4 +39,47 @@ public class RiskService {
     public long countByWebsiteId(UUID websiteId) {
         return riskRepository.countByWebsiteId(websiteId);
     }
+
+    @Transactional
+    public Risk recordRisk(
+            UUID websiteId,
+            UUID monitoringRunId,
+            String riskType,
+            RiskSeverity severity,
+            Integer riskScore,
+            Integer confidenceScore,
+            String rationale,
+            UUID findingId
+    ) {
+        if (riskType == null || riskType.isBlank()) {
+            throw new IllegalArgumentException("Risk type is required.");
+        }
+
+        if (severity == null) {
+            throw new IllegalArgumentException("Risk severity is required.");
+        }
+
+        if (rationale == null || rationale.isBlank()) {
+            throw new IllegalArgumentException("Risk rationale is required.");
+        }
+
+        Risk risk = new Risk(
+                websiteId,
+                monitoringRunId,
+                riskType.trim(),
+                severity,
+                riskScore,
+                confidenceScore,
+                rationale.trim()
+        );
+
+        Risk savedRisk = riskRepository.save(risk);
+
+        if (findingId != null) {
+            RiskFinding riskFinding = new RiskFinding(savedRisk.getId(), findingId);
+            riskFindingRepository.save(riskFinding);
+        }
+
+        return savedRisk;
+    }
 }
