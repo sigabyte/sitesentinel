@@ -39,4 +39,45 @@ public class TrustAssessmentService {
     public long countByWebsiteId(UUID websiteId) {
         return trustAssessmentRepository.countByWebsiteId(websiteId);
     }
+
+    @Transactional
+    public TrustAssessment recordTrustAssessment(
+            UUID websiteId,
+            UUID monitoringRunId,
+            TrustStatus trustStatus,
+            Integer trustScore,
+            Integer confidenceScore,
+            String summary,
+            List<UUID> riskIds
+    ) {
+        if (trustStatus == null) {
+            throw new IllegalArgumentException("Trust status is required.");
+        }
+
+        if (summary == null || summary.isBlank()) {
+            throw new IllegalArgumentException("Trust assessment summary is required.");
+        }
+
+        TrustAssessment trustAssessment = new TrustAssessment(
+                websiteId,
+                monitoringRunId,
+                trustStatus,
+                trustScore,
+                confidenceScore,
+                summary.trim()
+        );
+
+        TrustAssessment savedAssessment = trustAssessmentRepository.save(trustAssessment);
+
+        if (riskIds != null) {
+            for (UUID riskId : riskIds) {
+                TrustAssessmentRisk assessmentRisk =
+                        new TrustAssessmentRisk(savedAssessment.getId(), riskId);
+
+                trustAssessmentRiskRepository.save(assessmentRisk);
+            }
+        }
+
+        return savedAssessment;
+    }
 }
