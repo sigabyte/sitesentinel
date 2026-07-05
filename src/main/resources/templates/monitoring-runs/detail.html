@@ -27,6 +27,79 @@
     <p>Created at: <strong th:text="${monitoringRun.createdAt}">Created</strong></p>
     <p>Failure reason: <strong th:text="${monitoringRun.failureReason}">Failure reason</strong></p>
 </section>
+<section>
+    <h2>Assessment summary</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Run Status</span>
+            <span class="summary-card-value" th:text="${monitoringRun.status}">COMPLETED</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Trust Status</span>
+            <span class="summary-card-value"
+                  th:text="${latestTrustAssessment != null ? latestTrustAssessment.trustStatus : 'NOT_ASSESSED'}">
+                NOT_ASSESSED
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Trust Score</span>
+            <span class="summary-card-value"
+                  th:text="${latestTrustAssessment != null ? latestTrustAssessment.trustScore : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Confidence</span>
+            <span class="summary-card-value"
+                  th:text="${latestTrustAssessment != null ? latestTrustAssessment.confidenceScore : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Collected Evidence</span>
+            <span class="summary-card-value" th:text="${collectedEvidenceCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Normalized Evidence</span>
+            <span class="summary-card-value" th:text="${normalizedEvidenceCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Findings</span>
+            <span class="summary-card-value" th:text="${findingCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Risks</span>
+            <span class="summary-card-value" th:text="${riskCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Trust Assessments</span>
+            <span class="summary-card-value" th:text="${trustAssessmentCount}">0</span>
+        </div>
+    </div>
+
+    <div class="assessment-summary" th:if="${latestTrustAssessment != null}">
+        <h3>Latest trust assessment</h3>
+        <p>
+            <span class="status-pill" th:text="${latestTrustAssessment.trustStatus}">HIGH_RISK</span>
+        </p>
+        <p th:text="${latestTrustAssessment.summary}">
+            Trust assessment summary.
+        </p>
+    </div>
+
+    <div class="assessment-summary" th:if="${latestTrustAssessment == null}">
+        <p>No trust assessment was produced for this monitoring run.</p>
+    </div>
+</section>
 
 <section>
     <h2>Collected evidence</h2>
