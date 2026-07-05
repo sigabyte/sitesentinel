@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import com.cigabyte.sitesentinel.monitoring.MonitoringRunService;
 
 import java.util.UUID;
 
@@ -13,9 +14,14 @@ import java.util.UUID;
 public class WebsiteController {
 
     private final WebsiteService websiteService;
+    private final MonitoringRunService monitoringRunService;
 
-    public WebsiteController(WebsiteService websiteService) {
+    public WebsiteController(
+            WebsiteService websiteService,
+            MonitoringRunService monitoringRunService
+    ) {
         this.websiteService = websiteService;
+        this.monitoringRunService = monitoringRunService;
     }
 
     @GetMapping
@@ -52,6 +58,7 @@ public class WebsiteController {
     @GetMapping("/{id}")
     public String detail(@PathVariable UUID id, Model model) {
         model.addAttribute("website", websiteService.findById(id));
+        model.addAttribute("monitoringRuns", monitoringRunService.findByWebsiteId(id));
         return "websites/detail";
     }
 }

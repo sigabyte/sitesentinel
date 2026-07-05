@@ -22,8 +22,36 @@
 </section>
 
 <section>
-    <h2>Monitoring</h2>
-    <p>Monitoring runs will be added in the next Sprint 1 block.</p>
+    <h2>Monitoring runs</h2>
+
+    <form th:action="@{/websites/{websiteId}/monitoring-runs(websiteId=${website.id})}" method="post">
+        <button type="submit">Create monitoring run</button>
+    </form>
+
+    <div th:if="${#lists.isEmpty(monitoringRuns)}">
+        <p>No monitoring runs created yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(monitoringRuns)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Status</th>
+            <th>Started At</th>
+            <th>Completed At</th>
+            <th>Created At</th>
+            <th>Failure Reason</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="run : ${monitoringRuns}">
+            <td th:text="${run.status}">PENDING</td>
+            <td th:text="${run.startedAt}">Started</td>
+            <td th:text="${run.completedAt}">Completed</td>
+            <td th:text="${run.createdAt}">Created</td>
+            <td th:text="${run.failureReason}">Failure</td>
+        </tr>
+        </tbody>
+    </table>
 </section>
 </body>
 </html>
