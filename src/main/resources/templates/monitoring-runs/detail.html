@@ -108,5 +108,35 @@
         </tbody>
     </table>
 </section>
+<section>
+    <h2>Risks</h2>
+
+    <div th:if="${#lists.isEmpty(risks)}">
+        <p>No risks recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(risks)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Risk Type</th>
+            <th>Severity</th>
+            <th>Risk Score</th>
+            <th>Confidence</th>
+            <th>Rationale</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="risk : ${risks}">
+            <td th:text="${risk.riskType}">Risk type</td>
+            <td th:text="${risk.severity}">Severity</td>
+            <td th:text="${risk.riskScore}">Risk score</td>
+            <td th:text="${risk.confidenceScore}">Confidence</td>
+            <td th:text="${risk.rationale}">Rationale</td>
+            <td th:text="${risk.createdAt}">Created at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
 </body>
 </html>

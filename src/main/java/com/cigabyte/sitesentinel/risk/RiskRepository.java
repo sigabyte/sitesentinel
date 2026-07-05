@@ -1,4 +1,13 @@
 package com.cigabyte.sitesentinel.risk;
 
-public class RiskRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface RiskRepository extends JpaRepository<Risk, UUID> {
+
+    List<Risk> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
+
+    long countByMonitoringRunId(UUID monitoringRunId);
 }

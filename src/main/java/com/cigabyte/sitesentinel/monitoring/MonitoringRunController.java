@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.cigabyte.sitesentinel.finding.FindingService;
+import com.cigabyte.sitesentinel.risk.RiskService;
 
 import java.util.UUID;
 
@@ -17,17 +18,20 @@ public class MonitoringRunController {
     private final WebsiteService websiteService;
     private final EvidenceService evidenceService;
     private final FindingService findingService;
+    private final RiskService riskService;
 
     public MonitoringRunController(
             MonitoringRunService monitoringRunService,
             WebsiteService websiteService,
             EvidenceService evidenceService,
-            FindingService findingService
+            FindingService findingService,
+            RiskService riskService
     ) {
         this.monitoringRunService = monitoringRunService;
         this.websiteService = websiteService;
         this.evidenceService = evidenceService;
         this.findingService = findingService;
+        this.riskService = riskService;
     }
 
     @PostMapping
@@ -49,6 +53,7 @@ public class MonitoringRunController {
         model.addAttribute("collectedEvidence", evidenceService.findCollectedEvidence(runId));
         model.addAttribute("normalizedEvidence", evidenceService.findNormalizedEvidence(runId));
         model.addAttribute("findings", findingService.findByMonitoringRunId(runId));
+        model.addAttribute("risks", riskService.findByMonitoringRunId(runId));
 
         return "monitoring-runs/detail";
     }
