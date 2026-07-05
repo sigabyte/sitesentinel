@@ -37,6 +37,17 @@ public class RuleBasedEvidenceAnalysisEngine implements EvidenceAnalysisEngine {
         String evidenceType = evidence.getEvidenceType();
         String rawValue = safeValue(evidence.getRawValue());
 
+        if ("FETCH_OUTCOME".equals(evidenceType)) {
+            evidenceService.recordNormalizedEvidence(
+                    evidence.getWebsiteId(),
+                    evidence.getMonitoringRunId(),
+                    evidence.getId(),
+                    "FETCH_OUTCOME",
+                    normalizeFetchOutcome(rawValue)
+            );
+            return;
+        }
+
         if ("HTTP_STATUS".equals(evidenceType)) {
             evidenceService.recordNormalizedEvidence(
                     evidence.getWebsiteId(),
@@ -90,6 +101,11 @@ public class RuleBasedEvidenceAnalysisEngine implements EvidenceAnalysisEngine {
 
         String evidenceType = evidence.getEvidenceType();
         String rawValue = safeValue(evidence.getRawValue());
+
+        if ("FETCH_OUTCOME".equals(evidenceType)) {
+            createHomepageFetchOutcomeFindingIfNeeded(evidence, rawValue);
+            return;
+        }
 
         if ("HTTP_STATUS".equals(evidenceType)) {
             createHttpStatusFindingIfNeeded(evidence, rawValue);
@@ -342,5 +358,35 @@ public class RuleBasedEvidenceAnalysisEngine implements EvidenceAnalysisEngine {
         }
 
         return value.trim();
+    }
+
+    private String normalizeFetchOutcome(String rawValue) {
+        String value = safeValue(rawValue).toUpperCase(Locale.ROOT);
+
+        if ("SUCCESS".equals(value)) {
+            return "SUCCESS";
+        }
+
+        if ("FAILED".equals(value)) {
+            return "FAILED";
+        }
+
+        return "UNKNOWN";
+    }
+
+    private void createHomepageFetchOutcomeFindingIfNeeded(CollectedEvidence evidence, String rawValue) {
+        if (!"FAILED".equalsIgnoreCase(rawValue)) {
+            return;
+        }
+
+        findingService.recordFinding(
+                evidence.getWebsiteId(),
+                evidence.getMonitoringRunId(),
+                "HOMEPAGE_FETCH_FAILED",
+                "Homepage fetch failed",
+                "The scanner could not fetch the homepage resource successfully.",
+                95,
+                evidence.getId()
+        );
     }
 }

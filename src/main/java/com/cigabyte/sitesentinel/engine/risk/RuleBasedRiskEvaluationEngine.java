@@ -52,6 +52,15 @@ public class RuleBasedRiskEvaluationEngine implements RiskEvaluationEngine {
     }
 
     private RiskRule resolveRiskRule(String findingType) {
+        if ("HOMEPAGE_FETCH_FAILED".equals(findingType)) {
+            return new RiskRule(
+                    "WEBSITE_REACHABILITY_RISK",
+                    RiskSeverity.HIGH,
+                    90,
+                    "The homepage could not be fetched successfully."
+            );
+        }
+
         if ("HOMEPAGE_HTTP_ERROR_STATUS".equals(findingType)) {
             return new RiskRule(
                     "WEBSITE_AVAILABILITY_RISK",

@@ -86,10 +86,30 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
 
         try {
             HttpResponse<String> response = fetch(httpsUrl);
+
+            record(
+                    website,
+                    monitoringRun,
+                    "HOMEPAGE",
+                    "FETCH_OUTCOME",
+                    httpsUrl,
+                    "SUCCESS"
+            );
+
             recordResponseEvidence(website, monitoringRun, "HOMEPAGE", httpsUrl, response);
             recordHomepageHtmlEvidence(website, monitoringRun, response);
+
             return response;
         } catch (RuntimeException exception) {
+            record(
+                    website,
+                    monitoringRun,
+                    "HOMEPAGE",
+                    "FETCH_OUTCOME",
+                    httpsUrl,
+                    "FAILED"
+            );
+
             record(
                     website,
                     monitoringRun,
@@ -103,10 +123,30 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
 
             try {
                 HttpResponse<String> fallbackResponse = fetch(httpUrl);
+
+                record(
+                        website,
+                        monitoringRun,
+                        "HOMEPAGE",
+                        "FETCH_OUTCOME",
+                        httpUrl,
+                        "SUCCESS"
+                );
+
                 recordResponseEvidence(website, monitoringRun, "HOMEPAGE", httpUrl, fallbackResponse);
                 recordHomepageHtmlEvidence(website, monitoringRun, fallbackResponse);
+
                 return fallbackResponse;
             } catch (RuntimeException fallbackException) {
+                record(
+                        website,
+                        monitoringRun,
+                        "HOMEPAGE",
+                        "FETCH_OUTCOME",
+                        httpUrl,
+                        "FAILED"
+                );
+
                 record(
                         website,
                         monitoringRun,
@@ -117,7 +157,7 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
                 );
 
                 throw new IllegalStateException(
-                        "Homepage fetch failed for domain: " + website.getDomain(),
+                        "Homepage fetch failed for both HTTPS and HTTP for domain: " + website.getDomain(),
                         fallbackException
                 );
             }
@@ -132,9 +172,28 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
     ) {
         try {
             HttpResponse<String> response = fetch(url);
+
+            record(
+                    website,
+                    monitoringRun,
+                    sourceType,
+                    "FETCH_OUTCOME",
+                    url,
+                    "SUCCESS"
+            );
+
             recordResponseEvidence(website, monitoringRun, sourceType, url, response);
             recordBodyFingerprintEvidence(website, monitoringRun, sourceType, url, response.body());
         } catch (RuntimeException exception) {
+            record(
+                    website,
+                    monitoringRun,
+                    sourceType,
+                    "FETCH_OUTCOME",
+                    url,
+                    "FAILED"
+            );
+
             record(
                     website,
                     monitoringRun,
