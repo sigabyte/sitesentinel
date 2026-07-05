@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.cigabyte.sitesentinel.finding.FindingService;
 import com.cigabyte.sitesentinel.risk.RiskService;
+import com.cigabyte.sitesentinel.trust.TrustAssessmentService;
 
 import java.util.UUID;
 
@@ -19,19 +20,22 @@ public class MonitoringRunController {
     private final EvidenceService evidenceService;
     private final FindingService findingService;
     private final RiskService riskService;
+    private final TrustAssessmentService trustAssessmentService;
 
     public MonitoringRunController(
             MonitoringRunService monitoringRunService,
             WebsiteService websiteService,
             EvidenceService evidenceService,
             FindingService findingService,
-            RiskService riskService
+            RiskService riskService,
+            TrustAssessmentService trustAssessmentService
     ) {
         this.monitoringRunService = monitoringRunService;
         this.websiteService = websiteService;
         this.evidenceService = evidenceService;
         this.findingService = findingService;
         this.riskService = riskService;
+        this.trustAssessmentService = trustAssessmentService;
     }
 
     @PostMapping
@@ -54,6 +58,7 @@ public class MonitoringRunController {
         model.addAttribute("normalizedEvidence", evidenceService.findNormalizedEvidence(runId));
         model.addAttribute("findings", findingService.findByMonitoringRunId(runId));
         model.addAttribute("risks", riskService.findByMonitoringRunId(runId));
+        model.addAttribute("trustAssessments", trustAssessmentService.findByMonitoringRunId(runId));
 
         return "monitoring-runs/detail";
     }

@@ -138,5 +138,33 @@
         </tbody>
     </table>
 </section>
+<section>
+    <h2>Trust assessments</h2>
+
+    <div th:if="${#lists.isEmpty(trustAssessments)}">
+        <p>No trust assessment recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(trustAssessments)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Status</th>
+            <th>Trust Score</th>
+            <th>Confidence</th>
+            <th>Summary</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="assessment : ${trustAssessments}">
+            <td th:text="${assessment.trustStatus}">UNKNOWN</td>
+            <td th:text="${assessment.trustScore}">0</td>
+            <td th:text="${assessment.confidenceScore}">0</td>
+            <td th:text="${assessment.summary}">Summary</td>
+            <td th:text="${assessment.createdAt}">Created at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
 </body>
 </html>
