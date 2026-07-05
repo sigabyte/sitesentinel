@@ -10,10 +10,80 @@
 <p>Core platform foundation for website trust monitoring.</p>
 
 <section>
-  <h2>Dashboard</h2>
+  <h2>Websites</h2>
 
   <p>Total websites: <strong th:text="${totalWebsites}">0</strong></p>
   <p>Active websites: <strong th:text="${activeWebsites}">0</strong></p>
+</section>
+
+<section>
+  <h2>Monitoring runs</h2>
+
+  <p>Total runs: <strong th:text="${totalMonitoringRuns}">0</strong></p>
+  <p>Pending: <strong th:text="${pendingMonitoringRuns}">0</strong></p>
+  <p>Running: <strong th:text="${runningMonitoringRuns}">0</strong></p>
+  <p>Completed: <strong th:text="${completedMonitoringRuns}">0</strong></p>
+  <p>Failed: <strong th:text="${failedMonitoringRuns}">0</strong></p>
+</section>
+
+<section>
+  <h2>Latest monitoring runs</h2>
+
+  <div th:if="${#lists.isEmpty(latestMonitoringRuns)}">
+    <p>No monitoring runs created yet.</p>
+  </div>
+
+  <table th:if="${!#lists.isEmpty(latestMonitoringRuns)}" border="1" cellpadding="8">
+    <thead>
+    <tr>
+      <th>Status</th>
+      <th>Website ID</th>
+      <th>Started At</th>
+      <th>Completed At</th>
+      <th>Created At</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="run : ${latestMonitoringRuns}">
+      <td th:text="${run.status}">COMPLETED</td>
+      <td th:text="${run.websiteId}">Website ID</td>
+      <td th:text="${run.startedAt}">Started</td>
+      <td th:text="${run.completedAt}">Completed</td>
+      <td th:text="${run.createdAt}">Created</td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Latest trust assessments</h2>
+
+  <div th:if="${#lists.isEmpty(latestTrustAssessments)}">
+    <p>No trust assessments recorded yet.</p>
+  </div>
+
+  <table th:if="${!#lists.isEmpty(latestTrustAssessments)}" border="1" cellpadding="8">
+    <thead>
+    <tr>
+      <th>Status</th>
+      <th>Trust Score</th>
+      <th>Confidence</th>
+      <th>Website ID</th>
+      <th>Monitoring Run ID</th>
+      <th>Created At</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="assessment : ${latestTrustAssessments}">
+      <td th:text="${assessment.trustStatus}">UNKNOWN</td>
+      <td th:text="${assessment.trustScore}">0</td>
+      <td th:text="${assessment.confidenceScore}">0</td>
+      <td th:text="${assessment.websiteId}">Website ID</td>
+      <td th:text="${assessment.monitoringRunId}">Run ID</td>
+      <td th:text="${assessment.createdAt}">Created</td>
+    </tr>
+    </tbody>
+  </table>
 </section>
 
 <section>

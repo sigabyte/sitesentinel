@@ -8,4 +8,8 @@ import java.util.UUID;
 public interface MonitoringRunRepository extends JpaRepository<MonitoringRun, UUID> {
 
     List<MonitoringRun> findByWebsiteIdOrderByCreatedAtDesc(UUID websiteId);
+
+    List<MonitoringRun> findTop10ByOrderByCreatedAtDesc();
+
+    long countByStatus(MonitoringRunStatus status);
 }
