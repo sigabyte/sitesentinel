@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoring Run Detail</title>
+</head>
+<body>
+<h1>Monitoring Run Detail</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a>
+</p>
+
+<section>
+    <h2>Website</h2>
+    <p>Name: <strong th:text="${website.name}">Website name</strong></p>
+    <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
+</section>
+
+<section>
+    <h2>Run baseline</h2>
+    <p>Status: <strong th:text="${monitoringRun.status}">PENDING</strong></p>
+    <p>Started at: <strong th:text="${monitoringRun.startedAt}">Started</strong></p>
+    <p>Completed at: <strong th:text="${monitoringRun.completedAt}">Completed</strong></p>
+    <p>Created at: <strong th:text="${monitoringRun.createdAt}">Created</strong></p>
+    <p>Failure reason: <strong th:text="${monitoringRun.failureReason}">Failure reason</strong></p>
+</section>
+
+<section>
+    <h2>Collected evidence</h2>
+
+    <div th:if="${#lists.isEmpty(collectedEvidence)}">
+        <p>No collected evidence recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(collectedEvidence)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Source Type</th>
+            <th>Evidence Type</th>
+            <th>Source URL</th>
+            <th>Raw Value</th>
+            <th>Collected At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evidence : ${collectedEvidence}">
+            <td th:text="${evidence.sourceType}">Source type</td>
+            <td th:text="${evidence.evidenceType}">Evidence type</td>
+            <td th:text="${evidence.sourceUrl}">Source URL</td>
+            <td th:text="${evidence.rawValue}">Raw value</td>
+            <td th:text="${evidence.collectedAt}">Collected at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Normalized evidence</h2>
+
+    <div th:if="${#lists.isEmpty(normalizedEvidence)}">
+        <p>No normalized evidence recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(normalizedEvidence)}" border="1" cellpadding="8">
+        <thead>
+        <tr>
+            <th>Normalized Type</th>
+            <th>Normalized Value</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evidence : ${normalizedEvidence}">
+            <td th:text="${evidence.normalizedType}">Normalized type</td>
+            <td th:text="${evidence.normalizedValue}">Normalized value</td>
+            <td th:text="${evidence.createdAt}">Created at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

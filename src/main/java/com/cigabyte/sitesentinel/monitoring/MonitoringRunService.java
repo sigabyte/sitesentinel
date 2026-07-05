@@ -37,4 +37,16 @@ public class MonitoringRunService {
         MonitoringRun monitoringRun = new MonitoringRun(websiteId);
         return monitoringRunRepository.save(monitoringRun);
     }
+
+    @Transactional(readOnly = true)
+    public MonitoringRun findByIdAndWebsiteId(UUID runId, UUID websiteId) {
+        MonitoringRun monitoringRun = monitoringRunRepository.findById(runId)
+                .orElseThrow(() -> new IllegalArgumentException("Monitoring run not found: " + runId));
+
+        if (!monitoringRun.getWebsiteId().equals(websiteId)) {
+            throw new IllegalArgumentException("Monitoring run does not belong to website: " + websiteId);
+        }
+
+        return monitoringRun;
+    }
 }

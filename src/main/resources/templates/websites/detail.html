@@ -35,11 +35,14 @@
     <table th:if="${!#lists.isEmpty(monitoringRuns)}" border="1" cellpadding="8">
         <thead>
         <tr>
+        <tr>
             <th>Status</th>
             <th>Started At</th>
             <th>Completed At</th>
             <th>Created At</th>
             <th>Failure Reason</th>
+            <th>Open</th>
+        </tr>
         </tr>
         </thead>
         <tbody>
@@ -49,6 +52,11 @@
             <td th:text="${run.completedAt}">Completed</td>
             <td th:text="${run.createdAt}">Created</td>
             <td th:text="${run.failureReason}">Failure</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${run.id})}">
+                    Open
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>
