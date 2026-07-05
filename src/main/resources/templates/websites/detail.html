@@ -25,7 +25,7 @@
     <h2>Monitoring runs</h2>
 
     <form th:action="@{/websites/{websiteId}/monitoring-runs(websiteId=${website.id})}" method="post">
-        <button type="submit">Create monitoring run</button>
+        <button type="submit">Run baseline assessment</button>
     </form>
 
     <div th:if="${#lists.isEmpty(monitoringRuns)}">

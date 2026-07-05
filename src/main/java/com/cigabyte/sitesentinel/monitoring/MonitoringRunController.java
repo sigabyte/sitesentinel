@@ -21,9 +21,11 @@ public class MonitoringRunController {
     private final FindingService findingService;
     private final RiskService riskService;
     private final TrustAssessmentService trustAssessmentService;
+    private final MonitoringExecutionService monitoringExecutionService;
 
     public MonitoringRunController(
             MonitoringRunService monitoringRunService,
+            MonitoringExecutionService monitoringExecutionService,
             WebsiteService websiteService,
             EvidenceService evidenceService,
             FindingService findingService,
@@ -31,6 +33,7 @@ public class MonitoringRunController {
             TrustAssessmentService trustAssessmentService
     ) {
         this.monitoringRunService = monitoringRunService;
+        this.monitoringExecutionService = monitoringExecutionService;
         this.websiteService = websiteService;
         this.evidenceService = evidenceService;
         this.findingService = findingService;
@@ -40,8 +43,8 @@ public class MonitoringRunController {
 
     @PostMapping
     public String create(@PathVariable UUID websiteId) {
-        monitoringRunService.createPendingRun(websiteId);
-        return "redirect:/websites/" + websiteId;
+        MonitoringRun monitoringRun = monitoringExecutionService.execute(websiteId);
+        return "redirect:/websites/" + websiteId + "/monitoring-runs/" + monitoringRun.getId();
     }
 
     @GetMapping("/{runId}")
