@@ -74,6 +74,11 @@ public class MonitoringRunController {
 
         model.addAttribute("latestTrustAssessment", latestTrustAssessment);
         model.addAttribute("collectedEvidenceCount", evidenceService.countCollectedEvidence(runId));
+        model.addAttribute("homepageEvidence", evidenceService.findHomepageEvidence(runId));
+        model.addAttribute("robotsTxtEvidence", evidenceService.findRobotsTxtEvidence(runId));
+        model.addAttribute("sitemapXmlEvidence", evidenceService.findSitemapXmlEvidence(runId));
+        model.addAttribute("otherCollectedEvidence", evidenceService.findOtherCollectedEvidence(runId));
+
         model.addAttribute("normalizedEvidenceCount", evidenceService.countNormalizedEvidence(runId));
         model.addAttribute("findingCount", findingService.countByMonitoringRunId(runId));
         model.addAttribute("riskCount", riskService.countByMonitoringRunId(runId));

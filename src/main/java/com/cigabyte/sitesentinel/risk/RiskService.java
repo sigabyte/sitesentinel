@@ -22,7 +22,7 @@ public class RiskService {
 
     @Transactional(readOnly = true)
     public List<Risk> findByMonitoringRunId(UUID monitoringRunId) {
-        return riskRepository.findByMonitoringRunIdOrderByCreatedAtDesc(monitoringRunId);
+        return riskRepository.findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(monitoringRunId);
     }
 
     @Transactional(readOnly = true)

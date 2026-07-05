@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface NormalizedEvidenceRepository extends JpaRepository<NormalizedEvidence, UUID> {
 
-    List<NormalizedEvidence> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
+    List<NormalizedEvidence> findByMonitoringRunIdOrderByNormalizedTypeAscCreatedAtAsc(UUID monitoringRunId);
 
     Optional<NormalizedEvidence> findFirstByCollectedEvidenceIdAndNormalizedTypeOrderByCreatedAtAsc(
             UUID collectedEvidenceId,

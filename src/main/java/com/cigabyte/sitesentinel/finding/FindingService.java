@@ -22,7 +22,7 @@ public class FindingService {
 
     @Transactional(readOnly = true)
     public List<Finding> findByMonitoringRunId(UUID monitoringRunId) {
-        return findingRepository.findByMonitoringRunIdOrderByCreatedAtDesc(monitoringRunId);
+        return findingRepository.findByMonitoringRunIdOrderByFindingTypeAscCreatedAtAsc(monitoringRunId);
     }
 
     @Transactional(readOnly = true)

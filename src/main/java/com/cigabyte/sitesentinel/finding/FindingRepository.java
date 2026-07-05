@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface FindingRepository extends JpaRepository<Finding, UUID> {
 
-    List<Finding> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
+    List<Finding> findByMonitoringRunIdOrderByFindingTypeAscCreatedAtAsc(UUID monitoringRunId);
 
     Optional<Finding> findFirstByMonitoringRunIdAndFindingTypeOrderByCreatedAtAsc(
             UUID monitoringRunId,

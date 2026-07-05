@@ -22,12 +22,16 @@ public class EvidenceService {
 
     @Transactional(readOnly = true)
     public List<CollectedEvidence> findCollectedEvidence(UUID monitoringRunId) {
-        return collectedEvidenceRepository.findByMonitoringRunIdOrderByCollectedAtDesc(monitoringRunId);
+        return collectedEvidenceRepository.findByMonitoringRunIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
+                monitoringRunId
+        );
     }
 
     @Transactional(readOnly = true)
     public List<NormalizedEvidence> findNormalizedEvidence(UUID monitoringRunId) {
-        return normalizedEvidenceRepository.findByMonitoringRunIdOrderByCreatedAtDesc(monitoringRunId);
+        return normalizedEvidenceRepository.findByMonitoringRunIdOrderByNormalizedTypeAscCreatedAtAsc(
+                monitoringRunId
+        );
     }
 
     @Transactional(readOnly = true)
@@ -121,5 +125,37 @@ public class EvidenceService {
 
                     return normalizedEvidenceRepository.save(normalizedEvidence);
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public List<CollectedEvidence> findHomepageEvidence(UUID monitoringRunId) {
+        return collectedEvidenceRepository.findByMonitoringRunIdAndSourceTypeOrderByEvidenceTypeAscCollectedAtAsc(
+                monitoringRunId,
+                "HOMEPAGE"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CollectedEvidence> findRobotsTxtEvidence(UUID monitoringRunId) {
+        return collectedEvidenceRepository.findByMonitoringRunIdAndSourceTypeOrderByEvidenceTypeAscCollectedAtAsc(
+                monitoringRunId,
+                "ROBOTS_TXT"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CollectedEvidence> findSitemapXmlEvidence(UUID monitoringRunId) {
+        return collectedEvidenceRepository.findByMonitoringRunIdAndSourceTypeOrderByEvidenceTypeAscCollectedAtAsc(
+                monitoringRunId,
+                "SITEMAP_XML"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CollectedEvidence> findOtherCollectedEvidence(UUID monitoringRunId) {
+        return collectedEvidenceRepository.findByMonitoringRunIdAndSourceTypeNotInOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
+                monitoringRunId,
+                List.of("HOMEPAGE", "ROBOTS_TXT", "SITEMAP_XML")
+        );
     }
 }

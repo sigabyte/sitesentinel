@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface RiskRepository extends JpaRepository<Risk, UUID> {
 
-    List<Risk> findByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
+    List<Risk> findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(UUID monitoringRunId);
 
     Optional<Risk> findFirstByMonitoringRunIdAndRiskTypeOrderByCreatedAtAsc(
             UUID monitoringRunId,

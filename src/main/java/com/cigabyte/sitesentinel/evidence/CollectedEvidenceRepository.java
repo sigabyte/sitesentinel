@@ -7,7 +7,17 @@ import java.util.UUID;
 
 public interface CollectedEvidenceRepository extends JpaRepository<CollectedEvidence, UUID> {
 
-    List<CollectedEvidence> findByMonitoringRunIdOrderByCollectedAtDesc(UUID monitoringRunId);
+    List<CollectedEvidence> findByMonitoringRunIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(UUID monitoringRunId);
+
+    List<CollectedEvidence> findByMonitoringRunIdAndSourceTypeOrderByEvidenceTypeAscCollectedAtAsc(
+            UUID monitoringRunId,
+            String sourceType
+    );
+
+    List<CollectedEvidence> findByMonitoringRunIdAndSourceTypeNotInOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
+            UUID monitoringRunId,
+            List<String> sourceTypes
+    );
 
     long countByMonitoringRunId(UUID monitoringRunId);
 

@@ -100,93 +100,35 @@
         <p>No trust assessment was produced for this monitoring run.</p>
     </div>
 </section>
+<section class="output-section">
+    <h2>Trust assessments</h2>
 
-<section>
-    <h2>Collected evidence</h2>
-
-    <div th:if="${#lists.isEmpty(collectedEvidence)}">
-        <p>No collected evidence recorded for this monitoring run yet.</p>
+    <div th:if="${#lists.isEmpty(trustAssessments)}">
+        <p>No trust assessment recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(collectedEvidence)}">
+    <table th:if="${!#lists.isEmpty(trustAssessments)}">
         <thead>
         <tr>
-            <th>Source Type</th>
-            <th>Evidence Type</th>
-            <th>Source URL</th>
-            <th>Raw Value</th>
-            <th>Collected At</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="evidence : ${collectedEvidence}">
-            <td th:text="${evidence.sourceType}">Source type</td>
-            <td th:text="${evidence.evidenceType}">Evidence type</td>
-            <td th:text="${evidence.sourceUrl}">Source URL</td>
-            <td class="raw-value-cell">
-                <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
-            </td>
-            <td th:text="${evidence.collectedAt}">Collected at</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
-
-<section>
-    <h2>Normalized evidence</h2>
-
-    <div th:if="${#lists.isEmpty(normalizedEvidence)}">
-        <p>No normalized evidence recorded for this monitoring run yet.</p>
-    </div>
-
-    <table th:if="${!#lists.isEmpty(normalizedEvidence)}">
-        <thead>
-        <tr>
-            <th>Normalized Type</th>
-            <th>Normalized Value</th>
-            <th>Created At</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="evidence : ${normalizedEvidence}">
-            <td th:text="${evidence.normalizedType}">Normalized type</td>
-            <td class="raw-value-cell">
-                <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
-            </td>
-            <td th:text="${evidence.createdAt}">Created at</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
-<section>
-    <h2>Findings</h2>
-
-    <div th:if="${#lists.isEmpty(findings)}">
-        <p>No findings recorded for this monitoring run yet.</p>
-    </div>
-
-    <table th:if="${!#lists.isEmpty(findings)}">
-        <thead>
-        <tr>
-            <th>Finding Type</th>
-            <th>Title</th>
-            <th>Description</th>
+            <th>Status</th>
+            <th>Trust Score</th>
             <th>Confidence</th>
+            <th>Summary</th>
             <th>Created At</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="finding : ${findings}">
-            <td th:text="${finding.findingType}">Finding type</td>
-            <td th:text="${finding.title}">Finding title</td>
-            <td th:text="${finding.description}">Finding description</td>
-            <td th:text="${finding.confidenceScore}">Confidence</td>
-            <td th:text="${finding.createdAt}">Created at</td>
+        <tr th:each="assessment : ${trustAssessments}">
+            <td th:text="${assessment.trustStatus}">UNKNOWN</td>
+            <td th:text="${assessment.trustScore}">0</td>
+            <td th:text="${assessment.confidenceScore}">0</td>
+            <td th:text="${assessment.summary}">Summary</td>
+            <td th:text="${assessment.createdAt}">Created at</td>
         </tr>
         </tbody>
     </table>
 </section>
-<section>
+<section class="output-section">
     <h2>Risks</h2>
 
     <div th:if="${#lists.isEmpty(risks)}">
@@ -216,33 +158,171 @@
         </tbody>
     </table>
 </section>
-<section>
-    <h2>Trust assessments</h2>
+<section class="output-section">
+    <h2>Findings</h2>
 
-    <div th:if="${#lists.isEmpty(trustAssessments)}">
-        <p>No trust assessment recorded for this monitoring run yet.</p>
+    <div th:if="${#lists.isEmpty(findings)}">
+        <p>No findings recorded for this monitoring run yet.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(trustAssessments)}">
+    <table th:if="${!#lists.isEmpty(findings)}">
         <thead>
         <tr>
-            <th>Status</th>
-            <th>Trust Score</th>
+            <th>Finding Type</th>
+            <th>Title</th>
+            <th>Description</th>
             <th>Confidence</th>
-            <th>Summary</th>
             <th>Created At</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="assessment : ${trustAssessments}">
-            <td th:text="${assessment.trustStatus}">UNKNOWN</td>
-            <td th:text="${assessment.trustScore}">0</td>
-            <td th:text="${assessment.confidenceScore}">0</td>
-            <td th:text="${assessment.summary}">Summary</td>
-            <td th:text="${assessment.createdAt}">Created at</td>
+        <tr th:each="finding : ${findings}">
+            <td th:text="${finding.findingType}">Finding type</td>
+            <td th:text="${finding.title}">Finding title</td>
+            <td th:text="${finding.description}">Finding description</td>
+            <td th:text="${finding.confidenceScore}">Confidence</td>
+            <td th:text="${finding.createdAt}">Created at</td>
         </tr>
         </tbody>
     </table>
+</section>
+<section class="output-section">
+    <h2>Normalized evidence</h2>
+
+    <div th:if="${#lists.isEmpty(normalizedEvidence)}">
+        <p>No normalized evidence recorded for this monitoring run yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(normalizedEvidence)}">
+        <thead>
+        <tr>
+            <th>Normalized Type</th>
+            <th>Normalized Value</th>
+            <th>Created At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evidence : ${normalizedEvidence}">
+            <td th:text="${evidence.normalizedType}">Normalized type</td>
+            <td class="raw-value-cell">
+                <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
+            </td>
+            <td th:text="${evidence.createdAt}">Created at</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+<section class="output-section">
+    <h2>Collected evidence</h2>
+    <p class="output-note">
+        Raw evidence collected directly from website resources. This is the lowest-level assessment input.
+    </p>
+
+    <div th:if="${#lists.isEmpty(collectedEvidence)}">
+        <p>No collected evidence recorded for this monitoring run yet.</p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(homepageEvidence)}" class="output-subsection">
+        <h3>Homepage evidence</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Evidence Type</th>
+                <th>Source URL</th>
+                <th>Raw Value</th>
+                <th>Collected At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="evidence : ${homepageEvidence}">
+                <td th:text="${evidence.evidenceType}">Evidence type</td>
+                <td th:text="${evidence.sourceUrl}">Source URL</td>
+                <td class="raw-value-cell">
+                    <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+                </td>
+                <td th:text="${evidence.collectedAt}">Collected at</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(robotsTxtEvidence)}" class="output-subsection">
+        <h3>Robots.txt evidence</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Evidence Type</th>
+                <th>Source URL</th>
+                <th>Raw Value</th>
+                <th>Collected At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="evidence : ${robotsTxtEvidence}">
+                <td th:text="${evidence.evidenceType}">Evidence type</td>
+                <td th:text="${evidence.sourceUrl}">Source URL</td>
+                <td class="raw-value-cell">
+                    <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+                </td>
+                <td th:text="${evidence.collectedAt}">Collected at</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(sitemapXmlEvidence)}" class="output-subsection">
+        <h3>Sitemap.xml evidence</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Evidence Type</th>
+                <th>Source URL</th>
+                <th>Raw Value</th>
+                <th>Collected At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="evidence : ${sitemapXmlEvidence}">
+                <td th:text="${evidence.evidenceType}">Evidence type</td>
+                <td th:text="${evidence.sourceUrl}">Source URL</td>
+                <td class="raw-value-cell">
+                    <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+                </td>
+                <td th:text="${evidence.collectedAt}">Collected at</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(otherCollectedEvidence)}" class="output-subsection">
+        <h3>Other evidence</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Source Type</th>
+                <th>Evidence Type</th>
+                <th>Source URL</th>
+                <th>Raw Value</th>
+                <th>Collected At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="evidence : ${otherCollectedEvidence}">
+                <td th:text="${evidence.sourceType}">Source type</td>
+                <td th:text="${evidence.evidenceType}">Evidence type</td>
+                <td th:text="${evidence.sourceUrl}">Source URL</td>
+                <td class="raw-value-cell">
+                    <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+                </td>
+                <td th:text="${evidence.collectedAt}">Collected at</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 </body>
 </html>
