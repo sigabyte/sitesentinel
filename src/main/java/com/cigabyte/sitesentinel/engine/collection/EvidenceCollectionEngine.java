@@ -1,4 +1,8 @@
 package com.cigabyte.sitesentinel.engine.collection;
 
-public class EvidenceCollectionEngine {
+import java.util.UUID;
+
+public interface EvidenceCollectionEngine {
+
+    void collect(UUID monitoringRunId);
 }

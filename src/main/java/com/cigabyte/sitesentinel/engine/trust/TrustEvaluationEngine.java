@@ -1,4 +1,8 @@
 package com.cigabyte.sitesentinel.engine.trust;
 
-public class TrustEvaluationEngine {
+import java.util.UUID;
+
+public interface TrustEvaluationEngine {
+
+    void assess(UUID monitoringRunId);
 }

@@ -1,4 +1,8 @@
 package com.cigabyte.sitesentinel.engine.risk;
 
-public class RiskEvaluationEngine {
+import java.util.UUID;
+
+public interface RiskEvaluationEngine {
+
+    void evaluate(UUID monitoringRunId);
 }

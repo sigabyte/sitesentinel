@@ -1,4 +1,8 @@
 package com.cigabyte.sitesentinel.engine.analysis;
 
-public class EvidenceAnalysisEngine {
+import java.util.UUID;
+
+public interface EvidenceAnalysisEngine {
+
+    void analyze(UUID monitoringRunId);
 }
