@@ -39,4 +39,45 @@ public class FindingService {
     public long countByWebsiteId(UUID websiteId) {
         return findingRepository.countByWebsiteId(websiteId);
     }
+
+    @Transactional
+    public Finding recordFinding(
+            UUID websiteId,
+            UUID monitoringRunId,
+            String findingType,
+            String title,
+            String description,
+            Integer confidenceScore,
+            UUID collectedEvidenceId
+    ) {
+        if (findingType == null || findingType.isBlank()) {
+            throw new IllegalArgumentException("Finding type is required.");
+        }
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Finding title is required.");
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Finding description is required.");
+        }
+
+        Finding finding = new Finding(
+                websiteId,
+                monitoringRunId,
+                findingType.trim(),
+                title.trim(),
+                description.trim(),
+                confidenceScore
+        );
+
+        Finding savedFinding = findingRepository.save(finding);
+
+        if (collectedEvidenceId != null) {
+            FindingEvidence findingEvidence = new FindingEvidence(savedFinding.getId(), collectedEvidenceId);
+            findingEvidenceRepository.save(findingEvidence);
+        }
+
+        return savedFinding;
+    }
 }

@@ -82,4 +82,35 @@ public class EvidenceService {
 
         return collectedEvidenceRepository.save(evidence);
     }
+
+    @Transactional
+    public NormalizedEvidence recordNormalizedEvidence(
+            UUID websiteId,
+            UUID monitoringRunId,
+            UUID collectedEvidenceId,
+            String normalizedType,
+            String normalizedValue
+    ) {
+        if (collectedEvidenceId == null) {
+            throw new IllegalArgumentException("Collected evidence id is required.");
+        }
+
+        if (normalizedType == null || normalizedType.isBlank()) {
+            throw new IllegalArgumentException("Normalized evidence type is required.");
+        }
+
+        if (normalizedValue == null || normalizedValue.isBlank()) {
+            throw new IllegalArgumentException("Normalized evidence value is required.");
+        }
+
+        NormalizedEvidence normalizedEvidence = new NormalizedEvidence(
+                websiteId,
+                monitoringRunId,
+                collectedEvidenceId,
+                normalizedType.trim(),
+                normalizedValue.trim()
+        );
+
+        return normalizedEvidenceRepository.save(normalizedEvidence);
+    }
 }
