@@ -371,6 +371,10 @@ public class RuleBasedEvidenceAnalysisEngine implements EvidenceAnalysisEngine {
             return "FAILED";
         }
 
+        if ("SKIPPED".equals(value)) {
+            return "SKIPPED";
+        }
+
         return "UNKNOWN";
     }
 

@@ -22,15 +22,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
 
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(8);
-    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(15);
-
-    private static final String USER_AGENT =
+    private static final String DEFAULT_USER_AGENT =
             "SiteSentinel/1.0 (+https://sitesentinel.local; website trust monitoring)";
+
+    private static final int DEFAULT_BODY_SNIPPET_MAX_LENGTH = 1000;
 
     private static final Pattern TITLE_PATTERN =
             Pattern.compile("(?is)<title[^>]*>(.*?)</title>");
@@ -51,17 +51,36 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
     private final WebsiteRepository websiteRepository;
     private final EvidenceService evidenceService;
     private final HttpClient httpClient;
+    private final Duration requestTimeout;
+    private final String userAgent;
+    private final boolean scanRobotsTxt;
+    private final boolean scanSitemapXml;
+    private final int bodySnippetMaxLength;
 
     public HttpEvidenceCollectionEngine(
             MonitoringRunRepository monitoringRunRepository,
             WebsiteRepository websiteRepository,
-            EvidenceService evidenceService
+            EvidenceService evidenceService,
+            @Value("${sitesentinel.scanner.connect-timeout-seconds:8}") long connectTimeoutSeconds,
+            @Value("${sitesentinel.scanner.request-timeout-seconds:15}") long requestTimeoutSeconds,
+            @Value("${sitesentinel.scanner.user-agent:}") String configuredUserAgent,
+            @Value("${sitesentinel.scanner.scan-robots-txt:true}") boolean scanRobotsTxt,
+            @Value("${sitesentinel.scanner.scan-sitemap-xml:true}") boolean scanSitemapXml,
+            @Value("${sitesentinel.scanner.body-snippet-max-length:1000}") int configuredBodySnippetMaxLength
     ) {
         this.monitoringRunRepository = monitoringRunRepository;
         this.websiteRepository = websiteRepository;
         this.evidenceService = evidenceService;
+
+        Duration connectTimeout = Duration.ofSeconds(Math.max(1, connectTimeoutSeconds));
+        this.requestTimeout = Duration.ofSeconds(Math.max(1, requestTimeoutSeconds));
+        this.userAgent = cleanUserAgent(configuredUserAgent);
+        this.scanRobotsTxt = scanRobotsTxt;
+        this.scanSitemapXml = scanSitemapXml;
+        this.bodySnippetMaxLength = Math.max(100, configuredBodySnippetMaxLength);
+
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(CONNECT_TIMEOUT)
+                .connectTimeout(connectTimeout)
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
     }
@@ -77,8 +96,20 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
         HttpResponse<String> homepageResponse = scanHomepage(website, monitoringRun);
         String origin = resolveOrigin(homepageResponse.uri(), website);
 
-        scanOptionalResource(website, monitoringRun, origin + "/robots.txt", "ROBOTS_TXT");
-        scanOptionalResource(website, monitoringRun, origin + "/sitemap.xml", "SITEMAP_XML");
+        String robotsTxtUrl = origin + "/robots.txt";
+        String sitemapXmlUrl = origin + "/sitemap.xml";
+
+        if (scanRobotsTxt) {
+            scanOptionalResource(website, monitoringRun, robotsTxtUrl, "ROBOTS_TXT");
+        } else {
+            recordOptionalResourceSkipped(website, monitoringRun, robotsTxtUrl, "ROBOTS_TXT");
+        }
+
+        if (scanSitemapXml) {
+            scanOptionalResource(website, monitoringRun, sitemapXmlUrl, "SITEMAP_XML");
+        } else {
+            recordOptionalResourceSkipped(website, monitoringRun, sitemapXmlUrl, "SITEMAP_XML");
+        }
     }
 
     private HttpResponse<String> scanHomepage(Website website, MonitoringRun monitoringRun) {
@@ -205,11 +236,44 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
         }
     }
 
+    private void recordOptionalResourceSkipped(
+            Website website,
+            MonitoringRun monitoringRun,
+            String url,
+            String sourceType
+    ) {
+        record(
+                website,
+                monitoringRun,
+                sourceType,
+                "FETCH_OUTCOME",
+                url,
+                "SKIPPED"
+        );
+
+        record(
+                website,
+                monitoringRun,
+                sourceType,
+                "SCAN_SKIPPED_REASON",
+                url,
+                "Disabled by scanner configuration."
+        );
+    }
+
+    private String cleanUserAgent(String configuredUserAgent) {
+        if (configuredUserAgent == null || configuredUserAgent.isBlank()) {
+            return DEFAULT_USER_AGENT;
+        }
+
+        return configuredUserAgent.trim();
+    }
+
     private HttpResponse<String> fetch(String url) {
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(REQUEST_TIMEOUT)
-                    .header("User-Agent", USER_AGENT)
+                    .timeout(requestTimeout)
+                    .header("User-Agent", userAgent)
                     .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                     .GET()
                     .build();
@@ -290,7 +354,14 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
         record(website, monitoringRun, sourceType, "BODY_SHA256", sourceUrl, sha256(safeBody));
 
         if (!safeBody.isBlank()) {
-            record(website, monitoringRun, sourceType, "BODY_SNIPPET", sourceUrl, truncate(cleanText(safeBody), 1000));
+            record(
+                    website,
+                    monitoringRun,
+                    sourceType,
+                    "BODY_SNIPPET",
+                    sourceUrl,
+                    truncate(cleanText(safeBody), bodySnippetMaxLength)
+            );
         }
     }
 
