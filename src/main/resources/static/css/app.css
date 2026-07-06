@@ -156,3 +156,19 @@ th {
     border: 1px solid #dddddd;
     padding: 10px;
 }
+
+.traceability-chain {
+    border: 1px solid #cccccc;
+    background: #fafafa;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.traceability-chain-step {
+    padding: 6px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.traceability-chain-step:last-child {
+    border-bottom: none;
+}

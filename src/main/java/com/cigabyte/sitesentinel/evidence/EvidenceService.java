@@ -52,6 +52,47 @@ public class EvidenceService {
     }
 
     @Transactional(readOnly = true)
+    public CollectedEvidence findCollectedEvidenceById(
+            UUID websiteId,
+            UUID monitoringRunId,
+            UUID collectedEvidenceId
+    ) {
+        return collectedEvidenceRepository.findByIdAndMonitoringRunIdAndWebsiteId(
+                        collectedEvidenceId,
+                        monitoringRunId,
+                        websiteId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Collected evidence not found: " + collectedEvidenceId));
+    }
+
+    @Transactional(readOnly = true)
+    public NormalizedEvidence findNormalizedEvidenceById(
+            UUID websiteId,
+            UUID monitoringRunId,
+            UUID normalizedEvidenceId
+    ) {
+        return normalizedEvidenceRepository.findByIdAndMonitoringRunIdAndWebsiteId(
+                        normalizedEvidenceId,
+                        monitoringRunId,
+                        websiteId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Normalized evidence not found: " + normalizedEvidenceId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<NormalizedEvidence> findNormalizedEvidenceForCollectedEvidence(
+            UUID websiteId,
+            UUID monitoringRunId,
+            UUID collectedEvidenceId
+    ) {
+        return normalizedEvidenceRepository.findByCollectedEvidenceIdAndMonitoringRunIdAndWebsiteIdOrderByNormalizedTypeAscCreatedAtAsc(
+                collectedEvidenceId,
+                monitoringRunId,
+                websiteId
+        );
+    }
+
+    @Transactional(readOnly = true)
     public long countCollectedEvidence(UUID monitoringRunId) {
         return collectedEvidenceRepository.countByMonitoringRunId(monitoringRunId);
     }

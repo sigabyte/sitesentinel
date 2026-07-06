@@ -3,11 +3,18 @@ package com.cigabyte.sitesentinel.evidence;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CollectedEvidenceRepository extends JpaRepository<CollectedEvidence, UUID> {
 
     List<CollectedEvidence> findByMonitoringRunIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(UUID monitoringRunId);
+
+    Optional<CollectedEvidence> findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID id,
+            UUID monitoringRunId,
+            UUID websiteId
+    );
 
     List<CollectedEvidence> findByIdInAndMonitoringRunIdAndWebsiteIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
             List<UUID> ids,

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Normalized Evidence Detail</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Normalized Evidence Detail</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+        Back to monitoring run
+    </a>
+</p>
+
+<section>
+    <h2>Traceability chain</h2>
+
+    <div class="traceability-chain">
+        <div class="traceability-chain-step">
+            Website:
+            <strong th:text="${website.domain}">example.com</strong>
+        </div>
+
+        <div class="traceability-chain-step">
+            Monitoring Run:
+            <strong th:text="${monitoringRun.id}">Run ID</strong>
+        </div>
+
+        <div class="traceability-chain-step">
+            Normalized Evidence:
+            <strong th:text="${normalizedEvidence.normalizedType}">Normalized Type</strong>
+        </div>
+
+        <div class="traceability-chain-step">
+            Source Collected Evidence:
+            <strong th:text="${sourceEvidence.evidenceType}">Evidence Type</strong>
+        </div>
+
+        <div class="traceability-chain-step">
+            Related Findings:
+            <strong th:text="${#lists.size(relatedFindings)}">0</strong>
+        </div>
+    </div>
+</section>
+
+<section class="output-section">
+    <h2>Normalized evidence baseline</h2>
+
+    <div class="traceability-card">
+        <p>Normalized Type: <strong th:text="${normalizedEvidence.normalizedType}">Normalized type</strong></p>
+        <p>Created at: <strong th:text="${normalizedEvidence.createdAt}">Created at</strong></p>
+        <p>Collected Evidence ID: <strong th:text="${normalizedEvidence.collectedEvidenceId}">Collected evidence id</strong></p>
+
+        <p>Normalized Value:</p>
+        <div class="traceability-description" th:text="${normalizedEvidence.normalizedValue}">
+            Normalized value
+        </div>
+    </div>
+</section>
+
+<section class="output-section">
+    <h2>Source collected evidence</h2>
+    <p class="output-note">
+        This is the raw collected evidence record used to create the normalized evidence.
+    </p>
+
+    <div class="traceability-card">
+        <p>Source Type: <strong th:text="${sourceEvidence.sourceType}">Source type</strong></p>
+        <p>Evidence Type: <strong th:text="${sourceEvidence.evidenceType}">Evidence type</strong></p>
+        <p>Source URL: <strong th:text="${sourceEvidence.sourceUrl}">Source URL</strong></p>
+        <p>Collected at: <strong th:text="${sourceEvidence.collectedAt}">Collected at</strong></p>
+
+        <p>Raw Value:</p>
+        <div class="raw-value-preview" th:text="${sourceEvidence.rawValue}">
+            Raw value
+        </div>
+    </div>
+</section>
+
+<section class="output-section">
+    <h2>Normalized evidence from same source</h2>
+    <p class="output-note">
+        These normalized records were produced from the same collected evidence input.
+    </p>
+
+    <div th:if="${#lists.isEmpty(normalizedEvidenceFromSameSource)}">
+        <p>No related normalized evidence records found for this source evidence.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(normalizedEvidenceFromSameSource)}">
+        <thead>
+        <tr>
+            <th>Normalized Type</th>
+            <th>Normalized Value</th>
+            <th>Created At</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evidence : ${normalizedEvidenceFromSameSource}">
+            <td th:text="${evidence.normalizedType}">Normalized type</td>
+            <td class="raw-value-cell">
+                <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
+            </td>
+            <td th:text="${evidence.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${evidence.id})}">
+                    View
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="output-section">
+    <h2>Related findings</h2>
+    <p class="output-note">
+        These findings are linked through the same source collected evidence.
+    </p>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Finding Evidence Links</span>
+            <span class="summary-card-value" th:text="${#lists.size(findingEvidenceLinks)}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Loaded Findings</span>
+            <span class="summary-card-value" th:text="${#lists.size(relatedFindings)}">0</span>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(relatedFindings)}" class="assessment-summary">
+        <p>No findings are linked to this source evidence yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(relatedFindings)}">
+        <thead>
+        <tr>
+            <th>Finding Type</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Confidence</th>
+            <th>Created At</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="finding : ${relatedFindings}">
+            <td th:text="${finding.findingType}">Finding type</td>
+            <td th:text="${finding.title}">Finding title</td>
+            <td th:text="${finding.description}">Finding description</td>
+            <td th:text="${finding.confidenceScore}">Confidence</td>
+            <td th:text="${finding.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${monitoringRun.id}, findingId=${finding.id})}">
+                    View finding
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+</body>
+</html>

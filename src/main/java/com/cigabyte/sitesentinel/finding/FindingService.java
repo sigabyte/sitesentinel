@@ -50,6 +50,33 @@ public class FindingService {
     }
 
     @Transactional(readOnly = true)
+    public List<FindingEvidence> findEvidenceLinksByCollectedEvidenceId(UUID collectedEvidenceId) {
+        return findingEvidenceRepository.findByCollectedEvidenceIdOrderByCreatedAtAsc(collectedEvidenceId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Finding> findByIdsAndMonitoringRunIdAndWebsiteId(
+            UUID websiteId,
+            UUID monitoringRunId,
+            List<UUID> findingIds
+    ) {
+        if (findingIds == null || findingIds.isEmpty()) {
+            return List.of();
+        }
+
+        return findingRepository.findByIdInAndMonitoringRunIdAndWebsiteIdOrderByFindingTypeAscCreatedAtAsc(
+                findingIds,
+                monitoringRunId,
+                websiteId
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public long countEvidenceLinksByCollectedEvidenceId(UUID collectedEvidenceId) {
+        return findingEvidenceRepository.countByCollectedEvidenceId(collectedEvidenceId);
+    }
+
+    @Transactional(readOnly = true)
     public long countByMonitoringRunId(UUID monitoringRunId) {
         return findingRepository.countByMonitoringRunId(monitoringRunId);
     }

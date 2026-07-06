@@ -221,9 +221,13 @@
     <table th:if="${!#lists.isEmpty(normalizedEvidence)}">
         <thead>
         <tr>
+        <tr>
             <th>Normalized Type</th>
             <th>Normalized Value</th>
+            <th>Source Evidence</th>
             <th>Created At</th>
+            <th>Action</th>
+        </tr>
         </tr>
         </thead>
         <tbody>
@@ -232,7 +236,13 @@
             <td class="raw-value-cell">
                 <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
             </td>
+            <td th:text="${evidence.collectedEvidenceId}">Collected evidence id</td>
             <td th:text="${evidence.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${evidence.id})}">
+                    View traceability
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>
