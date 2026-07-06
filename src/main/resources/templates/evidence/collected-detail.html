@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Normalized Evidence Detail</title>
+    <title>Collected Evidence Detail</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<h1>Normalized Evidence Detail</h1>
+<h1>Collected Evidence Detail</h1>
 
 <p>
     <a href="/">Dashboard</a> |
@@ -31,13 +31,13 @@
         </div>
 
         <div class="traceability-chain-step">
-            Normalized Evidence:
-            <strong th:text="${normalizedEvidence.normalizedType}">Normalized Type</strong>
+            Collected Evidence:
+            <strong th:text="${collectedEvidence.evidenceType}">Evidence Type</strong>
         </div>
 
         <div class="traceability-chain-step">
-            Source Collected Evidence:
-            <strong th:text="${sourceEvidence.evidenceType}">Evidence Type</strong>
+            Normalized Evidence:
+            <strong th:text="${#lists.size(normalizedEvidence)}">0</strong>
         </div>
 
         <div class="traceability-chain-step">
@@ -48,55 +48,33 @@
 </section>
 
 <section class="output-section">
-    <h2>Normalized evidence baseline</h2>
+    <h2>Collected evidence baseline</h2>
 
     <div class="traceability-card">
-        <p>Normalized Type: <strong th:text="${normalizedEvidence.normalizedType}">Normalized type</strong></p>
-        <p>Created at: <strong th:text="${normalizedEvidence.createdAt}">Created at</strong></p>
-        <p>Collected Evidence ID: <strong th:text="${normalizedEvidence.collectedEvidenceId}">Collected evidence id</strong></p>
-
-        <p>Normalized Value:</p>
-        <div class="traceability-description" th:text="${normalizedEvidence.normalizedValue}">
-            Normalized value
-        </div>
-    </div>
-</section>
-
-<section class="output-section">
-    <h2>Source collected evidence</h2>
-    <p class="output-note">
-        This is the raw collected evidence record used to create the normalized evidence.
-    </p>
-
-    <div class="traceability-card">
-        <p>Source Type: <strong th:text="${sourceEvidence.sourceType}">Source type</strong></p>
-        <p>Evidence Type: <strong th:text="${sourceEvidence.evidenceType}">Evidence type</strong></p>
-        <p>Source URL: <strong th:text="${sourceEvidence.sourceUrl}">Source URL</strong></p>
-        <p>Collected at: <strong th:text="${sourceEvidence.collectedAt}">Collected at</strong></p>
+        <p>Source Type: <strong th:text="${collectedEvidence.sourceType}">Source type</strong></p>
+        <p>Evidence Type: <strong th:text="${collectedEvidence.evidenceType}">Evidence type</strong></p>
+        <p>Source URL: <strong th:text="${collectedEvidence.sourceUrl}">Source URL</strong></p>
+        <p>Collected at: <strong th:text="${collectedEvidence.collectedAt}">Collected at</strong></p>
+        <p>Created at: <strong th:text="${collectedEvidence.createdAt}">Created at</strong></p>
 
         <p>Raw Value:</p>
-        <div class="raw-value-preview" th:text="${sourceEvidence.rawValue}">
+        <div class="traceability-description" th:text="${collectedEvidence.rawValue}">
             Raw value
         </div>
-        <p class="traceability-actions">
-            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${sourceEvidence.id})}">
-                View collected evidence detail
-            </a>
-        </p>
     </div>
 </section>
 
 <section class="output-section">
-    <h2>Normalized evidence from same source</h2>
+    <h2>Normalized evidence produced from this source</h2>
     <p class="output-note">
-        These normalized records were produced from the same collected evidence input.
+        These normalized evidence records were produced from this collected evidence item.
     </p>
 
-    <div th:if="${#lists.isEmpty(normalizedEvidenceFromSameSource)}">
-        <p>No related normalized evidence records found for this source evidence.</p>
+    <div th:if="${#lists.isEmpty(normalizedEvidence)}" class="assessment-summary">
+        <p>No normalized evidence was produced from this collected evidence item.</p>
     </div>
 
-    <table th:if="${!#lists.isEmpty(normalizedEvidenceFromSameSource)}">
+    <table th:if="${!#lists.isEmpty(normalizedEvidence)}">
         <thead>
         <tr>
             <th>Normalized Type</th>
@@ -106,7 +84,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="evidence : ${normalizedEvidenceFromSameSource}">
+        <tr th:each="evidence : ${normalizedEvidence}">
             <td th:text="${evidence.normalizedType}">Normalized type</td>
             <td class="raw-value-cell">
                 <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
@@ -114,7 +92,7 @@
             <td th:text="${evidence.createdAt}">Created at</td>
             <td>
                 <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${evidence.id})}">
-                    View
+                    View normalized evidence
                 </a>
             </td>
         </tr>
@@ -125,7 +103,7 @@
 <section class="output-section">
     <h2>Related findings</h2>
     <p class="output-note">
-        These findings are linked through the same source collected evidence.
+        These findings are linked to this collected evidence through the finding_evidence table.
     </p>
 
     <div class="summary-grid">
@@ -141,7 +119,7 @@
     </div>
 
     <div th:if="${#lists.isEmpty(relatedFindings)}" class="assessment-summary">
-        <p>No findings are linked to this source evidence yet.</p>
+        <p>No findings are linked to this collected evidence item.</p>
     </div>
 
     <table th:if="${!#lists.isEmpty(relatedFindings)}">

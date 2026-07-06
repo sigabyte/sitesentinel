@@ -10,9 +10,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.cigabyte.sitesentinel.evidence.CollectedEvidence;
+import com.cigabyte.sitesentinel.evidence.NormalizedEvidence;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/websites/{websiteId}/monitoring-runs/{runId}/findings")
@@ -55,15 +59,29 @@ public class FindingController {
                 .map(FindingEvidence::getCollectedEvidenceId)
                 .toList();
 
+        List<CollectedEvidence> sourceEvidence = evidenceService.findCollectedEvidenceByIds(
+                websiteId,
+                runId,
+                collectedEvidenceIds
+        );
+
+        Map<UUID, List<NormalizedEvidence>> normalizedEvidenceByCollectedEvidenceId =
+                sourceEvidence.stream()
+                        .collect(Collectors.toMap(
+                                CollectedEvidence::getId,
+                                evidence -> evidenceService.findNormalizedEvidenceForCollectedEvidence(
+                                        websiteId,
+                                        runId,
+                                        evidence.getId()
+                                )
+                        ));
+
         model.addAttribute("website", website);
         model.addAttribute("monitoringRun", monitoringRun);
         model.addAttribute("finding", finding);
         model.addAttribute("evidenceLinks", evidenceLinks);
-        model.addAttribute("sourceEvidence", evidenceService.findCollectedEvidenceByIds(
-                websiteId,
-                runId,
-                collectedEvidenceIds
-        ));
+        model.addAttribute("sourceEvidence", sourceEvidence);
+        model.addAttribute("normalizedEvidenceByCollectedEvidenceId", normalizedEvidenceByCollectedEvidenceId);
 
         return "findings/detail";
     }

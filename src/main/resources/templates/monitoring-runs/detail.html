@@ -236,7 +236,12 @@
             <td class="raw-value-cell">
                 <div class="raw-value-preview" th:text="${evidence.normalizedValue}">Normalized value</div>
             </td>
-            <td th:text="${evidence.collectedEvidenceId}">Collected evidence id</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.collectedEvidenceId})}"
+                   th:text="${evidence.collectedEvidenceId}">
+                    Collected evidence id
+                </a>
+            </td>
             <td th:text="${evidence.createdAt}">Created at</td>
             <td>
                 <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${evidence.id})}">
@@ -267,6 +272,7 @@
                 <th>Source URL</th>
                 <th>Raw Value</th>
                 <th>Collected At</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -277,6 +283,11 @@
                     <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
                 </td>
                 <td th:text="${evidence.collectedAt}">Collected at</td>
+                <td>
+                    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+                        View traceability
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -292,6 +303,7 @@
                 <th>Source URL</th>
                 <th>Raw Value</th>
                 <th>Collected At</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -302,6 +314,11 @@
                     <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
                 </td>
                 <td th:text="${evidence.collectedAt}">Collected at</td>
+                <td>
+                    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+                        View traceability
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -317,6 +334,7 @@
                 <th>Source URL</th>
                 <th>Raw Value</th>
                 <th>Collected At</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -326,7 +344,11 @@
                 <td class="raw-value-cell">
                     <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
                 </td>
-                <td th:text="${evidence.collectedAt}">Collected at</td>
+                <td>
+                    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+                        View traceability
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -343,6 +365,7 @@
                 <th>Source URL</th>
                 <th>Raw Value</th>
                 <th>Collected At</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
@@ -354,6 +377,11 @@
                     <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
                 </td>
                 <td th:text="${evidence.collectedAt}">Collected at</td>
+                <td>
+                    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+                        View traceability
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>

@@ -95,3 +95,53 @@ The following items are intentionally deferred to future sprints:
 - AI-assisted analysis
 - Database-level uniqueness constraints for idempotent outputs
 - Automated service and integration tests for the scanner lifecycle
+
+## Sprint 2 Block 2C — Traceability Navigation Hardening
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added collected evidence detail traceability page.
+- Added navigation from collected evidence to normalized evidence.
+- Added navigation from collected evidence to related findings.
+- Added navigation from finding detail source evidence to normalized evidence.
+- Added navigation from finding detail source evidence to collected evidence detail.
+- Added navigation from normalized evidence detail back to collected evidence detail.
+- Added monitoring run detail links from collected evidence rows to collected evidence traceability.
+
+### Traceability Coverage
+
+The UI now supports the following navigation paths:
+
+Website
+↓
+MonitoringRun
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+↓
+Related Findings
+
+Finding
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+NormalizedEvidence
+↓
+Source CollectedEvidence
+↓
+Related Findings
+
+### Preserved Architecture Boundaries
+
+- Evidence Collection Engine remains responsible only for raw evidence collection.
+- Evidence Analysis Engine remains responsible for normalized evidence and findings.
+- Traceability navigation does not create, modify, or reinterpret assessment outputs.
+- No new database table or migration was introduced.
+- No risk or trust evaluation logic was changed.

@@ -172,3 +172,13 @@ th {
 .traceability-chain-step:last-child {
     border-bottom: none;
 }
+
+.inline-link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.traceability-actions {
+    margin-top: 12px;
+}

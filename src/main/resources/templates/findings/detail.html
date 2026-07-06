@@ -71,7 +71,9 @@
       <th>Evidence Type</th>
       <th>Source URL</th>
       <th>Raw Value</th>
+      <th>Normalized Evidence</th>
       <th>Collected At</th>
+      <th>Action</th>
     </tr>
     </thead>
     <tbody>
@@ -82,7 +84,25 @@
       <td class="raw-value-cell">
         <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
       </td>
+      <td>
+        <div th:with="normalizedItems=${normalizedEvidenceByCollectedEvidenceId[evidence.id]}">
+          <span th:if="${normalizedItems == null || #lists.isEmpty(normalizedItems)}">None</span>
+
+          <div class="inline-link-list" th:if="${normalizedItems != null && !#lists.isEmpty(normalizedItems)}">
+            <a th:each="normalized : ${normalizedItems}"
+               th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${normalized.id})}"
+               th:text="${normalized.normalizedType}">
+              Normalized evidence
+            </a>
+          </div>
+        </div>
+      </td>
       <td th:text="${evidence.collectedAt}">Collected at</td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+          View source evidence
+        </a>
+      </td>
     </tr>
     </tbody>
   </table>
