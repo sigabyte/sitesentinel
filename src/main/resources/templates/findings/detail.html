@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Finding Detail</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Finding Detail</h1>
+
+<p>
+  <a href="/">Dashboard</a> |
+  <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+  <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+    Back to monitoring run
+  </a>
+</p>
+
+<section>
+  <h2>Website</h2>
+  <p>Name: <strong th:text="${website.name}">Website name</strong></p>
+  <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
+</section>
+
+<section>
+  <h2>Monitoring run</h2>
+  <p>Status: <strong th:text="${monitoringRun.status}">COMPLETED</strong></p>
+  <p>Started at: <strong th:text="${monitoringRun.startedAt}">Started</strong></p>
+  <p>Completed at: <strong th:text="${monitoringRun.completedAt}">Completed</strong></p>
+</section>
+
+<section class="output-section">
+  <h2>Finding baseline</h2>
+
+  <div class="traceability-card">
+    <p>Finding Type: <strong th:text="${finding.findingType}">Finding type</strong></p>
+    <p>Title: <strong th:text="${finding.title}">Finding title</strong></p>
+    <p>Confidence: <strong th:text="${finding.confidenceScore}">0</strong></p>
+    <p>Created at: <strong th:text="${finding.createdAt}">Created at</strong></p>
+    <p>Description:</p>
+    <div class="traceability-description" th:text="${finding.description}">Finding description</div>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Source evidence traceability</h2>
+  <p class="output-note">
+    These records are the collected evidence items linked to this finding through the finding_evidence table.
+  </p>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Evidence Links</span>
+      <span class="summary-card-value" th:text="${#lists.size(evidenceLinks)}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Loaded Source Evidence</span>
+      <span class="summary-card-value" th:text="${#lists.size(sourceEvidence)}">0</span>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(sourceEvidence)}" class="assessment-summary">
+    <p>No source evidence is linked to this finding.</p>
+  </div>
+
+  <table th:if="${!#lists.isEmpty(sourceEvidence)}">
+    <thead>
+    <tr>
+      <th>Source Type</th>
+      <th>Evidence Type</th>
+      <th>Source URL</th>
+      <th>Raw Value</th>
+      <th>Collected At</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="evidence : ${sourceEvidence}">
+      <td th:text="${evidence.sourceType}">Source type</td>
+      <td th:text="${evidence.evidenceType}">Evidence type</td>
+      <td th:text="${evidence.sourceUrl}">Source URL</td>
+      <td class="raw-value-cell">
+        <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+      </td>
+      <td th:text="${evidence.collectedAt}">Collected at</td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+</body>
+</html>

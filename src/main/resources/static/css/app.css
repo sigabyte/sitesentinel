@@ -141,3 +141,18 @@ th {
     overflow-wrap: anywhere;
     margin: 0;
 }
+
+.traceability-card {
+    border: 1px solid #cccccc;
+    background: #fafafa;
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.traceability-description {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #ffffff;
+    border: 1px solid #dddddd;
+    padding: 10px;
+}

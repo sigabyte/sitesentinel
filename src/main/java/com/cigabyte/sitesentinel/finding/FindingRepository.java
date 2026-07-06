@@ -10,6 +10,12 @@ public interface FindingRepository extends JpaRepository<Finding, UUID> {
 
     List<Finding> findByMonitoringRunIdOrderByFindingTypeAscCreatedAtAsc(UUID monitoringRunId);
 
+    Optional<Finding> findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID id,
+            UUID monitoringRunId,
+            UUID websiteId
+    );
+
     Optional<Finding> findFirstByMonitoringRunIdAndFindingTypeOrderByCreatedAtAsc(
             UUID monitoringRunId,
             String findingType

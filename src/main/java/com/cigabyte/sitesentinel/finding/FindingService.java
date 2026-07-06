@@ -26,8 +26,27 @@ public class FindingService {
     }
 
     @Transactional(readOnly = true)
+    public Finding findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID findingId,
+            UUID monitoringRunId,
+            UUID websiteId
+    ) {
+        return findingRepository.findByIdAndMonitoringRunIdAndWebsiteId(
+                        findingId,
+                        monitoringRunId,
+                        websiteId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Finding not found for monitoring run: " + findingId));
+    }
+
+    @Transactional(readOnly = true)
     public List<FindingEvidence> findEvidenceLinks(UUID findingId) {
         return findingEvidenceRepository.findByFindingId(findingId);
+    }
+
+    @Transactional(readOnly = true)
+    public long countEvidenceLinks(UUID findingId) {
+        return findingEvidenceRepository.countByFindingId(findingId);
     }
 
     @Transactional(readOnly = true)

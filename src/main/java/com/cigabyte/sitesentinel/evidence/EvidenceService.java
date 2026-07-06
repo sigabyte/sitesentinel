@@ -28,6 +28,23 @@ public class EvidenceService {
     }
 
     @Transactional(readOnly = true)
+    public List<CollectedEvidence> findCollectedEvidenceByIds(
+            UUID websiteId,
+            UUID monitoringRunId,
+            List<UUID> collectedEvidenceIds
+    ) {
+        if (collectedEvidenceIds == null || collectedEvidenceIds.isEmpty()) {
+            return List.of();
+        }
+
+        return collectedEvidenceRepository.findByIdInAndMonitoringRunIdAndWebsiteIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
+                collectedEvidenceIds,
+                monitoringRunId,
+                websiteId
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<NormalizedEvidence> findNormalizedEvidence(UUID monitoringRunId) {
         return normalizedEvidenceRepository.findByMonitoringRunIdOrderByNormalizedTypeAscCreatedAtAsc(
                 monitoringRunId

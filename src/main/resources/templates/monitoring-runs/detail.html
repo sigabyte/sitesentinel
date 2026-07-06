@@ -189,7 +189,9 @@
             <th>Title</th>
             <th>Description</th>
             <th>Confidence</th>
+            <th>Evidence Links</th>
             <th>Created At</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -198,7 +200,13 @@
             <td th:text="${finding.title}">Finding title</td>
             <td th:text="${finding.description}">Finding description</td>
             <td th:text="${finding.confidenceScore}">Confidence</td>
+            <td th:text="${findingEvidenceCounts[finding.id]}">0</td>
             <td th:text="${finding.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${monitoringRun.id}, findingId=${finding.id})}">
+                    View traceability
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>

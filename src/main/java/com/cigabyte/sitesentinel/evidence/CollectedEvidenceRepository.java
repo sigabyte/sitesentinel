@@ -9,6 +9,12 @@ public interface CollectedEvidenceRepository extends JpaRepository<CollectedEvid
 
     List<CollectedEvidence> findByMonitoringRunIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(UUID monitoringRunId);
 
+    List<CollectedEvidence> findByIdInAndMonitoringRunIdAndWebsiteIdOrderBySourceTypeAscEvidenceTypeAscCollectedAtAsc(
+            List<UUID> ids,
+            UUID monitoringRunId,
+            UUID websiteId
+    );
+
     List<CollectedEvidence> findByMonitoringRunIdAndSourceTypeOrderByEvidenceTypeAscCollectedAtAsc(
             UUID monitoringRunId,
             String sourceType

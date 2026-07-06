@@ -12,6 +12,8 @@ import com.cigabyte.sitesentinel.trust.TrustAssessmentService;
 
 import java.util.List;
 import java.util.UUID;
+import com.cigabyte.sitesentinel.finding.Finding;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -68,7 +70,16 @@ public class MonitoringRunController {
 
         model.addAttribute("collectedEvidence", evidenceService.findCollectedEvidence(runId));
         model.addAttribute("normalizedEvidence", evidenceService.findNormalizedEvidence(runId));
-        model.addAttribute("findings", findingService.findByMonitoringRunId(runId));
+
+        List<Finding> findings = findingService.findByMonitoringRunId(runId);
+
+        model.addAttribute("findings", findings);
+        model.addAttribute("findingEvidenceCounts", findings.stream()
+                .collect(Collectors.toMap(
+                        finding -> finding.getId(),
+                        finding -> findingService.countEvidenceLinks(finding.getId())
+                )));
+
         model.addAttribute("risks", riskService.findByMonitoringRunId(runId));
         model.addAttribute("trustAssessments", trustAssessments);
 
