@@ -96,6 +96,85 @@ The following items are intentionally deferred to future sprints:
 - Database-level uniqueness constraints for idempotent outputs
 - Automated service and integration tests for the scanner lifecycle
 
+## Sprint 2 Block 2A — Finding Detail Traceability
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added finding detail traceability page under monitoring run context.
+- Added navigation from monitoring run findings table to finding detail page.
+- Added evidence link counts for findings on monitoring run detail.
+- Added repository and service methods to safely load findings within website and monitoring run boundaries.
+- Added source collected evidence visibility for each finding.
+- Added UI support for reviewing why a finding was produced.
+
+### Traceability Coverage
+
+The UI now supports the following navigation path:
+
+Website
+↓
+MonitoringRun
+↓
+Finding
+↓
+Source CollectedEvidence
+
+### Preserved Architecture Boundaries
+
+- Evidence Collection Engine remains responsible only for collecting raw evidence.
+- Evidence Analysis Engine remains responsible for producing normalized evidence and findings.
+- Finding detail traceability only exposes existing relationships.
+- No evidence generation logic was changed.
+- No risk evaluation logic was changed.
+- No trust assessment logic was changed.
+- No new database migration was introduced.
+
+---
+
+## Sprint 2 Block 2B — Normalized Evidence Detail Traceability
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added normalized evidence detail traceability page under monitoring run context.
+- Added navigation from monitoring run normalized evidence table to normalized evidence detail page.
+- Linked normalized evidence to its source collected evidence.
+- Displayed normalized evidence records produced from the same collected evidence source.
+- Displayed findings related through the same collected evidence source.
+- Added repository and service methods to safely load normalized evidence, collected evidence, and related findings within website and monitoring run boundaries.
+
+### Traceability Coverage
+
+The UI now supports the following navigation path:
+
+Website
+↓
+MonitoringRun
+↓
+NormalizedEvidence
+↓
+Source CollectedEvidence
+↓
+Related Findings
+
+### Preserved Architecture Boundaries
+
+- Normalized evidence detail does not create, modify, or reinterpret evidence.
+- Existing normalized evidence and finding relationships are only exposed through UI traceability.
+- Evidence Collection Engine remains unchanged.
+- Evidence Analysis Engine remains unchanged.
+- Risk and trust assessment logic remains unchanged.
+- No new database migration was introduced.
+
+---
+
 ## Sprint 2 Block 2C — Traceability Navigation Hardening
 
 ### Status
@@ -145,3 +224,43 @@ Related Findings
 - Traceability navigation does not create, modify, or reinterpret assessment outputs.
 - No new database table or migration was introduced.
 - No risk or trust evaluation logic was changed.
+
+## Sprint 2 Block 2D — Risk Detail Traceability
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added risk detail traceability page under monitoring run context.
+- Added navigation from monitoring run risks table to risk detail page.
+- Linked each risk to its source findings through the risk_finding table.
+- Displayed source collected evidence behind each finding linked to a risk.
+- Displayed normalized evidence produced from each collected evidence item.
+- Added repository and service methods to safely load risks within website and monitoring run boundaries.
+
+### Traceability Coverage
+
+The UI now supports the following navigation path:
+
+Website
+↓
+MonitoringRun
+↓
+Risk
+↓
+Source Findings
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+### Preserved Architecture Boundaries
+
+- Risk Evaluation Engine remains responsible for producing risks.
+- Risk detail traceability only exposes existing risk-to-finding relationships.
+- Finding-to-evidence and evidence-to-normalized-evidence relationships are reused.
+- No risk generation logic was changed.
+- No trust assessment logic was changed.
+- No database migration was introduced.

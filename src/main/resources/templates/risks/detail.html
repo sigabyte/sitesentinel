@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Risk Detail</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Risk Detail</h1>
+
+<p>
+  <a href="/">Dashboard</a> |
+  <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+  <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+    Back to monitoring run
+  </a>
+</p>
+
+<section>
+  <h2>Traceability chain</h2>
+
+  <div class="traceability-chain">
+    <div class="traceability-chain-step">
+      Website:
+      <strong th:text="${website.domain}">example.com</strong>
+    </div>
+
+    <div class="traceability-chain-step">
+      Monitoring Run:
+      <strong th:text="${monitoringRun.id}">Run ID</strong>
+    </div>
+
+    <div class="traceability-chain-step">
+      Risk:
+      <strong th:text="${risk.riskType}">Risk Type</strong>
+    </div>
+
+    <div class="traceability-chain-step">
+      Source Findings:
+      <strong th:text="${#lists.size(sourceFindings)}">0</strong>
+    </div>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Risk baseline</h2>
+
+  <div class="traceability-card">
+    <p>Risk Type: <strong th:text="${risk.riskType}">Risk type</strong></p>
+    <p>Severity: <strong th:text="${risk.severity}">Severity</strong></p>
+    <p>Risk Score: <strong th:text="${risk.riskScore}">0</strong></p>
+    <p>Confidence: <strong th:text="${risk.confidenceScore}">0</strong></p>
+    <p>Created at: <strong th:text="${risk.createdAt}">Created at</strong></p>
+
+    <p>Rationale:</p>
+    <div class="traceability-description" th:text="${risk.rationale}">
+      Risk rationale
+    </div>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Source findings</h2>
+  <p class="output-note">
+    These findings are linked to this risk through the risk_finding table.
+  </p>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Risk Finding Links</span>
+      <span class="summary-card-value" th:text="${#lists.size(riskFindingLinks)}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Loaded Findings</span>
+      <span class="summary-card-value" th:text="${#lists.size(sourceFindings)}">0</span>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(sourceFindings)}" class="assessment-summary">
+    <p>No findings are linked to this risk.</p>
+  </div>
+
+  <div th:each="finding : ${sourceFindings}" class="traceability-nested-block">
+    <h3 th:text="${finding.title}">Finding title</h3>
+
+    <div class="traceability-card">
+      <p>Finding Type: <strong th:text="${finding.findingType}">Finding type</strong></p>
+      <p>Confidence: <strong th:text="${finding.confidenceScore}">0</strong></p>
+      <p>Created at: <strong th:text="${finding.createdAt}">Created at</strong></p>
+
+      <p>Description:</p>
+      <div class="traceability-description" th:text="${finding.description}">
+        Finding description
+      </div>
+
+      <p class="traceability-actions">
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${monitoringRun.id}, findingId=${finding.id})}">
+          View finding detail
+        </a>
+      </p>
+    </div>
+
+    <h4>Source evidence for this finding</h4>
+
+    <div th:with="sourceEvidence=${sourceEvidenceByFindingId[finding.id]}">
+      <div th:if="${sourceEvidence == null || #lists.isEmpty(sourceEvidence)}" class="assessment-summary">
+        <p>No source evidence is linked to this finding.</p>
+      </div>
+
+      <table th:if="${sourceEvidence != null && !#lists.isEmpty(sourceEvidence)}">
+        <thead>
+        <tr>
+          <th>Source Type</th>
+          <th>Evidence Type</th>
+          <th>Source URL</th>
+          <th>Raw Value</th>
+          <th>Normalized Evidence</th>
+          <th>Collected At</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="evidence : ${sourceEvidence}">
+          <td th:text="${evidence.sourceType}">Source type</td>
+          <td th:text="${evidence.evidenceType}">Evidence type</td>
+          <td th:text="${evidence.sourceUrl}">Source URL</td>
+          <td class="raw-value-cell">
+            <div class="raw-value-preview" th:text="${evidence.rawValue}">Raw value</div>
+          </td>
+          <td>
+            <div th:with="normalizedItems=${normalizedEvidenceByCollectedEvidenceId[evidence.id]}">
+              <span th:if="${normalizedItems == null || #lists.isEmpty(normalizedItems)}">None</span>
+
+              <div class="inline-link-list"
+                   th:if="${normalizedItems != null && !#lists.isEmpty(normalizedItems)}">
+                <a th:each="normalized : ${normalizedItems}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/normalized-evidence/{normalizedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, normalizedEvidenceId=${normalized.id})}"
+                   th:text="${normalized.normalizedType}">
+                  Normalized evidence
+                </a>
+              </div>
+            </div>
+          </td>
+          <td th:text="${evidence.collectedAt}">Collected at</td>
+          <td>
+            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/collected-evidence/{collectedEvidenceId}(websiteId=${website.id}, runId=${monitoringRun.id}, collectedEvidenceId=${evidence.id})}">
+              View source evidence
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</body>
+</html>

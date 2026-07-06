@@ -161,6 +161,7 @@
             <th>Confidence</th>
             <th>Rationale</th>
             <th>Created At</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -171,6 +172,11 @@
             <td th:text="${risk.confidenceScore}">Confidence</td>
             <td th:text="${risk.rationale}">Rationale</td>
             <td th:text="${risk.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(websiteId=${website.id}, runId=${monitoringRun.id}, riskId=${risk.id})}">
+                    View traceability
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>

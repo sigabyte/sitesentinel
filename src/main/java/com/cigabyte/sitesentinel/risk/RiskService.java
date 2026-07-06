@@ -26,8 +26,22 @@ public class RiskService {
     }
 
     @Transactional(readOnly = true)
+    public Risk findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID riskId,
+            UUID monitoringRunId,
+            UUID websiteId
+    ) {
+        return riskRepository.findByIdAndMonitoringRunIdAndWebsiteId(
+                        riskId,
+                        monitoringRunId,
+                        websiteId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Risk not found for monitoring run: " + riskId));
+    }
+
+    @Transactional(readOnly = true)
     public List<RiskFinding> findFindingLinks(UUID riskId) {
-        return riskFindingRepository.findByRiskId(riskId);
+        return riskFindingRepository.findByRiskIdOrderByCreatedAtAsc(riskId);
     }
 
     @Transactional(readOnly = true)
