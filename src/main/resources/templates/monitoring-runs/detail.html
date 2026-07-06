@@ -27,7 +27,7 @@
     <p>Created at: <strong th:text="${monitoringRun.createdAt}">Created</strong></p>
     <p>Failure reason: <strong th:text="${monitoringRun.failureReason}">Failure reason</strong></p>
 </section>
-<section>
+<section class="output-section">
     <h2>Assessment summary</h2>
 
     <div class="summary-grid">
@@ -84,6 +84,23 @@
             <span class="summary-card-label">Trust Assessments</span>
             <span class="summary-card-value" th:text="${trustAssessmentCount}">0</span>
         </div>
+    </div>
+
+    <div class="outcome-panel">
+        <h3>Execution outcome</h3>
+
+        <p>
+            <span class="outcome-label" th:text="${assessmentOutcome}">TRUST_ASSESSED</span>
+        </p>
+
+        <p th:text="${assessmentOutcomeDescription}">
+            Assessment outcome description.
+        </p>
+    </div>
+
+    <div class="failure-box" th:if="${monitoringRun.failureReason != null}">
+        <h3>Failure reason</h3>
+        <pre th:text="${monitoringRun.failureReason}">Failure reason</pre>
     </div>
 
     <div class="assessment-summary" th:if="${latestTrustAssessment != null}">

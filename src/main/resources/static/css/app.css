@@ -111,3 +111,33 @@ th {
     color: #666666;
     font-size: 13px;
 }
+
+.outcome-panel {
+    border: 1px solid #cccccc;
+    background: #f7f7f7;
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.outcome-label {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #999999;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    background: #ffffff;
+}
+
+.failure-box {
+    border: 1px solid #cc9999;
+    background: #fff7f7;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.failure-box pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 0;
+}
