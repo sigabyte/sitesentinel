@@ -12,9 +12,15 @@ import java.util.UUID;
 public class WebsiteService {
 
     private final WebsiteRepository websiteRepository;
+    private final WebsiteTargetValidator websiteTargetValidator;
 
-    public WebsiteService(WebsiteRepository websiteRepository) {
+
+    public WebsiteService(
+            WebsiteRepository websiteRepository,
+            WebsiteTargetValidator websiteTargetValidator
+    ) {
         this.websiteRepository = websiteRepository;
+        this.websiteTargetValidator = websiteTargetValidator;
     }
 
     @Transactional(readOnly = true)
@@ -31,6 +37,8 @@ public class WebsiteService {
     @Transactional
     public Website create(WebsiteCreateRequest request) {
         String normalizedDomain = normalizeDomain(request.getDomain());
+
+        websiteTargetValidator.validateConfiguredHost(normalizedDomain);
 
         if (websiteRepository.existsByDomain(normalizedDomain)) {
             throw new IllegalArgumentException("This domain is already monitored.");

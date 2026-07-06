@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
+import com.cigabyte.sitesentinel.website.WebsiteTargetValidator;
 
 @Service
 public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
@@ -49,6 +50,7 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
 
     private final MonitoringRunRepository monitoringRunRepository;
     private final WebsiteRepository websiteRepository;
+    private final WebsiteTargetValidator websiteTargetValidator;
     private final EvidenceService evidenceService;
     private final HttpClient httpClient;
     private final Duration requestTimeout;
@@ -56,20 +58,24 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
     private final boolean scanRobotsTxt;
     private final boolean scanSitemapXml;
     private final int bodySnippetMaxLength;
+    private final int maxRedirects;
 
     public HttpEvidenceCollectionEngine(
             MonitoringRunRepository monitoringRunRepository,
             WebsiteRepository websiteRepository,
+            WebsiteTargetValidator websiteTargetValidator,
             EvidenceService evidenceService,
             @Value("${sitesentinel.scanner.connect-timeout-seconds:8}") long connectTimeoutSeconds,
             @Value("${sitesentinel.scanner.request-timeout-seconds:15}") long requestTimeoutSeconds,
             @Value("${sitesentinel.scanner.user-agent:}") String configuredUserAgent,
             @Value("${sitesentinel.scanner.scan-robots-txt:true}") boolean scanRobotsTxt,
             @Value("${sitesentinel.scanner.scan-sitemap-xml:true}") boolean scanSitemapXml,
-            @Value("${sitesentinel.scanner.body-snippet-max-length:1000}") int configuredBodySnippetMaxLength
+            @Value("${sitesentinel.scanner.body-snippet-max-length:1000}") int configuredBodySnippetMaxLength,
+            @Value("${sitesentinel.scanner.max-redirects:5}") int configuredMaxRedirects
     ) {
         this.monitoringRunRepository = monitoringRunRepository;
         this.websiteRepository = websiteRepository;
+        this.websiteTargetValidator = websiteTargetValidator;
         this.evidenceService = evidenceService;
 
         Duration connectTimeout = Duration.ofSeconds(Math.max(1, connectTimeoutSeconds));
@@ -78,10 +84,11 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
         this.scanRobotsTxt = scanRobotsTxt;
         this.scanSitemapXml = scanSitemapXml;
         this.bodySnippetMaxLength = Math.max(100, configuredBodySnippetMaxLength);
+        this.maxRedirects = Math.max(0, configuredMaxRedirects);
 
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(connectTimeout)
-                .followRedirects(HttpClient.Redirect.NORMAL)
+                .followRedirects(HttpClient.Redirect.NEVER)
                 .build();
     }
 
@@ -92,6 +99,8 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
 
         Website website = websiteRepository.findById(monitoringRun.getWebsiteId())
                 .orElseThrow(() -> new IllegalArgumentException("Website not found: " + monitoringRun.getWebsiteId()));
+
+        validateScannerTarget(website, monitoringRun);
 
         HttpResponse<String> homepageResponse = scanHomepage(website, monitoringRun);
         String origin = resolveOrigin(homepageResponse.uri(), website);
@@ -270,26 +279,46 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
     }
 
     private HttpResponse<String> fetch(String url) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(requestTimeout)
-                    .header("User-Agent", userAgent)
-                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                    .GET()
-                    .build();
+        URI currentUri = URI.create(url);
 
-            return httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-            );
-        } catch (IOException exception) {
-            throw new IllegalStateException("HTTP request failed: " + url, exception);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("HTTP request interrupted: " + url, exception);
-        } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException("Invalid URL: " + url, exception);
+        for (int redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
+            validateUriTarget(currentUri);
+
+            try {
+                HttpRequest request = HttpRequest.newBuilder(currentUri)
+                        .timeout(requestTimeout)
+                        .header("User-Agent", userAgent)
+                        .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                );
+
+                if (!isRedirectStatus(response.statusCode())) {
+                    return response;
+                }
+
+                Optional<String> location = response.headers().firstValue("location");
+
+                if (location.isEmpty() || location.get().isBlank()) {
+                    return response;
+                }
+
+                currentUri = resolveRedirectUri(currentUri, location.get());
+            } catch (IOException exception) {
+                throw new IllegalStateException("HTTP request failed: " + currentUri, exception);
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("HTTP request interrupted: " + currentUri, exception);
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalStateException("Invalid or unsafe URL: " + currentUri, exception);
+            }
         }
+
+        throw new IllegalStateException("Maximum redirect limit exceeded: " + url);
     }
 
     private void recordResponseEvidence(
@@ -501,5 +530,67 @@ public class HttpEvidenceCollectionEngine implements EvidenceCollectionEngine {
         }
 
         return truncate(message, 1000);
+    }
+
+    private void validateScannerTarget(Website website, MonitoringRun monitoringRun) {
+        try {
+            websiteTargetValidator.validateScanTarget(website.getDomain());
+
+            record(
+                    website,
+                    monitoringRun,
+                    "SCAN_TARGET",
+                    "TARGET_ACCEPTED",
+                    "https://" + website.getDomain() + "/",
+                    website.getDomain()
+            );
+        } catch (IllegalArgumentException exception) {
+            record(
+                    website,
+                    monitoringRun,
+                    "SCAN_TARGET",
+                    "TARGET_REJECTED",
+                    "https://" + website.getDomain() + "/",
+                    safeMessage(exception)
+            );
+
+            throw exception;
+        }
+    }
+
+    private void validateUriTarget(URI uri) {
+        String scheme = uri.getScheme();
+
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+            throw new IllegalArgumentException("Only HTTP and HTTPS scanner targets are allowed.");
+        }
+
+        String host = uri.getHost();
+
+        if (host == null || host.isBlank()) {
+            throw new IllegalArgumentException("Scanner target host is required.");
+        }
+
+        websiteTargetValidator.validateScanTarget(host);
+    }
+
+    private URI resolveRedirectUri(URI currentUri, String locationHeader) {
+        URI nextUri = currentUri.resolve(locationHeader.trim());
+
+        String scheme = nextUri.getScheme();
+
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+            throw new IllegalArgumentException("Redirect target must use HTTP or HTTPS.");
+        }
+
+        return nextUri;
+    }
+
+    private boolean isRedirectStatus(int statusCode) {
+        return statusCode == 301
+                || statusCode == 302
+                || statusCode == 303
+                || statusCode == 307
+                || statusCode == 308;
     }
 }
