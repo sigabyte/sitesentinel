@@ -4,9 +4,10 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 1 is complete.
+Sprint 2 is complete.
 
-The current implementation provides a working core assessment lifecycle:
+The current implementation provides a working core assessment lifecycle 
+with an explainable traceability review layer:
 
 Website
 ↓
@@ -24,7 +25,7 @@ Risk
 ↓
 TrustAssessment
 
-## Sprint 1 Implemented Baseline
+## Implemented Baseline Through Sprint 2
 
 - Website registration
 - Website detail view
@@ -52,6 +53,15 @@ TrustAssessment
 - Duplicate assessment output prevention
 - Assessment outcome clarity
 - Shared application stylesheet
+- Finding detail traceability
+- Normalized evidence detail traceability
+- Collected evidence detail traceability
+- Risk detail traceability
+- Trust assessment detail traceability
+- Traceability navigation between lifecycle outputs
+- Monitoring run traceability summary dashboard
+- Overall traceability QA status
+- Coverage status labels for lifecycle traceability paths
 
 ## Main Project Documents
 

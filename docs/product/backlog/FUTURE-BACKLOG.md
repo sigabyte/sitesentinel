@@ -86,11 +86,18 @@ Reason: MVP sonrasında her kalite özelliği için
 
 ## Added After Sprint 1
 
+### Completed in Sprint 2
+
+- Added finding detail pages with linked source evidence.
+- Added normalized evidence detail pages with source collected evidence and related findings.
+- Added collected evidence detail pages with normalized evidence and related findings.
+- Added risk detail pages with linked findings and source evidence chain.
+- Added trust assessment detail pages with linked risks, findings, and evidence chain.
+- Added monitoring run traceability summary dashboard.
+- Added traceability QA status and coverage labels.
+
 ### Sprint 2 Candidate Items
 
-- Add finding detail pages with linked source evidence.
-- Add risk detail pages with linked findings.
-- Add trust assessment detail pages with linked risks.
 - Add scan history comparison per website.
 - Add manual re-run controls for specific assessment stages.
 - Add scheduled monitoring runs.

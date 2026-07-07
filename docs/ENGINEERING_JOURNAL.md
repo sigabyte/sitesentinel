@@ -1,3 +1,5 @@
+## Engineering implementation notes and Sprint closure history.
+
 ## Sprint 1 Closure — Core Assessment Lifecycle Implementation
 
 ### Status
@@ -393,3 +395,144 @@ Completed.
 - No trust assessment logic was changed.
 - No database migration was introduced.
 - This block only improves traceability review clarity and QA consistency.
+
+## Sprint 2 Closure — Explainable Traceability Layer
+
+### Status
+
+Sprint 2 implementation is complete.
+
+Sprint 2 extended the Sprint 1 core assessment lifecycle with a full explainable traceability review layer.
+
+### Implemented Scope
+
+- Finding detail traceability.
+- Normalized evidence detail traceability.
+- Collected evidence detail traceability.
+- Traceability navigation hardening between evidence, normalized evidence, findings, risks, and trust assessments.
+- Risk detail traceability.
+- Trust assessment detail traceability.
+- Monitoring run traceability summary dashboard.
+- Overall traceability QA status.
+- Coverage status labels for lifecycle traceability paths.
+- Same-page review anchors for monitoring run assessment outputs.
+
+### Implemented Traceability Paths
+
+Website
+↓
+MonitoringRun
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+
+Website
+↓
+MonitoringRun
+↓
+Finding
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+Website
+↓
+MonitoringRun
+↓
+Risk
+↓
+Source Findings
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+Website
+↓
+MonitoringRun
+↓
+TrustAssessment
+↓
+Source Risks
+↓
+Source Findings
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+### Run-Level Traceability Summary
+
+Monitoring run detail now summarizes:
+
+- Collected Evidence → Normalized Evidence
+- Findings → Source Evidence
+- Risks → Source Findings
+- Trust Assessments → Source Risks
+
+Supported coverage status values:
+
+- AVAILABLE
+- PARTIAL
+- MISSING
+- NO_SOURCE_DATA
+
+Supported overall traceability status values:
+
+- TRACEABILITY_AVAILABLE
+- TRACEABILITY_PARTIAL
+- TRACEABILITY_MISSING_LINKS
+- NO_TRACEABILITY_SOURCE_DATA
+
+### Preserved Architecture Boundaries
+
+- Evidence Collection Engine remains responsible only for collecting raw evidence.
+- Evidence Analysis Engine remains responsible for normalized evidence and findings.
+- Risk Evaluation Engine remains responsible for producing risks from findings.
+- Trust Evaluation Engine remains responsible for producing trust assessments from risks.
+- Traceability pages only expose persisted lifecycle relationships.
+- Traceability UI does not reinterpret evidence, findings, risks, or trust assessments.
+- No database migration was introduced.
+- No scoring logic was changed.
+- No engine responsibility boundary was changed.
+
+### Manual QA Checklist
+
+The following flows were manually verified during Sprint 2:
+
+- Finding detail traceability opens from monitoring run detail.
+- Finding detail shows linked source collected evidence.
+- Normalized evidence detail opens from monitoring run detail.
+- Normalized evidence detail shows source collected evidence and related findings.
+- Collected evidence detail shows normalized evidence and related findings.
+- Risk detail shows source findings and their evidence chain.
+- Trust assessment detail shows source risks, findings, evidence, and normalized evidence.
+- Monitoring run traceability summary shows lifecycle coverage counts.
+- Overall traceability status appears correctly.
+- Traceability navigation links preserve website and monitoring run context.
+- Sprint 2 traceability pages compile and run successfully.
+
+### Deferred Items
+
+The following items remain deferred to future sprints:
+
+- Historical scan comparison.
+- Scheduled recurring scans.
+- Report export.
+- CSV export.
+- PDF export.
+- Authentication and user access control.
+- Advanced scanner signals.
+- External reputation integrations.
+- Notification engine.
+- Automated integration tests for the full traceability lifecycle.
+
+## Next Phase
+
+Sprint 3 should build on the Sprint 1 lifecycle foundation and Sprint 2 traceability layer without replacing either.
+
+Recommended future candidates are recorded in:
+
+`docs/product/backlog/FUTURE-BACKLOG.md`

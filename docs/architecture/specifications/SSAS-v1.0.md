@@ -5,7 +5,7 @@
 **Status:** Approved  
 **Version:** 1.0  
 **Owner:** Product Owner  
-**Last Updated:** 2026-07-04
+**Last Updated:** 2026-07-07
 
 ---
 
@@ -1523,6 +1523,8 @@ It is not responsible for:
 Reporting may consume:
 
 - Website
+- Collected Evidence
+- Normalized Evidence
 - Findings
 - Risk
 - Trust Assessment
@@ -1572,6 +1574,25 @@ Every report must preserve references to:
 Reports must never introduce unsupported conclusions.
 
 ---
+
+## Traceability Review Views
+
+The platform may provide dedicated traceability review views.
+
+Traceability review views are responsible for helping users understand how assessment outputs were produced.
+
+They may expose relationships such as:
+
+- Collected Evidence to Normalized Evidence
+- Findings to Source Evidence
+- Risks to Source Findings
+- Trust Assessments to Source Risks
+
+Traceability review views must not reinterpret assessment outputs.
+
+They must only present persisted relationships produced by the platform lifecycle.
+
+Traceability review views are part of presentation and reporting responsibility, not assessment responsibility.
 
 ## Related Documents
 
@@ -2106,6 +2127,7 @@ Examples include:
 - Website Management
 - Monitoring Management
 - Assessment Review
+- Traceability Review
 - Historical Analysis
 - Report Exploration
 - Notification Management
