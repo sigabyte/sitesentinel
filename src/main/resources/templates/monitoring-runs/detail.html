@@ -128,6 +128,25 @@
         Run-level visibility of how collected evidence, normalized evidence, findings, risks, and trust assessments are connected.
     </p>
 
+    <div class="traceability-card">
+        <p>
+            Overall Traceability Status:
+            <span class="coverage-status"
+                  th:classappend="|coverage-status--${#strings.toLowerCase(overallTraceabilityStatus)}|"
+                  th:text="${overallTraceabilityStatus}">
+                TRACEABILITY_AVAILABLE
+            </span>
+        </p>
+
+        <p th:text="${overallTraceabilityStatusDescription}">
+            Run output has usable traceability links across the monitored lifecycle.
+        </p>
+
+        <p class="output-note">
+            PARTIAL or MISSING coverage may be valid for records that are collected but not expected to produce downstream lifecycle output.
+        </p>
+    </div>
+
     <div class="summary-grid">
         <div class="summary-card">
             <span class="summary-card-label">Evidence → Normalized</span>
@@ -176,8 +195,10 @@
             <td>Collected Evidence → Normalized Evidence</td>
             <td th:text="|${collectedEvidenceWithNormalizedCount} / ${collectedEvidenceCount}|">0 / 0</td>
             <td>
-                <span class="coverage-status" th:text="${evidenceToNormalizedCoverageStatus}">
-                    AVAILABLE
+                <span class="coverage-status"
+                      th:classappend="|coverage-status--${#strings.toLowerCase(evidenceToNormalizedCoverageStatus)}|"
+                      th:text="${evidenceToNormalizedCoverageStatus}">
+                      AVAILABLE
                 </span>
             </td>
             <td>
@@ -189,8 +210,10 @@
             <td>Findings → Source Evidence</td>
             <td th:text="|${findingsWithEvidenceCount} / ${findingCount}|">0 / 0</td>
             <td>
-                <span class="coverage-status" th:text="${findingToEvidenceCoverageStatus}">
-                    AVAILABLE
+                <span class="coverage-status"
+                      th:classappend="|coverage-status--${#strings.toLowerCase(findingToEvidenceCoverageStatus)}|"
+                      th:text="${findingToEvidenceCoverageStatus}">
+                  AVAILABLE
                 </span>
             </td>
             <td>
@@ -202,8 +225,10 @@
             <td>Risks → Source Findings</td>
             <td th:text="|${risksWithFindingCount} / ${riskCount}|">0 / 0</td>
             <td>
-                <span class="coverage-status" th:text="${riskToFindingCoverageStatus}">
-                    AVAILABLE
+                <span class="coverage-status"
+                      th:classappend="|coverage-status--${#strings.toLowerCase(riskToFindingCoverageStatus)}|"
+                      th:text="${riskToFindingCoverageStatus}">
+                     AVAILABLE
                 </span>
             </td>
             <td>
@@ -215,8 +240,10 @@
             <td>Trust Assessments → Source Risks</td>
             <td th:text="|${trustAssessmentsWithRiskCount} / ${trustAssessmentCount}|">0 / 0</td>
             <td>
-                <span class="coverage-status" th:text="${trustToRiskCoverageStatus}">
-                    AVAILABLE
+                <span class="coverage-status"
+                      th:classappend="|coverage-status--${#strings.toLowerCase(trustToRiskCoverageStatus)}|"
+                      th:text="${trustToRiskCoverageStatus}">
+                     AVAILABLE
                 </span>
             </td>
             <td>

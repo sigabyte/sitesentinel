@@ -207,3 +207,27 @@ th {
     font-weight: 600;
     background: #fafafa;
 }
+
+.coverage-status--available,
+.coverage-status--traceability_available {
+    border-color: #9ac89a;
+    background: #f3fbf3;
+}
+
+.coverage-status--partial,
+.coverage-status--traceability_partial {
+    border-color: #d6bd75;
+    background: #fff9e8;
+}
+
+.coverage-status--missing,
+.coverage-status--traceability_missing_links {
+    border-color: #d99a9a;
+    background: #fff3f3;
+}
+
+.coverage-status--no_source_data,
+.coverage-status--no_traceability_source_data {
+    border-color: #bbbbbb;
+    background: #f7f7f7;
+}

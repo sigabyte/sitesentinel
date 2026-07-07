@@ -362,3 +362,34 @@ Source Risk
 - No risk evaluation logic was changed.
 - No trust assessment logic was changed.
 - No database migration was introduced.
+
+## Sprint 2 Block 2G — Traceability QA & Consistency Hardening
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added overall traceability status to monitoring run detail.
+- Added overall traceability status description for QA visibility.
+- Standardized coverage status rendering in the traceability summary table.
+- Added visual distinction for AVAILABLE, PARTIAL, MISSING, and NO_SOURCE_DATA coverage states.
+- Added QA note explaining that PARTIAL or MISSING coverage may be valid for records that are not expected to produce downstream lifecycle output.
+
+### Overall Traceability Status Values
+
+- TRACEABILITY_AVAILABLE: lifecycle output has usable traceability links across the monitored lifecycle.
+- TRACEABILITY_PARTIAL: some lifecycle outputs are linked, but not all source records have downstream traceability.
+- TRACEABILITY_MISSING_LINKS: one or more lifecycle stages produced records without downstream traceability links.
+- NO_TRACEABILITY_SOURCE_DATA: no source records exist yet for traceability evaluation.
+
+### Preserved Architecture Boundaries
+
+- No evidence collection logic was changed.
+- No evidence analysis logic was changed.
+- No finding generation logic was changed.
+- No risk evaluation logic was changed.
+- No trust assessment logic was changed.
+- No database migration was introduced.
+- This block only improves traceability review clarity and QA consistency.

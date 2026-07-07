@@ -147,24 +147,42 @@ public class MonitoringRunController {
         model.addAttribute("risksWithFindingCount", risksWithFindingCount);
         model.addAttribute("trustAssessmentsWithRiskCount", trustAssessmentsWithRiskCount);
 
-        model.addAttribute(
-                "evidenceToNormalizedCoverageStatus",
-                resolveCoverageStatus(collectedEvidenceCount, collectedEvidenceWithNormalizedCount)
+        String evidenceToNormalizedCoverageStatus = resolveCoverageStatus(
+                collectedEvidenceCount,
+                collectedEvidenceWithNormalizedCount
         );
 
-        model.addAttribute(
-                "findingToEvidenceCoverageStatus",
-                resolveCoverageStatus(findingCount, findingsWithEvidenceCount)
+        String findingToEvidenceCoverageStatus = resolveCoverageStatus(
+                findingCount,
+                findingsWithEvidenceCount
         );
 
-        model.addAttribute(
-                "riskToFindingCoverageStatus",
-                resolveCoverageStatus(riskCount, risksWithFindingCount)
+        String riskToFindingCoverageStatus = resolveCoverageStatus(
+                riskCount,
+                risksWithFindingCount
         );
 
+        String trustToRiskCoverageStatus = resolveCoverageStatus(
+                trustAssessmentCount,
+                trustAssessmentsWithRiskCount
+        );
+
+        String overallTraceabilityStatus = resolveOverallTraceabilityStatus(
+                evidenceToNormalizedCoverageStatus,
+                findingToEvidenceCoverageStatus,
+                riskToFindingCoverageStatus,
+                trustToRiskCoverageStatus
+        );
+
+        model.addAttribute("evidenceToNormalizedCoverageStatus", evidenceToNormalizedCoverageStatus);
+        model.addAttribute("findingToEvidenceCoverageStatus", findingToEvidenceCoverageStatus);
+        model.addAttribute("riskToFindingCoverageStatus", riskToFindingCoverageStatus);
+        model.addAttribute("trustToRiskCoverageStatus", trustToRiskCoverageStatus);
+
+        model.addAttribute("overallTraceabilityStatus", overallTraceabilityStatus);
         model.addAttribute(
-                "trustToRiskCoverageStatus",
-                resolveCoverageStatus(trustAssessmentCount, trustAssessmentsWithRiskCount)
+                "overallTraceabilityStatusDescription",
+                resolveOverallTraceabilityStatusDescription(overallTraceabilityStatus)
         );
 
         model.addAttribute("collectedEvidenceCount", collectedEvidenceCount);
@@ -213,6 +231,57 @@ public class MonitoringRunController {
         }
 
         return "AVAILABLE";
+    }
+
+    private String resolveOverallTraceabilityStatus(
+            String evidenceToNormalizedCoverageStatus,
+            String findingToEvidenceCoverageStatus,
+            String riskToFindingCoverageStatus,
+            String trustToRiskCoverageStatus
+    ) {
+        List<String> coverageStatuses = List.of(
+                evidenceToNormalizedCoverageStatus,
+                findingToEvidenceCoverageStatus,
+                riskToFindingCoverageStatus,
+                trustToRiskCoverageStatus
+        );
+
+        boolean allHaveNoSourceData = coverageStatuses.stream()
+                .allMatch("NO_SOURCE_DATA"::equals);
+
+        if (allHaveNoSourceData) {
+            return "NO_TRACEABILITY_SOURCE_DATA";
+        }
+
+        if (coverageStatuses.contains("MISSING")) {
+            return "TRACEABILITY_MISSING_LINKS";
+        }
+
+        if (coverageStatuses.contains("PARTIAL")) {
+            return "TRACEABILITY_PARTIAL";
+        }
+
+        return "TRACEABILITY_AVAILABLE";
+    }
+
+    private String resolveOverallTraceabilityStatusDescription(String overallTraceabilityStatus) {
+        if ("TRACEABILITY_AVAILABLE".equals(overallTraceabilityStatus)) {
+            return "Run output has usable traceability links across the monitored lifecycle.";
+        }
+
+        if ("TRACEABILITY_PARTIAL".equals(overallTraceabilityStatus)) {
+            return "Some lifecycle outputs have traceability links, but not every source record is linked downstream.";
+        }
+
+        if ("TRACEABILITY_MISSING_LINKS".equals(overallTraceabilityStatus)) {
+            return "One or more lifecycle stages produced records without downstream traceability links.";
+        }
+
+        if ("NO_TRACEABILITY_SOURCE_DATA".equals(overallTraceabilityStatus)) {
+            return "No source records exist yet for traceability evaluation.";
+        }
+
+        return "Traceability status could not be determined.";
     }
 
     private String resolveAssessmentOutcome(
