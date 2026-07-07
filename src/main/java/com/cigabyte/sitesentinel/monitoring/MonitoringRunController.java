@@ -83,6 +83,12 @@ public class MonitoringRunController {
         model.addAttribute("risks", riskService.findByMonitoringRunId(runId));
         model.addAttribute("trustAssessments", trustAssessments);
 
+        model.addAttribute("trustAssessmentRiskCounts", trustAssessments.stream()
+                .collect(Collectors.toMap(
+                        assessment -> assessment.getId(),
+                        assessment -> trustAssessmentService.countRiskLinks(assessment.getId())
+                )));
+
         model.addAttribute("latestTrustAssessment", latestTrustAssessment);
 
         model.addAttribute("homepageEvidence", evidenceService.findHomepageEvidence(runId));

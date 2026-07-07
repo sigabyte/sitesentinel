@@ -111,6 +111,11 @@
         <p th:text="${latestTrustAssessment.summary}">
             Trust assessment summary.
         </p>
+        <p class="traceability-actions">
+            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/trust-assessments/{trustAssessmentId}(websiteId=${website.id}, runId=${monitoringRun.id}, trustAssessmentId=${latestTrustAssessment.id})}">
+                View trust traceability
+            </a>
+        </p>
     </div>
 
     <div class="assessment-summary" th:if="${latestTrustAssessment == null}">
@@ -131,7 +136,9 @@
             <th>Trust Score</th>
             <th>Confidence</th>
             <th>Summary</th>
+            <th>Risk Links</th>
             <th>Created At</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -140,7 +147,13 @@
             <td th:text="${assessment.trustScore}">0</td>
             <td th:text="${assessment.confidenceScore}">0</td>
             <td th:text="${assessment.summary}">Summary</td>
+            <td th:text="${trustAssessmentRiskCounts[assessment.id]}">0</td>
             <td th:text="${assessment.createdAt}">Created at</td>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/trust-assessments/{trustAssessmentId}(websiteId=${website.id}, runId=${monitoringRun.id}, trustAssessmentId=${assessment.id})}">
+                    View traceability
+                </a>
+            </td>
         </tr>
         </tbody>
     </table>

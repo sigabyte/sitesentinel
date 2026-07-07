@@ -16,6 +16,12 @@ public interface RiskRepository extends JpaRepository<Risk, UUID> {
             UUID websiteId
     );
 
+    List<Risk> findByIdInAndMonitoringRunIdAndWebsiteIdOrderByRiskScoreDescCreatedAtAsc(
+            List<UUID> ids,
+            UUID monitoringRunId,
+            UUID websiteId
+    );
+
     Optional<Risk> findFirstByMonitoringRunIdAndRiskTypeOrderByCreatedAtAsc(
             UUID monitoringRunId,
             String riskType

@@ -26,8 +26,27 @@ public class TrustAssessmentService {
     }
 
     @Transactional(readOnly = true)
+    public TrustAssessment findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID trustAssessmentId,
+            UUID monitoringRunId,
+            UUID websiteId
+    ) {
+        return trustAssessmentRepository.findByIdAndMonitoringRunIdAndWebsiteId(
+                        trustAssessmentId,
+                        monitoringRunId,
+                        websiteId
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Trust assessment not found: " + trustAssessmentId));
+    }
+
+    @Transactional(readOnly = true)
     public List<TrustAssessmentRisk> findRiskLinks(UUID trustAssessmentId) {
-        return trustAssessmentRiskRepository.findByTrustAssessmentId(trustAssessmentId);
+        return trustAssessmentRiskRepository.findByTrustAssessmentIdOrderByCreatedAtAsc(trustAssessmentId);
+    }
+
+    @Transactional(readOnly = true)
+    public long countRiskLinks(UUID trustAssessmentId) {
+        return trustAssessmentRiskRepository.countByTrustAssessmentId(trustAssessmentId);
     }
 
     @Transactional(readOnly = true)

@@ -188,3 +188,9 @@ th {
     padding-top: 14px;
     margin-top: 18px;
 }
+
+.traceability-deep-block {
+    border-left: 3px solid #dddddd;
+    padding-left: 12px;
+    margin-top: 16px;
+}

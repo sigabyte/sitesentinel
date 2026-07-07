@@ -9,6 +9,8 @@ public interface TrustAssessmentRiskRepository extends JpaRepository<TrustAssess
 
     List<TrustAssessmentRisk> findByTrustAssessmentId(UUID trustAssessmentId);
 
+    List<TrustAssessmentRisk> findByTrustAssessmentIdOrderByCreatedAtAsc(UUID trustAssessmentId);
+
     boolean existsByTrustAssessmentIdAndRiskId(UUID trustAssessmentId, UUID riskId);
 
     long countByTrustAssessmentId(UUID trustAssessmentId);

@@ -12,6 +12,12 @@ public interface TrustAssessmentRepository extends JpaRepository<TrustAssessment
 
     Optional<TrustAssessment> findFirstByMonitoringRunIdOrderByCreatedAtDesc(UUID monitoringRunId);
 
+    Optional<TrustAssessment> findByIdAndMonitoringRunIdAndWebsiteId(
+            UUID id,
+            UUID monitoringRunId,
+            UUID websiteId
+    );
+
     List<TrustAssessment> findTop10ByOrderByCreatedAtDesc();
 
     long countByMonitoringRunId(UUID monitoringRunId);

@@ -40,6 +40,23 @@ public class RiskService {
     }
 
     @Transactional(readOnly = true)
+    public List<Risk> findByIdsAndMonitoringRunIdAndWebsiteId(
+            UUID websiteId,
+            UUID monitoringRunId,
+            List<UUID> riskIds
+    ) {
+        if (riskIds == null || riskIds.isEmpty()) {
+            return List.of();
+        }
+
+        return riskRepository.findByIdInAndMonitoringRunIdAndWebsiteIdOrderByRiskScoreDescCreatedAtAsc(
+                riskIds,
+                monitoringRunId,
+                websiteId
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<RiskFinding> findFindingLinks(UUID riskId) {
         return riskFindingRepository.findByRiskIdOrderByCreatedAtAsc(riskId);
     }

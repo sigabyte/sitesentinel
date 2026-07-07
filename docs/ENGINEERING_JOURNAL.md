@@ -264,3 +264,48 @@ NormalizedEvidence
 - No risk generation logic was changed.
 - No trust assessment logic was changed.
 - No database migration was introduced.
+
+## Sprint 2 Block 2E — Trust Assessment Detail Traceability
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added trust assessment detail traceability page under monitoring run context.
+- Added navigation from latest trust assessment summary to trust assessment detail.
+- Added navigation from trust assessments table to trust assessment detail.
+- Linked each trust assessment to its source risks through the trust_assessment_risk table.
+- Displayed source findings behind each risk linked to a trust assessment.
+- Displayed source collected evidence behind each finding.
+- Displayed normalized evidence produced from each collected evidence item.
+- Added repository and service methods to safely load trust assessments and risks within website and monitoring run boundaries.
+
+### Traceability Coverage
+
+The UI now supports the following navigation path:
+
+Website
+↓
+MonitoringRun
+↓
+TrustAssessment
+↓
+Source Risks
+↓
+Source Findings
+↓
+Source CollectedEvidence
+↓
+NormalizedEvidence
+
+### Preserved Architecture Boundaries
+
+- Trust Evaluation Engine remains responsible for producing trust assessments.
+- Trust assessment detail traceability only exposes existing trust-to-risk relationships.
+- Risk-to-finding, finding-to-evidence, and evidence-to-normalized-evidence relationships are reused.
+- No trust scoring logic was changed.
+- No risk evaluation logic was changed.
+- No evidence analysis logic was changed.
+- No database migration was introduced.
