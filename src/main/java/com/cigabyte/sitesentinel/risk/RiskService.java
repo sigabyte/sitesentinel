@@ -62,6 +62,11 @@ public class RiskService {
     }
 
     @Transactional(readOnly = true)
+    public long countFindingLinks(UUID riskId) {
+        return riskFindingRepository.countByRiskId(riskId);
+    }
+
+    @Transactional(readOnly = true)
     public long countByMonitoringRunId(UUID monitoringRunId) {
         return riskRepository.countByMonitoringRunId(monitoringRunId);
     }

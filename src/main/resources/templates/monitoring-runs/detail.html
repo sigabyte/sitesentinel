@@ -123,6 +123,110 @@
     </div>
 </section>
 <section class="output-section">
+    <h2>Traceability summary</h2>
+    <p class="output-note">
+        Run-level visibility of how collected evidence, normalized evidence, findings, risks, and trust assessments are connected.
+    </p>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Evidence → Normalized</span>
+            <span class="summary-card-value"
+                  th:text="|${collectedEvidenceWithNormalizedCount} / ${collectedEvidenceCount}|">
+                0 / 0
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Findings → Evidence</span>
+            <span class="summary-card-value"
+                  th:text="|${findingsWithEvidenceCount} / ${findingCount}|">
+                0 / 0
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Risks → Findings</span>
+            <span class="summary-card-value"
+                  th:text="|${risksWithFindingCount} / ${riskCount}|">
+                0 / 0
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Trust → Risks</span>
+            <span class="summary-card-value"
+                  th:text="|${trustAssessmentsWithRiskCount} / ${trustAssessmentCount}|">
+                0 / 0
+            </span>
+        </div>
+    </div>
+
+    <table class="traceability-coverage-table">
+        <thead>
+        <tr>
+            <th>Traceability Path</th>
+            <th>Coverage</th>
+            <th>Status</th>
+            <th>Review Area</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Collected Evidence → Normalized Evidence</td>
+            <td th:text="|${collectedEvidenceWithNormalizedCount} / ${collectedEvidenceCount}|">0 / 0</td>
+            <td>
+                <span class="coverage-status" th:text="${evidenceToNormalizedCoverageStatus}">
+                    AVAILABLE
+                </span>
+            </td>
+            <td>
+                <a href="#normalized-evidence-section">Normalized evidence</a>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Findings → Source Evidence</td>
+            <td th:text="|${findingsWithEvidenceCount} / ${findingCount}|">0 / 0</td>
+            <td>
+                <span class="coverage-status" th:text="${findingToEvidenceCoverageStatus}">
+                    AVAILABLE
+                </span>
+            </td>
+            <td>
+                <a href="#findings-section">Findings</a>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Risks → Source Findings</td>
+            <td th:text="|${risksWithFindingCount} / ${riskCount}|">0 / 0</td>
+            <td>
+                <span class="coverage-status" th:text="${riskToFindingCoverageStatus}">
+                    AVAILABLE
+                </span>
+            </td>
+            <td>
+                <a href="#risks-section">Risks</a>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Trust Assessments → Source Risks</td>
+            <td th:text="|${trustAssessmentsWithRiskCount} / ${trustAssessmentCount}|">0 / 0</td>
+            <td>
+                <span class="coverage-status" th:text="${trustToRiskCoverageStatus}">
+                    AVAILABLE
+                </span>
+            </td>
+            <td>
+                <a href="#trust-assessments-section">Trust assessments</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+<section class="output-section" id="trust-assessments-section">
     <h2>Trust assessments</h2>
 
     <div th:if="${#lists.isEmpty(trustAssessments)}">
@@ -158,7 +262,7 @@
         </tbody>
     </table>
 </section>
-<section class="output-section">
+<section class="output-section" id="risks-section">
     <h2>Risks</h2>
 
     <div th:if="${#lists.isEmpty(risks)}">
@@ -173,6 +277,7 @@
             <th>Risk Score</th>
             <th>Confidence</th>
             <th>Rationale</th>
+            <th>Finding Links</th>
             <th>Created At</th>
             <th>Action</th>
         </tr>
@@ -184,6 +289,7 @@
             <td th:text="${risk.riskScore}">Risk score</td>
             <td th:text="${risk.confidenceScore}">Confidence</td>
             <td th:text="${risk.rationale}">Rationale</td>
+            <td th:text="${riskFindingCounts[risk.id]}">0</td>
             <td th:text="${risk.createdAt}">Created at</td>
             <td>
                 <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(websiteId=${website.id}, runId=${monitoringRun.id}, riskId=${risk.id})}">
@@ -194,7 +300,7 @@
         </tbody>
     </table>
 </section>
-<section class="output-section">
+<section class="output-section" id="findings-section">
     <h2>Findings</h2>
 
     <div th:if="${#lists.isEmpty(findings)}">
@@ -230,7 +336,7 @@
         </tbody>
     </table>
 </section>
-<section class="output-section">
+<section class="output-section" id="normalized-evidence-section">
     <h2>Normalized evidence</h2>
 
     <div th:if="${#lists.isEmpty(normalizedEvidence)}">

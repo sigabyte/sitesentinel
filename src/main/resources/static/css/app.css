@@ -194,3 +194,16 @@ th {
     padding-left: 12px;
     margin-top: 16px;
 }
+
+.traceability-coverage-table {
+    margin-top: 14px;
+}
+
+.coverage-status {
+    display: inline-block;
+    border: 1px solid #cccccc;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #fafafa;
+}

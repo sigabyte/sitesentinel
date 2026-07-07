@@ -12,8 +12,13 @@ import com.cigabyte.sitesentinel.trust.TrustAssessmentService;
 
 import java.util.List;
 import java.util.UUID;
-import com.cigabyte.sitesentinel.finding.Finding;
 import java.util.stream.Collectors;
+import java.util.Map;
+
+import com.cigabyte.sitesentinel.finding.Finding;
+import com.cigabyte.sitesentinel.evidence.CollectedEvidence;
+import com.cigabyte.sitesentinel.evidence.NormalizedEvidence;
+import com.cigabyte.sitesentinel.risk.Risk;
 
 
 @Controller
@@ -68,26 +73,44 @@ public class MonitoringRunController {
         model.addAttribute("website", websiteService.findById(websiteId));
         model.addAttribute("monitoringRun", monitoringRun);
 
-        model.addAttribute("collectedEvidence", evidenceService.findCollectedEvidence(runId));
-        model.addAttribute("normalizedEvidence", evidenceService.findNormalizedEvidence(runId));
+        List<CollectedEvidence> collectedEvidence = evidenceService.findCollectedEvidence(runId);
+        List<NormalizedEvidence> normalizedEvidence = evidenceService.findNormalizedEvidence(runId);
+
+        model.addAttribute("collectedEvidence", collectedEvidence);
+        model.addAttribute("normalizedEvidence", normalizedEvidence);
 
         List<Finding> findings = findingService.findByMonitoringRunId(runId);
 
-        model.addAttribute("findings", findings);
-        model.addAttribute("findingEvidenceCounts", findings.stream()
+        Map<UUID, Long> findingEvidenceCounts = findings.stream()
                 .collect(Collectors.toMap(
                         finding -> finding.getId(),
                         finding -> findingService.countEvidenceLinks(finding.getId())
-                )));
+                ));
 
-        model.addAttribute("risks", riskService.findByMonitoringRunId(runId));
+        model.addAttribute("findings", findings);
+        model.addAttribute("findingEvidenceCounts", findingEvidenceCounts);
+
+        List<Risk> risks = riskService.findByMonitoringRunId(runId);
+
+        model.addAttribute("risks", risks);
+
+        Map<UUID, Long> riskFindingCounts = risks.stream()
+                .collect(Collectors.toMap(
+                        risk -> risk.getId(),
+                        risk -> riskService.countFindingLinks(risk.getId())
+                ));
+
+        model.addAttribute("riskFindingCounts", riskFindingCounts);
+
         model.addAttribute("trustAssessments", trustAssessments);
 
-        model.addAttribute("trustAssessmentRiskCounts", trustAssessments.stream()
+        Map<UUID, Long> trustAssessmentRiskCounts = trustAssessments.stream()
                 .collect(Collectors.toMap(
                         assessment -> assessment.getId(),
                         assessment -> trustAssessmentService.countRiskLinks(assessment.getId())
-                )));
+                ));
+
+        model.addAttribute("trustAssessmentRiskCounts", trustAssessmentRiskCounts);
 
         model.addAttribute("latestTrustAssessment", latestTrustAssessment);
 
@@ -101,6 +124,48 @@ public class MonitoringRunController {
         long findingCount = findingService.countByMonitoringRunId(runId);
         long riskCount = riskService.countByMonitoringRunId(runId);
         long trustAssessmentCount = trustAssessmentService.countByMonitoringRunId(runId);
+
+        long collectedEvidenceWithNormalizedCount = normalizedEvidence.stream()
+                .map(NormalizedEvidence::getCollectedEvidenceId)
+                .distinct()
+                .count();
+
+        long findingsWithEvidenceCount = findings.stream()
+                .filter(finding -> findingEvidenceCounts.getOrDefault(finding.getId(), 0L) > 0)
+                .count();
+
+        long risksWithFindingCount = risks.stream()
+                .filter(risk -> riskFindingCounts.getOrDefault(risk.getId(), 0L) > 0)
+                .count();
+
+        long trustAssessmentsWithRiskCount = trustAssessments.stream()
+                .filter(assessment -> trustAssessmentRiskCounts.getOrDefault(assessment.getId(), 0L) > 0)
+                .count();
+
+        model.addAttribute("collectedEvidenceWithNormalizedCount", collectedEvidenceWithNormalizedCount);
+        model.addAttribute("findingsWithEvidenceCount", findingsWithEvidenceCount);
+        model.addAttribute("risksWithFindingCount", risksWithFindingCount);
+        model.addAttribute("trustAssessmentsWithRiskCount", trustAssessmentsWithRiskCount);
+
+        model.addAttribute(
+                "evidenceToNormalizedCoverageStatus",
+                resolveCoverageStatus(collectedEvidenceCount, collectedEvidenceWithNormalizedCount)
+        );
+
+        model.addAttribute(
+                "findingToEvidenceCoverageStatus",
+                resolveCoverageStatus(findingCount, findingsWithEvidenceCount)
+        );
+
+        model.addAttribute(
+                "riskToFindingCoverageStatus",
+                resolveCoverageStatus(riskCount, risksWithFindingCount)
+        );
+
+        model.addAttribute(
+                "trustToRiskCoverageStatus",
+                resolveCoverageStatus(trustAssessmentCount, trustAssessmentsWithRiskCount)
+        );
 
         model.addAttribute("collectedEvidenceCount", collectedEvidenceCount);
         model.addAttribute("normalizedEvidenceCount", normalizedEvidenceCount);
@@ -132,6 +197,22 @@ public class MonitoringRunController {
                 )
         );
         return "monitoring-runs/detail";
+    }
+
+    private String resolveCoverageStatus(long sourceCount, long linkedSourceCount) {
+        if (sourceCount == 0) {
+            return "NO_SOURCE_DATA";
+        }
+
+        if (linkedSourceCount == 0) {
+            return "MISSING";
+        }
+
+        if (linkedSourceCount < sourceCount) {
+            return "PARTIAL";
+        }
+
+        return "AVAILABLE";
     }
 
     private String resolveAssessmentOutcome(

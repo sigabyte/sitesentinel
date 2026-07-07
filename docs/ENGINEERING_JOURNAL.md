@@ -309,3 +309,56 @@ NormalizedEvidence
 - No risk evaluation logic was changed.
 - No evidence analysis logic was changed.
 - No database migration was introduced.
+
+## Sprint 2 Block 2F — Traceability Summary Dashboard
+
+### Status
+
+Completed.
+
+### Implemented Scope
+
+- Added run-level traceability summary to monitoring run detail.
+- Added coverage counts for collected evidence to normalized evidence.
+- Added coverage counts for findings to source evidence.
+- Added coverage counts for risks to source findings.
+- Added coverage counts for trust assessments to source risks.
+- Added standardized traceability coverage status labels.
+- Added same-page navigation anchors for trust assessments, risks, findings, and normalized evidence.
+- Added finding link counts to the monitoring run risks table.
+
+### Traceability Coverage
+
+The monitoring run detail page now summarizes the following paths:
+
+CollectedEvidence
+↓
+NormalizedEvidence
+
+Finding
+↓
+Source CollectedEvidence
+
+Risk
+↓
+Source Finding
+
+TrustAssessment
+↓
+Source Risk
+
+### Coverage Status Values
+
+- AVAILABLE: all records at the source level have at least one linked downstream record.
+- PARTIAL: some source records have linked downstream records, but not all.
+- MISSING: source records exist, but no linked downstream records exist.
+- NO_SOURCE_DATA: no records exist at the source level.
+
+### Preserved Architecture Boundaries
+
+- Traceability summary reads existing persisted lifecycle outputs.
+- No evidence collection logic was changed.
+- No evidence analysis logic was changed.
+- No risk evaluation logic was changed.
+- No trust assessment logic was changed.
+- No database migration was introduced.
