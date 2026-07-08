@@ -4,9 +4,11 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 2 is complete.
+## Current Implementation Status
 
-Sprint 3 is now open with the following scope:
+Sprint 3 is complete.
+
+The current completed scope is:
 
 Assessment History & Change Comparison Baseline
 
@@ -28,7 +30,7 @@ Risk
 ↓
 TrustAssessment
 
-## Implemented Baseline Through Sprint 2
+## Implemented Baseline Through Sprint 3
 
 - Website registration
 - Website detail view
@@ -65,20 +67,35 @@ TrustAssessment
 - Monitoring run traceability summary dashboard
 - Overall traceability QA status
 - Coverage status labels for lifecycle traceability paths
+- Completed monitoring run history access
+- Latest completed run lookup per website
+- Previous completed run lookup per current completed run
+- Assessment comparison read model
+- Trust status comparison
+- Trust score delta calculation
+- Trust score direction classification
+- Finding type change comparison
+- Risk type change comparison
+- New, resolved, and unchanged change classification
+- Monitoring run comparison page
+- Website detail latest comparison summary
+- Comparison links back to traceability detail pages
 
 ## Active Sprint
 
+## Completed Sprint
+
 ### Sprint 3 — Assessment History & Change Comparison Baseline
 
-Sprint 3 should build on the Sprint 1 lifecycle foundation and Sprint 2 traceability layer without replacing either.
+Sprint 3 is complete.
 
-The goal of Sprint 3 is to introduce a baseline for comparing a completed monitoring run against the previous completed monitoring run for the same website.
+Sprint 3 added a read-only comparison layer that compares a completed monitoring run against the previous completed monitoring run for the same website.
 
-Sprint 3 should answer:
+The comparison layer answers:
 
 - What changed since the previous completed run?
 - Did the trust status change?
-- Did the trust score improve or decline?
+- Did the trust score improve, decline, or stay the same?
 - Which finding types are new?
 - Which finding types are resolved?
 - Which finding types are unchanged?
@@ -86,10 +103,10 @@ Sprint 3 should answer:
 - Which risk types are resolved?
 - Which risk types are unchanged?
 
-Sprint 3 must remain read-oriented.
+Sprint 3 preserved the Sprint 1 lifecycle and Sprint 2 traceability boundaries.
 
-It should compare existing persisted lifecycle outputs.  
-It must not create new findings, risks, or trust assessments.
+It compares existing persisted lifecycle outputs only.  
+It does not create new findings, risks, trust assessments, or evidence.
 
 ## Main Project Documents
 
@@ -123,19 +140,26 @@ It must not create new findings, risks, or trust assessments.
 
 ## Current Baseline
 
-SiteSentinel now has a functional real-scan baseline and an explainable traceability review layer.
+SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, and a historical 
+assessment comparison baseline.
 
-The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, generate findings, evaluate risks, produce a trust assessment, and expose traceability across the persisted lifecycle.
+The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence,
+generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, and compare the latest completed assessment against the previous completed assessment for the same website.
 
 ## Next Phase
 
-Sprint 3 should implement the first historical comparison baseline.
+Recommended next scope:
 
-Recommended Sprint 3 implementation blocks:
+Sprint 4 — Scheduled Monitoring & Recurring Scan Baseline
 
-- Block 3A — Documentation alignment
-- Block 3B — Monitoring run history access
-- Block 3C — Comparison read model
-- Block 3D — Monitoring run comparison page
-- Block 3E — Website detail latest comparison summary
-- Block 3F — Sprint 3 QA and closure documentation
+Sprint 4 should build on the Sprint 3 comparison baseline by introducing controlled scheduled monitoring.
+
+Recommended Sprint 4 candidate blocks:
+
+- Schedule configuration per website.
+- Manual enable/disable of scheduled monitoring.
+- Safe recurring scan execution.
+- Prevention of overlapping monitoring runs.
+- Latest scheduled run visibility.
+- Scheduled scan failure handling.
+- Scheduled monitoring QA and closure documentation.

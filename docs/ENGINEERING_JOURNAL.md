@@ -628,3 +628,148 @@ The following items remain deferred until after the Sprint 3 comparison baseline
 - Advanced scanner signals.
 - External reputation integrations.
 - AI-assisted analysis.
+
+---
+
+## Sprint 3 Closure — Assessment History & Change Comparison Baseline
+
+### Status
+
+Sprint 3 is complete.
+
+### Completed Scope
+
+Sprint 3 introduced the first historical comparison baseline for SiteSentinel.
+
+The system can now compare a completed monitoring run against the previous completed monitoring run for the same website.
+
+### Implemented Blocks
+
+- Block 3A — Documentation alignment.
+- Block 3B — Monitoring run history access.
+- Block 3C — Assessment comparison read model.
+- Block 3D — Monitoring run comparison page.
+- Block 3E — Website detail latest comparison summary.
+- Block 3F — QA and closure documentation.
+
+### Implemented Capabilities
+
+Sprint 3 added:
+
+- Completed monitoring run history access.
+- Latest completed run lookup per website.
+- Previous completed run lookup per current completed run.
+- Read-only assessment comparison model.
+- Comparison status handling.
+- Trust status comparison.
+- Trust score delta calculation.
+- Trust score direction classification.
+- Finding type comparison.
+- Risk type comparison.
+- New, resolved, and unchanged change classification.
+- Full monitoring run comparison page.
+- Comparison links from monitoring run detail.
+- Latest comparison summary on website detail.
+- Links from comparison output back to existing traceability pages.
+
+### Comparison Statuses
+
+The Sprint 3 comparison layer supports:
+
+- `AVAILABLE`
+- `CURRENT_RUN_NOT_COMPLETED`
+- `NO_PREVIOUS_COMPLETED_RUN`
+
+### Change Statuses
+
+Finding and risk comparison items support:
+
+- `NEW`
+- `RESOLVED`
+- `UNCHANGED`
+
+### Architecture Boundary Preserved
+
+Sprint 3 remains a read-oriented comparison layer.
+
+The comparison layer reads existing persisted lifecycle outputs only:
+
+Website
+↓
+MonitoringRun
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+↓
+Finding
+↓
+Risk
+↓
+TrustAssessment
+
+Sprint 3 does not:
+
+- Collect new evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Produce trust assessments.
+- Modify trust scores.
+- Reinterpret raw evidence.
+- Replace the Sprint 1 lifecycle.
+- Replace the Sprint 2 traceability layer.
+
+### Baseline Selection Rule
+
+Only completed monitoring runs are eligible for comparison.
+
+Failed, pending, or running monitoring runs are not used as the previous comparison baseline.
+
+### Manual QA Checklist
+
+Verified behaviours:
+
+- Website detail page remains accessible.
+- Monitoring run detail page remains accessible.
+- Full comparison page is accessible from monitoring run detail.
+- Latest comparison summary appears on website detail.
+- Websites without completed runs show comparison unavailable state.
+- Websites with one completed run show no previous completed run state.
+- Websites with two or more completed runs show comparison summary.
+- Trust status comparison is displayed.
+- Trust score delta is displayed.
+- Finding changes are grouped by finding type.
+- Risk changes are grouped by risk type.
+- Current and previous traceability links remain available.
+- Existing Sprint 2 traceability pages remain linked and accessible.
+
+### Outcome
+
+Sprint 3 establishes the historical assessment comparison foundation required before scheduled monitoring, notification, and reporting features.
+
+The product can now answer:
+
+- What changed since the previous completed scan?
+- Did trust status change?
+- Did trust score improve, decline, or remain unchanged?
+- Which finding types are new?
+- Which finding types are resolved?
+- Which finding types are unchanged?
+- Which risk types are new?
+- Which risk types are resolved?
+- Which risk types are unchanged?
+
+### Deferred Items
+
+The following items remain deferred:
+
+- Scheduled recurring scans.
+- Report export.
+- CSV export.
+- PDF export.
+- Authentication and user access control.
+- Notification engine.
+- Advanced scanner signals.
+- External reputation integrations.
+- AI-assisted analysis.
