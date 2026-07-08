@@ -21,6 +21,97 @@
     <p>Created at: <strong th:text="${website.createdAt}">Created</strong></p>
     <p>Updated at: <strong th:text="${website.updatedAt}">Updated</strong></p>
 </section>
+<section>
+    <h2>Scheduled monitoring</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Schedule Status</span>
+            <span class="summary-card-value"
+                  th:text="${monitoringSchedule != null ? monitoringSchedule.status : 'DISABLED'}">
+                DISABLED
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Frequency</span>
+            <span class="summary-card-value"
+                  th:text="${monitoringSchedule != null ? monitoringSchedule.frequency : 'DAILY'}">
+                DAILY
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Next Run At</span>
+            <span class="summary-card-value"
+                  th:text="${monitoringSchedule != null && monitoringSchedule.nextRunAt != null ? monitoringSchedule.nextRunAt : 'Not scheduled'}">
+                Not scheduled
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Last Triggered At</span>
+            <span class="summary-card-value"
+                  th:text="${monitoringSchedule != null && monitoringSchedule.lastTriggeredAt != null ? monitoringSchedule.lastTriggeredAt : 'Never'}">
+                Never
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Last Scheduled Run</span>
+            <span class="summary-card-value"
+                  th:text="${latestScheduledRun != null ? latestScheduledRun.status : 'None'}">
+                None
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Last Scheduled Run Trigger</span>
+            <span class="summary-card-value"
+                  th:text="${latestScheduledRun != null ? latestScheduledRun.triggerType : 'None'}">
+                 None
+            </span>
+        </div>
+    </div>
+
+    <p th:if="${latestScheduledRun != null}">
+        Latest scheduled run:
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${latestScheduledRun.id})}">
+            Open latest scheduled run
+        </a>
+    </p>
+
+    <p class="output-note" th:if="${monitoringSchedule != null && monitoringSchedule.nextRunAt != null}">
+        Schedule timestamps are stored and displayed in UTC format.
+    </p>
+
+    <p th:if="${monitoringSchedule != null && monitoringSchedule.lastFailureReason != null}">
+        Last failure:
+        <strong th:text="${monitoringSchedule.lastFailureReason}">Failure reason</strong>
+    </p>
+
+    <div th:if="${monitoringSchedule == null || !monitoringSchedule.enabled}">
+        <form th:action="@{/websites/{websiteId}/schedules/enable-daily(websiteId=${website.id})}" method="post">
+            <button type="submit">Enable daily scheduled monitoring</button>
+        </form>
+
+        <p class="output-note">
+            Enabling scheduled monitoring prepares this website for recurring scans.
+            The scheduler execution worker will be added in the next block.
+        </p>
+    </div>
+
+    <div th:if="${monitoringSchedule != null && monitoringSchedule.enabled}">
+        <form th:action="@{/websites/{websiteId}/schedules/disable(websiteId=${website.id})}" method="post">
+            <button type="submit">Disable scheduled monitoring</button>
+        </form>
+
+        <p class="output-note">
+            Scheduled monitoring is enabled for this website.
+            The next block will connect due schedules to the existing monitoring lifecycle.
+        </p>
+    </div>
+</section>
 
 <section>
     <h2>Assessment lifecycle summary</h2>
@@ -154,6 +245,7 @@
         <thead>
         <tr>
             <th>Status</th>
+            <th>Trigger</th>
             <th>Started At</th>
             <th>Completed At</th>
             <th>Created At</th>
@@ -164,6 +256,7 @@
         <tbody>
         <tr th:each="run : ${monitoringRuns}">
             <td th:text="${run.status}">PENDING</td>
+            <td th:text="${run.triggerType}">MANUAL</td>
             <td th:text="${run.startedAt}">Started</td>
             <td th:text="${run.completedAt}">Completed</td>
             <td th:text="${run.createdAt}">Created</td>

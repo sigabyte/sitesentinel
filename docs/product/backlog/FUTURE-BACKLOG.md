@@ -100,10 +100,13 @@ Reason: MVP sonrasında her kalite özelliği için
 
 - Add scan history comparison per website.
 
+### Completed Sprint 4 Item
+
+- Add scheduled monitoring runs.
+
 ### Future Candidate Items
 
 - Add manual re-run controls for specific assessment stages.
-- Add scheduled monitoring runs.
 - Add report generation for completed monitoring runs.
 - Add CSV export for assessment output.
 - Add PDF export for completed monitoring reports.
@@ -116,6 +119,11 @@ Reason: MVP sonrasında her kalite özelliği için
 - Add DNS evidence collection.
 - Add TLS evidence collection.
 - Add notification hooks for high-risk trust assessments.
+- Add notification delivery for scheduled monitoring results.
+- Add scheduled monitoring report generation.
+- Add custom cron expression support for monitoring schedules.
+- Add retry policy dashboard for failed scheduled runs.
+- Add distributed locking for multi-node scheduled execution.
 
 ### Deferred Technical Hardening
 

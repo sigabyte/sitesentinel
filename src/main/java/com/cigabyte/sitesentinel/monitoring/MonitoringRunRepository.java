@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Collection;
 
 public interface MonitoringRunRepository extends JpaRepository<MonitoringRun, UUID> {
 
@@ -32,4 +33,14 @@ public interface MonitoringRunRepository extends JpaRepository<MonitoringRun, UU
     long countByWebsiteId(UUID websiteId);
 
     long countByStatus(MonitoringRunStatus status);
+
+    boolean existsByWebsiteIdAndStatusIn(
+            UUID websiteId,
+            Collection<MonitoringRunStatus> statuses
+    );
+
+    List<MonitoringRun> findByWebsiteIdAndStatusInOrderByCreatedAtDesc(
+            UUID websiteId,
+            Collection<MonitoringRunStatus> statuses
+    );
 }

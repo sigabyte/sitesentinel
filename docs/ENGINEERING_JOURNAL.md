@@ -773,3 +773,353 @@ The following items remain deferred:
 - Advanced scanner signals.
 - External reputation integrations.
 - AI-assisted analysis.
+
+
+---
+
+## Sprint 4 Opening — Scheduled Monitoring & Recurring Scan Baseline
+
+### Status
+
+Sprint 4 is open.
+
+### Objective
+
+Sprint 4 introduces the first scheduled monitoring baseline for SiteSentinel.
+
+The goal is to allow websites to be monitored on a recurring schedule while preserving the existing Sprint 1 lifecycle, Sprint 2 traceability layer, and Sprint 3 comparison baseline.
+
+Sprint 4 should not create a new assessment engine.
+
+It should introduce a scheduling layer that safely triggers the existing monitoring lifecycle.
+
+### Product Goal
+
+Sprint 4 should allow the system to answer:
+
+- Which websites have scheduled monitoring enabled?
+- When is the next scheduled run expected?
+- When was the schedule last triggered?
+- Was a monitoring run started manually or by schedule?
+- Did the scheduled run complete using the existing lifecycle?
+- Did the completed scheduled run become eligible for Sprint 3 comparison?
+- Was overlapping execution prevented for the same website?
+
+### Architecture Boundary
+
+Sprint 4 must remain a scheduling and orchestration layer.
+
+The scheduled monitoring layer may:
+
+- Store schedule configuration per website.
+- Enable scheduled monitoring for a website.
+- Disable scheduled monitoring for a website.
+- Identify due schedules.
+- Trigger a monitoring run through the existing monitoring execution service.
+- Mark a scheduled run as manual or scheduled.
+- Recalculate the next scheduled run time.
+- Prevent overlapping monitoring runs for the same website.
+
+The scheduled monitoring layer must not:
+
+- Collect evidence directly.
+- Normalize evidence directly.
+- Generate findings directly.
+- Evaluate risks directly.
+- Produce trust assessments directly.
+- Compare assessments directly.
+- Replace the Sprint 1 monitoring lifecycle.
+- Replace the Sprint 2 traceability layer.
+- Replace the Sprint 3 comparison layer.
+- Send notifications.
+- Generate reports.
+- Export CSV or PDF output.
+
+### Required Execution Boundary
+
+Scheduled monitoring should follow this execution path:
+
+Website Schedule
+↓
+Scheduler
+↓
+MonitoringExecutionService
+↓
+Existing Sprint 1 Lifecycle
+↓
+Existing Sprint 2 Traceability
+↓
+Existing Sprint 3 Comparison Eligibility
+
+The scheduler should only decide when a scan is due.
+
+The existing lifecycle should still decide how evidence, findings, risks, and trust assessments are created.
+
+### Planned Implementation Blocks
+
+- Block 4A — Documentation alignment.
+- Block 4B — Scheduling domain model and database baseline.
+- Block 4C — Website-level schedule enable and disable controls.
+- Block 4D — Safe scheduled execution worker.
+- Block 4E — Scheduled run visibility in UI.
+- Block 4F — Sprint 4 QA and closure documentation.
+
+### Initial Scheduling Scope
+
+Sprint 4 should start with a controlled baseline.
+
+Supported in Sprint 4:
+
+- One schedule per website.
+- Enable or disable schedule.
+- Daily frequency.
+- Next run timestamp.
+- Last triggered timestamp.
+- Last scheduled monitoring run reference.
+- Manual run versus scheduled run distinction.
+- Overlap prevention for the same website.
+
+Not supported in Sprint 4:
+
+- Custom cron expressions.
+- Multiple schedules per website.
+- Email notifications.
+- WhatsApp notifications.
+- Slack notifications.
+- Webhook notifications.
+- PDF reports.
+- CSV exports.
+- Retry dashboard.
+- Distributed locking.
+- Multi-node scheduler coordination.
+- User permissions.
+- Advanced failure analytics.
+
+### Data Model Direction
+
+Sprint 4 should introduce a dedicated schedule model.
+
+Expected baseline entity:
+
+MonitoringSchedule
+
+Expected relationship:
+
+Website
+↓
+MonitoringSchedule
+↓
+MonitoringRun
+
+MonitoringRun should also record whether it was triggered manually or by schedule.
+
+### Safety Rule
+
+A scheduled run must not start if the same website already has a pending or running monitoring run.
+
+This prevents overlapping scans and protects the integrity of lifecycle output.
+
+### Deferred Items
+
+The following items remain deferred until after the Sprint 4 scheduled monitoring baseline:
+
+- Email notification.
+- WhatsApp notification.
+- Slack notification.
+- Webhook notification.
+- PDF report generation.
+- CSV export.
+- Custom cron expression support.
+- Retry policy dashboard.
+- Distributed locking.
+- Multi-node scheduling.
+- Authentication and user access control.
+- Advanced scanner signals.
+- External reputation integrations.
+- AI-assisted analysis.
+
+
+---
+
+## Sprint 4 Closure — Scheduled Monitoring & Recurring Scan Baseline
+
+### Status
+
+Sprint 4 is complete.
+
+### Completed Scope
+
+Sprint 4 introduced the scheduled monitoring baseline for SiteSentinel.
+
+The implementation added website-level recurring monitoring configuration while preserving the existing assessment lifecycle, traceability layer, and comparison baseline.
+
+### Implemented Capabilities
+
+Sprint 4 completed the following capabilities:
+
+- One monitoring schedule per website.
+- Daily scheduled monitoring frequency.
+- Website-level schedule enable action.
+- Website-level schedule disable action.
+- Schedule status visibility.
+- Next scheduled run visibility.
+- Last triggered timestamp visibility.
+- Latest scheduled monitoring run visibility.
+- Manual versus scheduled monitoring run distinction.
+- Scheduled run trigger metadata.
+- Schedule-to-run reference through monitoring schedule ID.
+- Safe scheduled execution worker.
+- Due schedule detection.
+- Scheduled run execution through the existing MonitoringExecutionService.
+- Overlap prevention for the same website.
+- Stale active run recovery for old pending or running runs.
+- Scheduled monitoring UI visibility in website detail.
+- Trigger type visibility in monitoring run list.
+- Trigger type visibility in monitoring run detail.
+
+### Architecture Preserved
+
+Sprint 4 preserved the existing lifecycle boundary.
+
+Scheduled monitoring follows this path:
+
+Website
+↓
+MonitoringSchedule
+↓
+ScheduledMonitoringWorker
+↓
+MonitoringExecutionService
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+↓
+Finding
+↓
+Risk
+↓
+TrustAssessment
+↓
+Assessment Comparison Eligibility
+
+The scheduled monitoring worker does not collect evidence directly.
+
+The scheduled monitoring worker does not analyze evidence directly.
+
+The scheduled monitoring worker does not generate findings directly.
+
+The scheduled monitoring worker does not evaluate risks directly.
+
+The scheduled monitoring worker does not produce trust assessments directly.
+
+The scheduled monitoring worker does not perform assessment comparison directly.
+
+### Data Model Added
+
+Sprint 4 added the following scheduling baseline:
+
+MonitoringSchedule
+
+Fields include:
+
+- Website reference.
+- Schedule status.
+- Schedule frequency.
+- Next run timestamp.
+- Last triggered timestamp.
+- Last monitoring run reference.
+- Last failure reason.
+- Created timestamp.
+- Updated timestamp.
+
+Sprint 4 also extended MonitoringRun with:
+
+- Trigger type.
+- Monitoring schedule reference.
+
+### Trigger Types
+
+Monitoring runs can now be identified as:
+
+- MANUAL
+- SCHEDULED
+
+Manual runs are started by user action.
+
+Scheduled runs are started by the scheduled monitoring worker.
+
+### Safety Rules
+
+Sprint 4 introduced the following scheduled execution safety rules:
+
+- A scheduled run must not start if the same website has an active pending or running monitoring run.
+- A stale pending or running monitoring run may be recovered as failed when it exceeds the configured stale active run timeout.
+- Scheduled execution must always enter the existing monitoring lifecycle through MonitoringExecutionService.
+- Scheduled execution must not bypass lifecycle persistence.
+- Scheduled execution must not bypass traceability generation.
+- Scheduled execution must not bypass comparison eligibility.
+
+### Stale Active Run Recovery
+
+Sprint 4 added stale active run recovery to prevent old pending or running runs from blocking scheduled monitoring forever.
+
+The configured baseline timeout is:
+
+60 minutes
+
+If an active run is older than the configured timeout, the scheduler marks it as failed with a recovery reason before attempting scheduled execution again.
+
+This protects the system from development interruptions, process shutdowns, and unfinished monitoring runs.
+
+### QA Results
+
+The following Sprint 4 QA checks were completed:
+
+- Schedule can be enabled from website detail.
+- Schedule can be disabled from website detail.
+- Enabled schedule receives a next run timestamp.
+- Scheduler detects due schedules.
+- Scheduler does not start duplicate runs for the same website.
+- Scheduler blocks execution when a real active run exists.
+- Scheduler recovers stale pending runs.
+- Scheduled execution creates a monitoring run.
+- Scheduled run uses trigger type SCHEDULED.
+- Manual run uses trigger type MANUAL.
+- Scheduled run stores monitoring schedule ID.
+- Schedule stores last monitoring run ID.
+- Schedule stores last triggered timestamp.
+- Schedule recalculates next run timestamp after execution.
+- Website detail displays scheduled monitoring status.
+- Website detail displays latest scheduled run.
+- Monitoring run list displays trigger type.
+- Monitoring run detail displays trigger type.
+- Monitoring run detail displays schedule ID for scheduled runs.
+- Scheduled run output remains compatible with lifecycle, traceability, and comparison views.
+
+### Known Limitations
+
+Sprint 4 intentionally does not include:
+
+- Custom cron expressions.
+- Multiple schedules per website.
+- Email notifications.
+- WhatsApp notifications.
+- Slack notifications.
+- Webhook notifications.
+- PDF report generation.
+- CSV export.
+- Retry dashboard.
+- Distributed locking.
+- Multi-node scheduler coordination.
+- Authentication.
+- User access control.
+- Advanced failure analytics.
+- AI-assisted analysis.
+
+### Closure Decision
+
+Sprint 4 is accepted as the scheduled monitoring baseline.
+
+Future work can build on this baseline without changing the Sprint 1 lifecycle, 
+Sprint 2 traceability layer, or Sprint 3 comparison baseline.

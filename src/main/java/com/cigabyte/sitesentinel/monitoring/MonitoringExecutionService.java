@@ -34,6 +34,19 @@ public class MonitoringExecutionService {
     public MonitoringRun execute(UUID websiteId) {
         MonitoringRun monitoringRun = monitoringRunService.createPendingRun(websiteId);
 
+        return executeRun(monitoringRun);
+    }
+
+    public MonitoringRun executeScheduled(UUID websiteId, UUID monitoringScheduleId) {
+        MonitoringRun monitoringRun = monitoringRunService.createScheduledPendingRun(
+                websiteId,
+                monitoringScheduleId
+        );
+
+        return executeRun(monitoringRun);
+    }
+
+    private MonitoringRun executeRun(MonitoringRun monitoringRun) {
         try {
             monitoringRunService.markRunning(monitoringRun.getId());
 

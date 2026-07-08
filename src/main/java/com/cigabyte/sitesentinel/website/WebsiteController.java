@@ -14,7 +14,9 @@ import com.cigabyte.sitesentinel.risk.RiskService;
 import com.cigabyte.sitesentinel.trust.TrustAssessmentService;
 import com.cigabyte.sitesentinel.comparison.AssessmentComparisonService;
 import com.cigabyte.sitesentinel.comparison.AssessmentComparisonSummary;
+import com.cigabyte.sitesentinel.scheduling.MonitoringScheduleService;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
+import com.cigabyte.sitesentinel.scheduling.MonitoringSchedule;
 
 @Controller
 @RequestMapping("/websites")
@@ -27,6 +29,8 @@ public class WebsiteController {
     private final RiskService riskService;
     private final TrustAssessmentService trustAssessmentService;
     private final AssessmentComparisonService assessmentComparisonService;
+    private final MonitoringScheduleService monitoringScheduleService;
+
 
     public WebsiteController(
             WebsiteService websiteService,
@@ -35,7 +39,8 @@ public class WebsiteController {
             FindingService findingService,
             RiskService riskService,
             TrustAssessmentService trustAssessmentService,
-            AssessmentComparisonService assessmentComparisonService
+            AssessmentComparisonService assessmentComparisonService,
+            MonitoringScheduleService monitoringScheduleService
     ) {
         this.websiteService = websiteService;
         this.monitoringRunService = monitoringRunService;
@@ -44,6 +49,7 @@ public class WebsiteController {
         this.riskService = riskService;
         this.trustAssessmentService = trustAssessmentService;
         this.assessmentComparisonService = assessmentComparisonService;
+        this.monitoringScheduleService = monitoringScheduleService;
     }
 
     @GetMapping
@@ -91,6 +97,20 @@ public class WebsiteController {
         model.addAttribute("website", website);
         model.addAttribute("monitoringRuns", monitoringRunService.findByWebsiteId(id));
         model.addAttribute("latestComparison", latestComparison);
+
+        MonitoringSchedule monitoringSchedule = monitoringScheduleService.findByWebsiteId(id).orElse(null);
+
+        MonitoringRun latestScheduledRun = null;
+
+        if (monitoringSchedule != null && monitoringSchedule.getLastMonitoringRunId() != null) {
+            latestScheduledRun = monitoringRunService.findByIdAndWebsiteId(
+                    monitoringSchedule.getLastMonitoringRunId(),
+                    id
+            );
+        }
+
+        model.addAttribute("monitoringSchedule", monitoringSchedule);
+        model.addAttribute("latestScheduledRun", latestScheduledRun);
 
         model.addAttribute("monitoringRunCount", monitoringRunService.countByWebsiteId(id));
         model.addAttribute("collectedEvidenceCount", evidenceService.countCollectedEvidenceByWebsiteId(id));

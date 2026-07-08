@@ -22,10 +22,19 @@
 <section>
     <h2>Run baseline</h2>
     <p>Status: <strong th:text="${monitoringRun.status}">PENDING</strong></p>
+    <p>Trigger type: <strong th:text="${monitoringRun.triggerType}">MANUAL</strong></p>
+    <p th:if="${monitoringRun.monitoringScheduleId != null}">
+        Monitoring schedule ID:
+        <strong th:text="${monitoringRun.monitoringScheduleId}">Schedule ID</strong>
+    </p>
     <p>Started at: <strong th:text="${monitoringRun.startedAt}">Started</strong></p>
     <p>Completed at: <strong th:text="${monitoringRun.completedAt}">Completed</strong></p>
     <p>Created at: <strong th:text="${monitoringRun.createdAt}">Created</strong></p>
     <p>Failure reason: <strong th:text="${monitoringRun.failureReason}">Failure reason</strong></p>
+
+    <p class="output-note">
+        Manual runs are started by the user. Scheduled runs are started by the scheduled monitoring worker.
+    </p>
 </section>
 <section>
     <h2>Assessment history</h2>

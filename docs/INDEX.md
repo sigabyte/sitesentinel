@@ -4,15 +4,19 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-## Current Implementation Status
+Sprint 4 is complete.
 
-Sprint 3 is complete.
+Sprint 5 is not open yet.
 
-The current completed scope is:
+The current completed implementation scope is:
 
 Assessment History & Change Comparison Baseline
 
-The current implementation provides a working core assessment lifecycle with an explainable traceability review layer:
+The latest completed sprint scope is:
+
+Scheduled Monitoring & Recurring Scan Baseline
+
+The current implementation provides a working core assessment lifecycle with an explainable traceability review layer and a historical comparison baseline:
 
 Website
 ↓
@@ -29,6 +33,8 @@ Finding
 Risk
 ↓
 TrustAssessment
+↓
+Assessment Comparison
 
 ## Implemented Baseline Through Sprint 3
 
@@ -81,7 +87,34 @@ TrustAssessment
 - Website detail latest comparison summary
 - Comparison links back to traceability detail pages
 
-## Active Sprint
+## Latest Completed Sprint
+
+### Sprint 4 — Scheduled Monitoring & Recurring Scan Baseline
+
+Sprint 4 is complete.
+
+Sprint 4 introduced controlled scheduled monitoring while preserving the existing lifecycle, traceability, and comparison boundaries.
+
+Sprint 4 added:
+
+- Schedule configuration per website.
+- Manual enable and disable controls for scheduled monitoring.
+- Safe recurring scan execution.
+- Prevention of overlapping monitoring runs for the same website.
+- Stale active run recovery.
+- Manual versus scheduled run visibility.
+- Latest scheduled run visibility.
+- Scheduled monitoring QA and closure documentation.
+
+Sprint 4 did not add:
+
+- Notification delivery.
+- Report generation.
+- CSV export.
+- PDF export.
+- Custom cron expression support.
+- Multi-node scheduler coordination.
+- Authentication or user access control.
 
 ## Completed Sprint
 
@@ -107,6 +140,7 @@ Sprint 3 preserved the Sprint 1 lifecycle and Sprint 2 traceability boundaries.
 
 It compares existing persisted lifecycle outputs only.  
 It does not create new findings, risks, trust assessments, or evidence.
+
 
 ## Main Project Documents
 

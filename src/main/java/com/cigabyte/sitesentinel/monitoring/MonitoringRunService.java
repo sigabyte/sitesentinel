@@ -4,6 +4,7 @@ import com.cigabyte.sitesentinel.website.WebsiteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,13 +67,39 @@ public class MonitoringRunService {
 
     @Transactional
     public MonitoringRun createPendingRun(UUID websiteId) {
+        return createPendingRun(
+                websiteId,
+                MonitoringRunTriggerType.MANUAL,
+                null
+        );
+    }
+
+    @Transactional
+    public MonitoringRun createScheduledPendingRun(UUID websiteId, UUID monitoringScheduleId) {
+        return createPendingRun(
+                websiteId,
+                MonitoringRunTriggerType.SCHEDULED,
+                monitoringScheduleId
+        );
+    }
+
+    private MonitoringRun createPendingRun(
+            UUID websiteId,
+            MonitoringRunTriggerType triggerType,
+            UUID monitoringScheduleId
+    ) {
         boolean websiteExists = websiteRepository.existsById(websiteId);
 
         if (!websiteExists) {
             throw new IllegalArgumentException("Website not found: " + websiteId);
         }
 
-        MonitoringRun monitoringRun = new MonitoringRun(websiteId);
+        MonitoringRun monitoringRun = new MonitoringRun(
+                websiteId,
+                triggerType,
+                monitoringScheduleId
+        );
+
         return monitoringRunRepository.save(monitoringRun);
     }
 
@@ -97,6 +124,58 @@ public class MonitoringRunService {
     @Transactional(readOnly = true)
     public long countByWebsiteId(UUID websiteId) {
         return monitoringRunRepository.countByWebsiteId(websiteId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasActiveRunForWebsite(UUID websiteId) {
+        return monitoringRunRepository.existsByWebsiteIdAndStatusIn(
+                websiteId,
+                List.of(
+                        MonitoringRunStatus.PENDING,
+                        MonitoringRunStatus.RUNNING
+                )
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitoringRun> findActiveRunsForWebsite(UUID websiteId) {
+        return monitoringRunRepository.findByWebsiteIdAndStatusInOrderByCreatedAtDesc(
+                websiteId,
+                List.of(
+                        MonitoringRunStatus.PENDING,
+                        MonitoringRunStatus.RUNNING
+                )
+        );
+    }
+
+    @Transactional
+    public List<MonitoringRun> recoverStaleActiveRunsForWebsite(
+            UUID websiteId,
+            OffsetDateTime staleBefore,
+            String failureReason
+    ) {
+        List<MonitoringRun> activeRuns = findActiveRunsForWebsite(websiteId);
+
+        return activeRuns.stream()
+                .filter(activeRun -> isStaleActiveRun(activeRun, staleBefore))
+                .map(activeRun -> markFailed(activeRun.getId(), failureReason))
+                .toList();
+    }
+
+    private boolean isStaleActiveRun(MonitoringRun monitoringRun, OffsetDateTime staleBefore) {
+        if (monitoringRun == null) {
+            return false;
+        }
+
+        OffsetDateTime referenceTime = monitoringRun.getStartedAt() == null
+                ? monitoringRun.getCreatedAt()
+                : monitoringRun.getStartedAt();
+
+        if (referenceTime == null) {
+            return false;
+        }
+
+        return referenceTime.isBefore(staleBefore);
     }
 
     @Transactional

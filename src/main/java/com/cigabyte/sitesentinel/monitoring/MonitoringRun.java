@@ -20,6 +20,13 @@ public class MonitoringRun {
     @Column(nullable = false, length = 30)
     private MonitoringRunStatus status = MonitoringRunStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trigger_type", nullable = false, length = 30)
+    private MonitoringRunTriggerType triggerType = MonitoringRunTriggerType.MANUAL;
+
+    @Column(name = "monitoring_schedule_id")
+    private UUID monitoringScheduleId;
+
     @Column(name = "started_at")
     private OffsetDateTime startedAt;
 
@@ -39,8 +46,18 @@ public class MonitoringRun {
     }
 
     public MonitoringRun(UUID websiteId) {
+        this(websiteId, MonitoringRunTriggerType.MANUAL, null);
+    }
+
+    public MonitoringRun(
+            UUID websiteId,
+            MonitoringRunTriggerType triggerType,
+            UUID monitoringScheduleId
+    ) {
         this.websiteId = websiteId;
         this.status = MonitoringRunStatus.PENDING;
+        this.triggerType = triggerType == null ? MonitoringRunTriggerType.MANUAL : triggerType;
+        this.monitoringScheduleId = monitoringScheduleId;
     }
 
     @PrePersist
@@ -51,6 +68,10 @@ public class MonitoringRun {
 
         if (this.status == null) {
             this.status = MonitoringRunStatus.PENDING;
+        }
+
+        if (this.triggerType == null) {
+            this.triggerType = MonitoringRunTriggerType.MANUAL;
         }
     }
 
@@ -69,6 +90,14 @@ public class MonitoringRun {
 
     public MonitoringRunStatus getStatus() {
         return status;
+    }
+
+    public MonitoringRunTriggerType getTriggerType() {
+        return triggerType;
+    }
+
+    public UUID getMonitoringScheduleId() {
+        return monitoringScheduleId;
     }
 
     public OffsetDateTime getStartedAt() {
