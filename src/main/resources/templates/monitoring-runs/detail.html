@@ -10,7 +10,10 @@
 
 <p>
     <a href="/">Dashboard</a> |
-    <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a>
+    <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report(websiteId=${website.id}, runId=${monitoringRun.id})}">
+        View report
+    </a>
 </p>
 
 <section>

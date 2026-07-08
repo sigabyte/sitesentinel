@@ -14,6 +14,16 @@
     <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${currentRun.id})}">
         Back to monitoring run
     </a>
+    |
+    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report(websiteId=${website.id}, runId=${currentRun.id})}">
+        View current report
+    </a>
+    <span th:if="${comparison.previousRun != null}">
+        |
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report(websiteId=${website.id}, runId=${comparison.previousRun.id})}">
+            View previous report
+        </a>
+    </span>
 </p>
 
 <section>

@@ -1123,3 +1123,222 @@ Sprint 4 is accepted as the scheduled monitoring baseline.
 
 Future work can build on this baseline without changing the Sprint 1 lifecycle, 
 Sprint 2 traceability layer, or Sprint 3 comparison baseline.
+
+
+---
+
+## Sprint 5 Opening — Monitoring Run Report Baseline
+
+### Status
+
+Sprint 5 is open.
+
+### Selected Scope
+
+Sprint 5 will introduce a read-only monitoring run report baseline.
+
+The report baseline should make existing monitoring output easier to review without changing the assessment lifecycle or generating new assessment data.
+
+### Product Goal
+
+Sprint 5 should allow a user to open a browser-based report for a monitoring run and understand:
+
+- Which website was assessed.
+- When the run started and completed.
+- Whether the run was manual or scheduled.
+- Whether the run completed successfully or failed.
+- What trust assessment was produced.
+- What findings were produced.
+- What risks were produced.
+- Whether comparison data is available.
+- What changed compared with the previous completed run.
+- Whether traceability is available for the run output.
+
+### Architecture Boundary
+
+Sprint 5 is a reporting and presentation layer only.
+
+The report layer may:
+
+- Read monitoring runs.
+- Read websites.
+- Read collected evidence.
+- Read normalized evidence.
+- Read findings.
+- Read risks.
+- Read trust assessments.
+- Read comparison summaries.
+- Display traceability availability.
+- Link to existing traceability detail pages.
+
+The report layer must not:
+
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring runs.
+- Modify evidence.
+- Modify findings.
+- Modify risks.
+- Modify trust assessments.
+- Modify historical comparison output.
+
+### Initial Sprint 5 Candidate Blocks
+
+Sprint 5 should proceed in controlled blocks:
+
+- Block 5A — Documentation and stale UI cleanup.
+- Block 5B — Monitoring run report read model baseline.
+- Block 5C — Monitoring run report service.
+- Block 5D — Monitoring run report controller.
+- Block 5E — Browser-based monitoring run report template.
+- Block 5F — Report navigation links.
+- Block 5G — QA and sprint closure documentation.
+
+### Explicitly Deferred From Sprint 5
+
+The following items remain deferred:
+
+- PDF export.
+- CSV export.
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhook delivery.
+- AI-assisted report writing.
+- New scanner signals.
+- External reputation integrations.
+- Authentication and user access control.
+- Report versioning.
+- Report approval workflow.
+
+### Sprint 5 Decision
+
+Sprint 5 will start with a browser-based read-only report.
+
+The first implementation goal is clarity, traceability preservation, and lifecycle-safe reporting.
+
+---
+
+## Sprint 5 Closure — Monitoring Run Report Baseline
+
+### Status
+
+Sprint 5 is complete.
+
+### Completed Scope
+
+Sprint 5 introduced a browser-based, read-only monitoring run report baseline.
+
+The report baseline summarizes existing persisted lifecycle output without changing the assessment lifecycle, traceability layer, comparison layer, or scheduled monitoring baseline.
+
+### Completed Blocks
+
+Sprint 5 completed the following blocks:
+
+- Block 5A — Documentation and stale UI cleanup.
+- Block 5B — Monitoring run report read model baseline.
+- Block 5C — Monitoring run report service.
+- Block 5D — Monitoring run report controller.
+- Block 5E — Browser-based monitoring run report template.
+- Block 5F — Report navigation links.
+- Block 5G — QA and sprint closure documentation.
+
+### Implemented Report Capabilities
+
+Sprint 5 added:
+
+- Monitoring run report read model.
+- Report status classification.
+- Full report mode for completed monitoring runs.
+- Limited report mode for pending, running, or failed monitoring runs.
+- Lifecycle output counts.
+- Trust assessment summary.
+- Finding summary.
+- Risk summary.
+- Stage-level traceability summary.
+- Assessment comparison summary.
+- Manual versus scheduled trigger visibility.
+- Monitoring schedule reference visibility for scheduled runs.
+- Failure reason visibility for failed runs.
+- Report route per monitoring run.
+- Browser-based report template.
+- Report links from monitoring run detail.
+- Report links from website detail.
+- Report links from latest scheduled run area.
+- Report links from latest assessment comparison area.
+- Report links from comparison detail.
+
+### Architecture Boundary
+
+Sprint 5 remained a reporting and presentation layer only.
+
+The report layer reads existing persisted output from:
+
+- Websites.
+- Monitoring runs.
+- Collected evidence counts.
+- Normalized evidence counts.
+- Findings.
+- Risks.
+- Trust assessments.
+- Assessment comparison summaries.
+
+The report layer does not:
+
+- Start monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring runs.
+- Modify evidence.
+- Modify findings.
+- Modify risks.
+- Modify trust assessments.
+- Persist comparison output.
+
+### QA Result
+
+Sprint 5 QA passed.
+
+Validated behavior:
+
+- Completed monitoring run reports open as full reports.
+- Scheduled monitoring run reports show scheduled trigger metadata.
+- Manual monitoring run reports show manual trigger metadata.
+- Report links from monitoring run detail work.
+- Report links from website detail work.
+- Report links from comparison detail work.
+- Report links back to traceability pages work.
+- Report output remains read-only.
+- Existing lifecycle execution remains unchanged.
+- Existing scheduled monitoring behavior remains unchanged.
+- Existing comparison behavior remains unchanged.
+
+### Deferred Items
+
+Sprint 5 intentionally deferred:
+
+- PDF export.
+- CSV export.
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhook delivery.
+- AI-assisted report writing.
+- Report approval workflow.
+- Report versioning.
+- Authentication.
+- User access control.
+- Advanced scanner signals.
+
+### Closure Decision
+
+Sprint 5 is approved and complete.
+
+The project can move to Sprint 6.

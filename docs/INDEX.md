@@ -4,19 +4,19 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 4 is complete.
+Sprint 5 is complete.
 
-Sprint 5 is not open yet.
+Sprint 6 is not open yet.
 
 The current completed implementation scope is:
 
-Assessment History & Change Comparison Baseline
+Monitoring Run Report Baseline
 
-The latest completed sprint scope is:
+The recommended next sprint scope is:
 
-Scheduled Monitoring & Recurring Scan Baseline
+Notification Event Baseline
 
-The current implementation provides a working core assessment lifecycle with an explainable traceability review layer and a historical comparison baseline:
+The current implementation provides a working core assessment lifecycle with an explainable traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
 
 Website
 ↓
@@ -36,7 +36,21 @@ TrustAssessment
 ↓
 Assessment Comparison
 
-## Implemented Baseline Through Sprint 3
+The scheduled monitoring baseline follows this execution path:
+
+Website
+↓
+MonitoringSchedule
+↓
+ScheduledMonitoringWorker
+↓
+MonitoringExecutionService
+↓
+MonitoringRun
+↓
+Existing Assessment Lifecycle
+
+## Implemented Baseline Through Sprint 4
 
 - Website registration
 - Website detail view
@@ -86,8 +100,81 @@ Assessment Comparison
 - Monitoring run comparison page
 - Website detail latest comparison summary
 - Comparison links back to traceability detail pages
+- Website-level monitoring schedule configuration
+- Daily scheduled monitoring frequency
+- Schedule enable and disable controls
+- Safe scheduled monitoring worker
+- Due schedule detection
+- Overlap prevention for active monitoring runs
+- Stale active run recovery
+- Manual versus scheduled run trigger visibility
+- Latest scheduled run visibility
+- Schedule-to-run reference tracking
+- Monitoring run report read model
+- Monitoring run report status classification
+- Full report mode for completed monitoring runs
+- Limited report mode for pending, running, and failed monitoring runs
+- Lifecycle output count summary
+- Trust assessment summary
+- Finding summary
+- Risk summary
+- Stage-level traceability summary
+- Assessment comparison summary in report view
+- Manual versus scheduled trigger visibility in report view
+- Monitoring schedule reference visibility in report view
+- Failure reason visibility in report view
+- Browser-based monitoring run report page
+- Report navigation from monitoring run detail
+- Report navigation from website detail
+- Report navigation from latest scheduled run area
+- Report navigation from latest assessment comparison area
+- Report navigation from comparison detail
 
 ## Latest Completed Sprint
+
+### Sprint 5 — Monitoring Run Report Baseline
+
+Sprint 5 is complete.
+
+Sprint 5 introduced a browser-based, read-only monitoring run report baseline.
+
+Sprint 5 added:
+
+- Monitoring run report read model.
+- Monitoring run report service.
+- Monitoring run report controller.
+- Browser-based report template.
+- Full report mode for completed monitoring runs.
+- Limited report mode for pending, running, and failed monitoring runs.
+- Lifecycle output counts.
+- Trust assessment summary.
+- Finding summary.
+- Risk summary.
+- Stage-level traceability summary.
+- Assessment comparison summary.
+- Manual versus scheduled trigger visibility.
+- Monitoring schedule reference visibility.
+- Failure reason visibility.
+- Report links from monitoring run detail.
+- Report links from website detail.
+- Report links from latest scheduled run area.
+- Report links from latest assessment comparison area.
+- Report links from comparison detail.
+
+Sprint 5 did not add:
+
+- PDF export.
+- CSV export.
+- Email notifications.
+- WhatsApp notifications.
+- Slack notifications.
+- Webhook notifications.
+- AI-written report summaries.
+- Report approval workflow.
+- Report versioning.
+- Authentication or user access control.
+
+## Completed Sprint
 
 ### Sprint 4 — Scheduled Monitoring & Recurring Scan Baseline
 
@@ -116,7 +203,6 @@ Sprint 4 did not add:
 - Multi-node scheduler coordination.
 - Authentication or user access control.
 
-## Completed Sprint
 
 ### Sprint 3 — Assessment History & Change Comparison Baseline
 
@@ -140,7 +226,6 @@ Sprint 3 preserved the Sprint 1 lifecycle and Sprint 2 traceability boundaries.
 
 It compares existing persisted lifecycle outputs only.  
 It does not create new findings, risks, trust assessments, or evidence.
-
 
 ## Main Project Documents
 
@@ -174,26 +259,26 @@ It does not create new findings, risks, trust assessments, or evidence.
 
 ## Current Baseline
 
-SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, and a historical 
-assessment comparison baseline.
+SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, a historical assessment comparison baseline, a controlled scheduled monitoring baseline, and a browser-based monitoring run report baseline.
 
-The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence,
-generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, and compare the latest completed assessment against the previous completed assessment for the same website.
+The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, compare completed assessments against previous completed assessments, and execute recurring scheduled scans through the existing monitoring lifecycle.
 
 ## Next Phase
 
 Recommended next scope:
 
-Sprint 4 — Scheduled Monitoring & Recurring Scan Baseline
+Sprint 6 — Notification Event Baseline
 
-Sprint 4 should build on the Sprint 3 comparison baseline by introducing controlled scheduled monitoring.
+Sprint 6 should build on the completed scheduled monitoring and report baselines by introducing an internal notification event baseline.
 
-Recommended Sprint 4 candidate blocks:
+Recommended Sprint 6 candidate blocks:
 
-- Schedule configuration per website.
-- Manual enable/disable of scheduled monitoring.
-- Safe recurring scan execution.
-- Prevention of overlapping monitoring runs.
-- Latest scheduled run visibility.
-- Scheduled scan failure handling.
-- Scheduled monitoring QA and closure documentation.
+- Notification event read/write model.
+- Notification event creation after scheduled monitoring completion.
+- Notification event creation after scheduled monitoring failure.
+- Notification event list page.
+- Notification event detail page.
+- Notification event status lifecycle.
+- Notification event QA and sprint closure documentation.
+
+Sprint 6 should not introduce real email, WhatsApp, Slack, or webhook delivery yet.

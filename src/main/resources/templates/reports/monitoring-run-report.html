@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${report.reportTitle}">Monitoring Run Report</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1 th:text="${report.reportTitle}">Monitoring Run Report</h1>
+
+<p>
+  <a href="/">Dashboard</a> |
+  <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+  <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+    Back to monitoring run
+  </a> |
+  <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/comparison(websiteId=${website.id}, runId=${monitoringRun.id})}">
+    View comparison
+  </a>
+</p>
+
+<section>
+  <h2>Report baseline</h2>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Report Status</span>
+      <span class="summary-card-value" th:text="${report.reportStatus}">FULL_REPORT</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Run Status</span>
+      <span class="summary-card-value" th:text="${monitoringRun.status}">COMPLETED</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Trigger Type</span>
+      <span class="summary-card-value" th:text="${monitoringRun.triggerType}">MANUAL</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Comparison</span>
+      <span class="summary-card-value"
+            th:text="${comparison != null && comparison.available ? 'AVAILABLE' : 'UNAVAILABLE'}">
+                AVAILABLE
+            </span>
+    </div>
+  </div>
+
+  <p class="output-note" th:if="${report.fullReport}">
+    This is a full report for a completed monitoring run. The report reads existing lifecycle output only.
+  </p>
+
+  <p class="output-note" th:if="${report.limitedReport}">
+    This is a limited report because the monitoring run is not completed. Available run metadata and partial lifecycle output are shown where present.
+  </p>
+</section>
+
+<section>
+  <h2>Website</h2>
+
+  <p>Name: <strong th:text="${website.name}">Website name</strong></p>
+  <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
+  <p>Created at: <strong th:text="${website.createdAt}">Created</strong></p>
+</section>
+
+<section>
+  <h2>Run summary</h2>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Run ID</span>
+      <span class="summary-card-value" th:text="${monitoringRun.id}">Run ID</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Started At</span>
+      <span class="summary-card-value" th:text="${monitoringRun.startedAt}">Started</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Completed At</span>
+      <span class="summary-card-value" th:text="${monitoringRun.completedAt}">Completed</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Created At</span>
+      <span class="summary-card-value" th:text="${monitoringRun.createdAt}">Created</span>
+    </div>
+  </div>
+
+  <p class="output-note">
+    Manual runs are started by the user. Scheduled runs are started by the scheduled monitoring worker.
+  </p>
+
+  <p th:if="${monitoringRun.monitoringScheduleId != null}">
+    Monitoring schedule ID:
+    <strong th:text="${monitoringRun.monitoringScheduleId}">Schedule ID</strong>
+  </p>
+
+  <div class="failure-box" th:if="${report.hasFailureReason()}">
+    <h3>Failure reason</h3>
+    <pre th:text="${monitoringRun.failureReason}">Failure reason</pre>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Lifecycle output counts</h2>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Collected Evidence</span>
+      <span class="summary-card-value" th:text="${report.counts.collectedEvidenceCount}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Normalized Evidence</span>
+      <span class="summary-card-value" th:text="${report.counts.normalizedEvidenceCount}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Findings</span>
+      <span class="summary-card-value" th:text="${report.counts.findingCount}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Risks</span>
+      <span class="summary-card-value" th:text="${report.counts.riskCount}">0</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Trust Assessments</span>
+      <span class="summary-card-value" th:text="${report.counts.trustAssessmentCount}">0</span>
+    </div>
+  </div>
+
+  <p class="output-note">
+    Counts are read from persisted lifecycle output. The report does not generate or modify assessment data.
+  </p>
+</section>
+
+<section class="output-section">
+  <h2>Trust assessment</h2>
+
+  <div class="assessment-summary" th:if="${report.hasTrustAssessment()}">
+    <p>
+      <span class="status-pill" th:text="${report.latestTrustAssessment.trustStatus}">UNKNOWN</span>
+    </p>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-card-label">Trust Score</span>
+        <span class="summary-card-value" th:text="${report.latestTrustAssessment.trustScore}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Confidence Score</span>
+        <span class="summary-card-value" th:text="${report.latestTrustAssessment.confidenceScore}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Created At</span>
+        <span class="summary-card-value" th:text="${report.latestTrustAssessment.createdAt}">Created</span>
+      </div>
+    </div>
+
+    <h3>Summary</h3>
+    <p th:text="${report.latestTrustAssessment.summary}">
+      Trust assessment summary.
+    </p>
+
+    <p class="traceability-actions">
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/trust-assessments/{trustAssessmentId}(websiteId=${website.id}, runId=${monitoringRun.id}, trustAssessmentId=${report.latestTrustAssessment.id})}">
+        View trust traceability
+      </a>
+    </p>
+  </div>
+
+  <div class="assessment-summary" th:if="${!report.hasTrustAssessment()}">
+    <p>No trust assessment was produced for this monitoring run.</p>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Traceability summary</h2>
+
+  <p class="output-note">
+    This report shows stage-level traceability availability. Detailed traceability remains available through the existing finding, risk, trust, and evidence detail pages.
+  </p>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">Collected Evidence Available</span>
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.collectedEvidenceAvailable ? 'YES' : 'NO'}">
+                YES
+            </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Normalized Evidence Available</span>
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.normalizedEvidenceAvailable ? 'YES' : 'NO'}">
+                YES
+            </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Findings Available</span>
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.findingsAvailable ? 'YES' : 'NO'}">
+                YES
+            </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Risks Available</span>
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.risksAvailable ? 'YES' : 'NO'}">
+                YES
+            </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">Trust Available</span>
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.trustAssessmentsAvailable ? 'YES' : 'NO'}">
+                YES
+            </span>
+    </div>
+  </div>
+
+  <table class="traceability-coverage-table">
+    <thead>
+    <tr>
+      <th>Traceability Path</th>
+      <th>Status</th>
+      <th>Review</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>Evidence → Finding</td>
+      <td th:text="${report.traceabilitySummary.evidenceToFindingReviewable ? 'REVIEWABLE' : 'LIMITED'}">
+        REVIEWABLE
+      </td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+          Open monitoring run traceability
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Finding → Risk</td>
+      <td th:text="${report.traceabilitySummary.findingToRiskReviewable ? 'REVIEWABLE' : 'LIMITED'}">
+        REVIEWABLE
+      </td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+          Open monitoring run traceability
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Risk → Trust</td>
+      <td th:text="${report.traceabilitySummary.riskToTrustReviewable ? 'REVIEWABLE' : 'LIMITED'}">
+        REVIEWABLE
+      </td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+          Open monitoring run traceability
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>End-to-End Lifecycle Output</td>
+      <td th:text="${report.traceabilitySummary.endToEndReviewable ? 'REVIEWABLE' : 'LIMITED'}">
+        REVIEWABLE
+      </td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
+          Open monitoring run detail
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="output-section">
+  <h2>Assessment comparison</h2>
+
+  <div class="assessment-summary" th:if="${comparison != null && comparison.available}">
+    <p>
+      Comparison status:
+      <strong th:text="${comparison.status}">AVAILABLE</strong>
+    </p>
+
+    <p>
+      Previous completed run:
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${comparison.previousRun.id})}"
+         th:text="${comparison.previousRun.id}">
+        Previous run
+      </a>
+    </p>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-card-label">New Finding Types</span>
+        <span class="summary-card-value" th:text="${comparison.newFindingCount}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Resolved Finding Types</span>
+        <span class="summary-card-value" th:text="${comparison.resolvedFindingCount}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Unchanged Finding Types</span>
+        <span class="summary-card-value" th:text="${comparison.unchangedFindingCount}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">New Risk Types</span>
+        <span class="summary-card-value" th:text="${comparison.newRiskCount}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Resolved Risk Types</span>
+        <span class="summary-card-value" th:text="${comparison.resolvedRiskCount}">0</span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Unchanged Risk Types</span>
+        <span class="summary-card-value" th:text="${comparison.unchangedRiskCount}">0</span>
+      </div>
+    </div>
+
+    <div class="assessment-summary" th:if="${comparison.trustComparison.available}">
+      <h3>Trust comparison</h3>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-card-label">Current Trust Status</span>
+          <span class="summary-card-value" th:text="${comparison.trustComparison.currentTrustStatus}">UNKNOWN</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-card-label">Previous Trust Status</span>
+          <span class="summary-card-value" th:text="${comparison.trustComparison.previousTrustStatus}">UNKNOWN</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-card-label">Score Delta</span>
+          <span class="summary-card-value" th:text="${comparison.trustComparison.scoreDelta}">0</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-card-label">Score Direction</span>
+          <span class="summary-card-value" th:text="${comparison.trustComparison.scoreDirection}">UNCHANGED</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="traceability-actions">
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/comparison(websiteId=${website.id}, runId=${monitoringRun.id})}">
+        Open full comparison detail
+      </a>
+    </p>
+  </div>
+
+  <div class="assessment-summary" th:if="${comparison == null || !comparison.available}">
+    <p>
+      Comparison is not available for this report.
+      Status:
+      <strong th:text="${comparison != null ? comparison.status : 'UNAVAILABLE'}">UNAVAILABLE</strong>
+    </p>
+
+    <p class="output-note">
+      Comparison requires this monitoring run to be completed and a previous completed run to exist for the same website.
+    </p>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Findings</h2>
+
+  <div th:if="${!report.hasFindings()}">
+    <p>No findings were produced for this monitoring run.</p>
+  </div>
+
+  <table th:if="${report.hasFindings()}">
+    <thead>
+    <tr>
+      <th>Finding Type</th>
+      <th>Title</th>
+      <th>Confidence</th>
+      <th>Description</th>
+      <th>Traceability</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="finding : ${report.findings}">
+      <td th:text="${finding.findingType}">FINDING_TYPE</td>
+      <td th:text="${finding.title}">Finding title</td>
+      <td th:text="${finding.confidenceScore}">0</td>
+      <td th:text="${finding.description}">Finding description</td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${monitoringRun.id}, findingId=${finding.id})}">
+          View finding traceability
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="output-section">
+  <h2>Risks</h2>
+
+  <div th:if="${!report.hasRisks()}">
+    <p>No risks were produced for this monitoring run.</p>
+  </div>
+
+  <table th:if="${report.hasRisks()}">
+    <thead>
+    <tr>
+      <th>Risk Type</th>
+      <th>Severity</th>
+      <th>Risk Score</th>
+      <th>Confidence</th>
+      <th>Rationale</th>
+      <th>Traceability</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="risk : ${report.risks}">
+      <td th:text="${risk.riskType}">RISK_TYPE</td>
+      <td th:text="${risk.severity}">LOW</td>
+      <td th:text="${risk.riskScore}">0</td>
+      <td th:text="${risk.confidenceScore}">0</td>
+      <td th:text="${risk.rationale}">Risk rationale</td>
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(websiteId=${website.id}, runId=${monitoringRun.id}, riskId=${risk.id})}">
+          View risk traceability
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="output-section">
+  <h2>Report boundary</h2>
+
+  <div class="traceability-card">
+    <p>
+      This report is read-only. It summarizes persisted lifecycle output and links back to existing traceability pages.
+    </p>
+
+    <p>
+      It does not collect evidence, normalize evidence, generate findings, evaluate risks, generate trust assessments, or modify comparison output.
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
