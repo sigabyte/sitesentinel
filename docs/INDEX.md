@@ -6,8 +6,11 @@ This index lists the active documentation set for the SiteSentinel project.
 
 Sprint 2 is complete.
 
-The current implementation provides a working core assessment lifecycle 
-with an explainable traceability review layer:
+Sprint 3 is now open with the following scope:
+
+Assessment History & Change Comparison Baseline
+
+The current implementation provides a working core assessment lifecycle with an explainable traceability review layer:
 
 Website
 ↓
@@ -63,6 +66,31 @@ TrustAssessment
 - Overall traceability QA status
 - Coverage status labels for lifecycle traceability paths
 
+## Active Sprint
+
+### Sprint 3 — Assessment History & Change Comparison Baseline
+
+Sprint 3 should build on the Sprint 1 lifecycle foundation and Sprint 2 traceability layer without replacing either.
+
+The goal of Sprint 3 is to introduce a baseline for comparing a completed monitoring run against the previous completed monitoring run for the same website.
+
+Sprint 3 should answer:
+
+- What changed since the previous completed run?
+- Did the trust status change?
+- Did the trust score improve or decline?
+- Which finding types are new?
+- Which finding types are resolved?
+- Which finding types are unchanged?
+- Which risk types are new?
+- Which risk types are resolved?
+- Which risk types are unchanged?
+
+Sprint 3 must remain read-oriented.
+
+It should compare existing persisted lifecycle outputs.  
+It must not create new findings, risks, or trust assessments.
+
 ## Main Project Documents
 
 ### Architecture
@@ -83,11 +111,11 @@ TrustAssessment
 
 ### Engineering Log
 
-- `docs/ENGINEERING_JOURNAL.md` — Engineering implementation notes and Sprint 1 closure status.
+- `docs/ENGINEERING_JOURNAL.md` — Engineering implementation notes and sprint closure history.
 
 ### Backlog
 
-- `docs/product/backlog/FUTURE-BACKLOG.md` — Deferred items and Sprint 2 candidate work.
+- `docs/product/backlog/FUTURE-BACKLOG.md` — Deferred items and future candidate work.
 
 ### Meetings
 
@@ -95,14 +123,19 @@ TrustAssessment
 
 ## Current Baseline
 
-SiteSentinel now has a functional real-scan baseline.
+SiteSentinel now has a functional real-scan baseline and an explainable traceability review layer.
 
-The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, generate findings, evaluate risks, and produce a trust assessment.
+The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, generate findings, evaluate risks, produce a trust assessment, and expose traceability across the persisted lifecycle.
 
 ## Next Phase
 
-Sprint 2 should build on this baseline without replacing the Sprint 1 lifecycle foundation.
+Sprint 3 should implement the first historical comparison baseline.
 
-Recommended Sprint 2 candidates are recorded in:
+Recommended Sprint 3 implementation blocks:
 
-`docs/product/backlog/FUTURE-BACKLOG.md`
+- Block 3A — Documentation alignment
+- Block 3B — Monitoring run history access
+- Block 3C — Comparison read model
+- Block 3D — Monitoring run comparison page
+- Block 3E — Website detail latest comparison summary
+- Block 3F — Sprint 3 QA and closure documentation

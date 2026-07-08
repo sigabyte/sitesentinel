@@ -96,9 +96,12 @@ Reason: MVP sonrasında her kalite özelliği için
 - Added monitoring run traceability summary dashboard.
 - Added traceability QA status and coverage labels.
 
-### Sprint 2 Candidate Items
+### Active Sprint 3 Candidate Item
 
 - Add scan history comparison per website.
+
+### Future Candidate Items
+
 - Add manual re-run controls for specific assessment stages.
 - Add scheduled monitoring runs.
 - Add report generation for completed monitoring runs.

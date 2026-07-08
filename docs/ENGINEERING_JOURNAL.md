@@ -536,3 +536,95 @@ Sprint 3 should build on the Sprint 1 lifecycle foundation and Sprint 2 traceabi
 Recommended future candidates are recorded in:
 
 `docs/product/backlog/FUTURE-BACKLOG.md`
+
+---
+
+## Sprint 3 Opening — Assessment History & Change Comparison Baseline
+
+### Status
+
+Sprint 3 is open.
+
+### Approved Scope
+
+Sprint 3 will introduce the first historical comparison baseline for SiteSentinel.
+
+The goal is to compare a completed monitoring run against the previous completed monitoring run for the same website.
+
+### Sprint 3 Objective
+
+Sprint 3 should help the user understand what changed between two completed assessments of the same website.
+
+The comparison baseline should answer:
+
+- Whether a previous completed monitoring run exists.
+- Which completed run is being used as the comparison baseline.
+- Whether the trust status changed.
+- Whether the trust score improved, declined, or stayed the same.
+- Which finding types are new.
+- Which finding types are resolved.
+- Which finding types are unchanged.
+- Which risk types are new.
+- Which risk types are resolved.
+- Which risk types are unchanged.
+
+### Planned Implementation Blocks
+
+- Block 3A — Documentation alignment.
+- Block 3B — Monitoring run history access.
+- Block 3C — Comparison read model.
+- Block 3D — Monitoring run comparison page.
+- Block 3E — Website detail latest comparison summary.
+- Block 3F — Sprint 3 QA and closure documentation.
+
+### Architecture Boundary
+
+Sprint 3 must remain a read-oriented comparison layer.
+
+The comparison layer must read existing persisted lifecycle outputs only:
+
+Website
+↓
+MonitoringRun
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+↓
+Finding
+↓
+Risk
+↓
+TrustAssessment
+
+The comparison layer must not:
+
+- Collect new evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Produce trust assessments.
+- Modify trust scores.
+- Reinterpret raw evidence.
+- Replace Sprint 1 lifecycle responsibilities.
+- Replace Sprint 2 traceability responsibilities.
+
+### Comparison Baseline Rule
+
+Only completed monitoring runs should be used for comparison.
+
+Failed, pending, or running monitoring runs should not be selected as the previous comparison baseline.
+
+### Deferred Items
+
+The following items remain deferred until after the Sprint 3 comparison baseline:
+
+- Scheduled recurring scans.
+- Report export.
+- CSV export.
+- PDF export.
+- Authentication and user access control.
+- Notification engine.
+- Advanced scanner signals.
+- External reputation integrations.
+- AI-assisted analysis.
