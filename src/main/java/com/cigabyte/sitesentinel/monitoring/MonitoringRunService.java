@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,6 +25,43 @@ public class MonitoringRunService {
     @Transactional(readOnly = true)
     public List<MonitoringRun> findByWebsiteId(UUID websiteId) {
         return monitoringRunRepository.findByWebsiteIdOrderByCreatedAtDesc(websiteId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitoringRun> findCompletedRunsByWebsiteId(UUID websiteId) {
+        return monitoringRunRepository.findByWebsiteIdAndStatusOrderByCompletedAtDesc(
+                websiteId,
+                MonitoringRunStatus.COMPLETED
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MonitoringRun> findLatestCompletedRun(UUID websiteId) {
+        return monitoringRunRepository.findFirstByWebsiteIdAndStatusOrderByCompletedAtDesc(
+                websiteId,
+                MonitoringRunStatus.COMPLETED
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MonitoringRun> findPreviousCompletedRun(MonitoringRun currentRun) {
+        if (currentRun == null) {
+            return Optional.empty();
+        }
+
+        if (currentRun.getStatus() != MonitoringRunStatus.COMPLETED) {
+            return Optional.empty();
+        }
+
+        if (currentRun.getCompletedAt() == null) {
+            return Optional.empty();
+        }
+
+        return monitoringRunRepository.findFirstByWebsiteIdAndStatusAndCompletedAtBeforeOrderByCompletedAtDesc(
+                currentRun.getWebsiteId(),
+                MonitoringRunStatus.COMPLETED,
+                currentRun.getCompletedAt()
+        );
     }
 
     @Transactional
@@ -48,6 +86,12 @@ public class MonitoringRunService {
         }
 
         return monitoringRun;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MonitoringRun> findPreviousCompletedRun(UUID websiteId, UUID currentRunId) {
+        MonitoringRun currentRun = findByIdAndWebsiteId(currentRunId, websiteId);
+        return findPreviousCompletedRun(currentRun);
     }
 
     @Transactional(readOnly = true)
