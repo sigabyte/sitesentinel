@@ -231,3 +231,27 @@ th {
     border-color: #bbbbbb;
     background: #f7f7f7;
 }
+
+.comparison-status {
+    display: inline-block;
+    border: 1px solid #cccccc;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #fafafa;
+}
+
+.comparison-status--new {
+    border-color: #d99a9a;
+    background: #fff3f3;
+}
+
+.comparison-status--resolved {
+    border-color: #9ac89a;
+    background: #f3fbf3;
+}
+
+.comparison-status--unchanged {
+    border-color: #bbbbbb;
+    background: #f7f7f7;
+}

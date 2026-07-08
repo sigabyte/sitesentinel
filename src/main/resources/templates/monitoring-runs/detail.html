@@ -27,6 +27,23 @@
     <p>Created at: <strong th:text="${monitoringRun.createdAt}">Created</strong></p>
     <p>Failure reason: <strong th:text="${monitoringRun.failureReason}">Failure reason</strong></p>
 </section>
+<section>
+    <h2>Assessment history</h2>
+
+    <p>
+        Compare this monitoring run against the previous completed monitoring run for the same website.
+    </p>
+
+    <p>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/comparison(websiteId=${website.id}, runId=${monitoringRun.id})}">
+            View assessment comparison
+        </a>
+    </p>
+
+    <p class="output-note">
+        Comparison is available only when this run is completed and a previous completed run exists.
+    </p>
+</section>
 <section class="output-section">
     <h2>Assessment summary</h2>
 

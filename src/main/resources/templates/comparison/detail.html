@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment Comparison</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Assessment Comparison</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a th:href="@{/websites/{id}(id=${website.id})}">Back to website</a> |
+    <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${currentRun.id})}">
+        Back to monitoring run
+    </a>
+</p>
+
+<section>
+    <h2>Website</h2>
+    <p>Name: <strong th:text="${website.name}">Website name</strong></p>
+    <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
+</section>
+
+<section>
+    <h2>Comparison baseline</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Comparison Status</span>
+            <span class="summary-card-value" th:text="${comparison.status}">AVAILABLE</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Run Status</span>
+            <span class="summary-card-value" th:text="${currentRun.status}">COMPLETED</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Completed At</span>
+            <span class="summary-card-value" th:text="${currentRun.completedAt}">Completed</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Previous Completed At</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.previousRun != null ? comparison.previousRun.completedAt : '-'}">
+                -
+            </span>
+        </div>
+    </div>
+
+    <div class="assessment-summary" th:if="${comparison.status.name() == 'CURRENT_RUN_NOT_COMPLETED'}">
+        <h3>Comparison unavailable</h3>
+        <p>
+            The selected monitoring run is not completed. Only completed monitoring runs can be compared.
+        </p>
+    </div>
+
+    <div class="assessment-summary" th:if="${comparison.status.name() == 'NO_PREVIOUS_COMPLETED_RUN'}">
+        <h3>Comparison unavailable</h3>
+        <p>
+            No previous completed monitoring run exists for this website yet.
+        </p>
+    </div>
+</section>
+
+<section class="output-section" th:if="${comparison.available}">
+    <h2>Trust change</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Previous Trust Status</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.previousTrustStatus != null ? comparison.trustComparison.previousTrustStatus : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Trust Status</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.currentTrustStatus != null ? comparison.trustComparison.currentTrustStatus : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Status Changed</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.statusChanged ? 'YES' : 'NO'}">
+                NO
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Previous Trust Score</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.previousTrustScore != null ? comparison.trustComparison.previousTrustScore : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Trust Score</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.currentTrustScore != null ? comparison.trustComparison.currentTrustScore : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Score Delta</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.scoreDelta != null ? comparison.trustComparison.scoreDelta : '-'}">
+                -
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Score Direction</span>
+            <span class="summary-card-value"
+                  th:text="${comparison.trustComparison.scoreDirection}">
+                UNAVAILABLE
+            </span>
+        </div>
+    </div>
+
+    <div class="assessment-summary" th:if="${comparison.trustComparison.available}">
+        <h3>Trust traceability</h3>
+
+        <p>
+            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/trust-assessments/{trustAssessmentId}(websiteId=${website.id}, runId=${comparison.currentRun.id}, trustAssessmentId=${comparison.trustComparison.currentAssessment.id})}">
+                View current trust traceability
+            </a>
+        </p>
+
+        <p>
+            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/trust-assessments/{trustAssessmentId}(websiteId=${website.id}, runId=${comparison.previousRun.id}, trustAssessmentId=${comparison.trustComparison.previousAssessment.id})}">
+                View previous trust traceability
+            </a>
+        </p>
+    </div>
+
+    <div class="assessment-summary" th:if="${!comparison.trustComparison.available}">
+        <p>
+            Trust comparison is unavailable because one of the compared runs does not have a trust assessment.
+        </p>
+    </div>
+</section>
+
+<section class="output-section" th:if="${comparison.available}">
+    <h2>Finding changes</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">New Finding Types</span>
+            <span class="summary-card-value" th:text="${comparison.newFindingCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Resolved Finding Types</span>
+            <span class="summary-card-value" th:text="${comparison.resolvedFindingCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Unchanged Finding Types</span>
+            <span class="summary-card-value" th:text="${comparison.unchangedFindingCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Finding Records</span>
+            <span class="summary-card-value" th:text="${comparison.currentFindingCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Previous Finding Records</span>
+            <span class="summary-card-value" th:text="${comparison.previousFindingCount}">0</span>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(comparison.findingChanges)}">
+        <p>No finding changes available.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(comparison.findingChanges)}">
+        <thead>
+        <tr>
+            <th>Finding Type</th>
+            <th>Change</th>
+            <th>Current Count</th>
+            <th>Previous Count</th>
+            <th>Current Traceability</th>
+            <th>Previous Traceability</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${comparison.findingChanges}">
+            <td th:text="${item.findingType}">FINDING_TYPE</td>
+            <td>
+                <span class="comparison-status"
+                      th:classappend="|comparison-status--${#strings.toLowerCase(item.changeStatus)}|"
+                      th:text="${item.changeStatus}">
+                    UNCHANGED
+                </span>
+            </td>
+            <td th:text="${item.currentCount}">0</td>
+            <td th:text="${item.previousCount}">0</td>
+            <td>
+                <span th:if="${item.currentFinding == null}">-</span>
+                <a th:if="${item.currentFinding != null}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${comparison.currentRun.id}, findingId=${item.currentFinding.id})}">
+                    View current finding
+                </a>
+            </td>
+            <td>
+                <span th:if="${item.previousFinding == null}">-</span>
+                <a th:if="${item.previousFinding != null}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/findings/{findingId}(websiteId=${website.id}, runId=${comparison.previousRun.id}, findingId=${item.previousFinding.id})}">
+                    View previous finding
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="output-section" th:if="${comparison.available}">
+    <h2>Risk changes</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">New Risk Types</span>
+            <span class="summary-card-value" th:text="${comparison.newRiskCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Resolved Risk Types</span>
+            <span class="summary-card-value" th:text="${comparison.resolvedRiskCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Unchanged Risk Types</span>
+            <span class="summary-card-value" th:text="${comparison.unchangedRiskCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Current Risk Records</span>
+            <span class="summary-card-value" th:text="${comparison.currentRiskCount}">0</span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Previous Risk Records</span>
+            <span class="summary-card-value" th:text="${comparison.previousRiskCount}">0</span>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(comparison.riskChanges)}">
+        <p>No risk changes available.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(comparison.riskChanges)}">
+        <thead>
+        <tr>
+            <th>Risk Type</th>
+            <th>Change</th>
+            <th>Current Count</th>
+            <th>Previous Count</th>
+            <th>Current Severity</th>
+            <th>Previous Severity</th>
+            <th>Current Score</th>
+            <th>Previous Score</th>
+            <th>Current Traceability</th>
+            <th>Previous Traceability</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${comparison.riskChanges}">
+            <td th:text="${item.riskType}">RISK_TYPE</td>
+            <td>
+                <span class="comparison-status"
+                      th:classappend="|comparison-status--${#strings.toLowerCase(item.changeStatus)}|"
+                      th:text="${item.changeStatus}">
+                    UNCHANGED
+                </span>
+            </td>
+            <td th:text="${item.currentCount}">0</td>
+            <td th:text="${item.previousCount}">0</td>
+            <td th:text="${item.currentSeverity != null ? item.currentSeverity : '-'}">-</td>
+            <td th:text="${item.previousSeverity != null ? item.previousSeverity : '-'}">-</td>
+            <td th:text="${item.currentRiskScore != null ? item.currentRiskScore : '-'}">-</td>
+            <td th:text="${item.previousRiskScore != null ? item.previousRiskScore : '-'}">-</td>
+            <td>
+                <span th:if="${item.currentRisk == null}">-</span>
+                <a th:if="${item.currentRisk != null}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(websiteId=${website.id}, runId=${comparison.currentRun.id}, riskId=${item.currentRisk.id})}">
+                    View current risk
+                </a>
+            </td>
+            <td>
+                <span th:if="${item.previousRisk == null}">-</span>
+                <a th:if="${item.previousRisk != null}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(websiteId=${website.id}, runId=${comparison.previousRun.id}, riskId=${item.previousRisk.id})}">
+                    View previous risk
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="output-section" th:if="${comparison.available}">
+    <h2>Comparison boundary</h2>
+
+    <div class="traceability-card">
+        <p>
+            This page compares existing persisted lifecycle outputs only.
+        </p>
+
+        <p class="output-note">
+            It does not collect evidence, normalize evidence, generate findings, evaluate risks, or produce trust assessments.
+        </p>
+    </div>
+</section>
+</body>
+</html>
