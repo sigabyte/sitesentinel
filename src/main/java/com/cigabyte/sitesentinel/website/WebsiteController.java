@@ -12,6 +12,9 @@ import com.cigabyte.sitesentinel.evidence.EvidenceService;
 import com.cigabyte.sitesentinel.finding.FindingService;
 import com.cigabyte.sitesentinel.risk.RiskService;
 import com.cigabyte.sitesentinel.trust.TrustAssessmentService;
+import com.cigabyte.sitesentinel.comparison.AssessmentComparisonService;
+import com.cigabyte.sitesentinel.comparison.AssessmentComparisonSummary;
+import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
 
 @Controller
 @RequestMapping("/websites")
@@ -23,6 +26,7 @@ public class WebsiteController {
     private final FindingService findingService;
     private final RiskService riskService;
     private final TrustAssessmentService trustAssessmentService;
+    private final AssessmentComparisonService assessmentComparisonService;
 
     public WebsiteController(
             WebsiteService websiteService,
@@ -30,7 +34,8 @@ public class WebsiteController {
             EvidenceService evidenceService,
             FindingService findingService,
             RiskService riskService,
-            TrustAssessmentService trustAssessmentService
+            TrustAssessmentService trustAssessmentService,
+            AssessmentComparisonService assessmentComparisonService
     ) {
         this.websiteService = websiteService;
         this.monitoringRunService = monitoringRunService;
@@ -38,6 +43,7 @@ public class WebsiteController {
         this.findingService = findingService;
         this.riskService = riskService;
         this.trustAssessmentService = trustAssessmentService;
+        this.assessmentComparisonService = assessmentComparisonService;
     }
 
     @GetMapping
@@ -73,8 +79,18 @@ public class WebsiteController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable UUID id, Model model) {
-        model.addAttribute("website", websiteService.findById(id));
+        Website website = websiteService.findById(id);
+
+        AssessmentComparisonSummary latestComparison = monitoringRunService.findLatestCompletedRun(id)
+                .map(latestCompletedRun -> assessmentComparisonService.compare(
+                        id,
+                        latestCompletedRun.getId()
+                ))
+                .orElse(null);
+
+        model.addAttribute("website", website);
         model.addAttribute("monitoringRuns", monitoringRunService.findByWebsiteId(id));
+        model.addAttribute("latestComparison", latestComparison);
 
         model.addAttribute("monitoringRunCount", monitoringRunService.countByWebsiteId(id));
         model.addAttribute("collectedEvidenceCount", evidenceService.countCollectedEvidenceByWebsiteId(id));

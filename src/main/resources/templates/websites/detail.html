@@ -32,6 +32,112 @@
     <p>Risks: <strong th:text="${riskCount}">0</strong></p>
     <p>Trust assessments: <strong th:text="${trustAssessmentCount}">0</strong></p>
 </section>
+<section>
+    <h2>Latest assessment change</h2>
+
+    <div th:if="${latestComparison == null}">
+        <p>No completed monitoring run is available yet.</p>
+        <p class="output-note">
+            Run a website scan to create the first completed assessment baseline.
+        </p>
+    </div>
+
+    <div th:if="${latestComparison != null && latestComparison.status.name() == 'NO_PREVIOUS_COMPLETED_RUN'}">
+        <p>
+            Latest completed run exists, but there is no previous completed run available for comparison yet.
+        </p>
+
+        <p>
+            Latest completed at:
+            <strong th:text="${latestComparison.currentRun.completedAt}">Completed</strong>
+        </p>
+
+        <p class="output-note">
+            Run another scan after this one to enable assessment history comparison.
+        </p>
+    </div>
+
+    <div th:if="${latestComparison != null && latestComparison.status.name() == 'CURRENT_RUN_NOT_COMPLETED'}">
+        <p>
+            Latest comparison is unavailable because the selected run is not completed.
+        </p>
+    </div>
+
+    <div th:if="${latestComparison != null && latestComparison.available}">
+        <div class="summary-grid">
+            <div class="summary-card">
+                <span class="summary-card-label">Compared Run</span>
+                <span class="summary-card-value" th:text="${latestComparison.currentRun.completedAt}">Current</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Previous Run</span>
+                <span class="summary-card-value" th:text="${latestComparison.previousRun.completedAt}">Previous</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Previous Trust Status</span>
+                <span class="summary-card-value"
+                      th:text="${latestComparison.trustComparison.previousTrustStatus != null ? latestComparison.trustComparison.previousTrustStatus : '-'}">
+                    -
+                </span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Current Trust Status</span>
+                <span class="summary-card-value"
+                      th:text="${latestComparison.trustComparison.currentTrustStatus != null ? latestComparison.trustComparison.currentTrustStatus : '-'}">
+                    -
+                </span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Trust Score Delta</span>
+                <span class="summary-card-value"
+                      th:text="${latestComparison.trustComparison.scoreDelta != null ? latestComparison.trustComparison.scoreDelta : '-'}">
+                    -
+                </span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Score Direction</span>
+                <span class="summary-card-value" th:text="${latestComparison.trustComparison.scoreDirection}">
+                    UNAVAILABLE
+                </span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">New Finding Types</span>
+                <span class="summary-card-value" th:text="${latestComparison.newFindingCount}">0</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Resolved Finding Types</span>
+                <span class="summary-card-value" th:text="${latestComparison.resolvedFindingCount}">0</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">New Risk Types</span>
+                <span class="summary-card-value" th:text="${latestComparison.newRiskCount}">0</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-card-label">Resolved Risk Types</span>
+                <span class="summary-card-value" th:text="${latestComparison.resolvedRiskCount}">0</span>
+            </div>
+        </div>
+
+        <p>
+            <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/comparison(websiteId=${website.id}, runId=${latestComparison.currentRun.id})}">
+                View full assessment comparison
+            </a>
+        </p>
+
+        <p class="output-note">
+            This summary compares the latest completed run with the previous completed run only.
+        </p>
+    </div>
+</section>
 
 <section>
     <h2>Monitoring runs</h2>
@@ -47,14 +153,12 @@
     <table th:if="${!#lists.isEmpty(monitoringRuns)}" border="1" cellpadding="8">
         <thead>
         <tr>
-        <tr>
             <th>Status</th>
             <th>Started At</th>
             <th>Completed At</th>
             <th>Created At</th>
             <th>Failure Reason</th>
             <th>Open</th>
-        </tr>
         </tr>
         </thead>
         <tbody>
