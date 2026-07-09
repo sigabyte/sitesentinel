@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Event Detail</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Notification Event Detail</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/notifications">Notification Management</a> |
+    <a href="/websites">Websites</a>
+</p>
+
+<section>
+    <h2>Notification summary</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Severity</span>
+            <span class="summary-card-value">
+                <span class="notification-severity"
+                      th:classappend="|notification-severity--${#strings.toLowerCase(notificationEvent.severity)}|"
+                      th:text="${notificationEvent.severity}">
+                    HIGH
+                </span>
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Status</span>
+            <span class="summary-card-value" th:text="${notificationEvent.status}">
+                UNREAD
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Event Type</span>
+            <span class="summary-card-value" th:text="${notificationEvent.eventType}">
+                EVENT_TYPE
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Created At</span>
+            <span class="summary-card-value" th:text="${notificationEvent.createdAt}">
+                Created
+            </span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Message</h2>
+
+    <div class="traceability-card">
+        <h3 th:text="${notificationEvent.title}">Notification title</h3>
+
+        <p class="traceability-description"
+           th:text="${notificationEvent.message}">
+            Notification message
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>Lifecycle links</h2>
+
+    <table>
+        <tbody>
+        <tr>
+            <th>Website</th>
+            <td>
+                <a th:href="@{/websites/{websiteId}(websiteId=${notificationEvent.websiteId})}"
+                   th:text="${notificationEvent.websiteId}">
+                    Website ID
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Monitoring Run</th>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${notificationEvent.websiteId}, runId=${notificationEvent.monitoringRunId})}"
+                   th:text="${notificationEvent.monitoringRunId}">
+                    Monitoring Run ID
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Monitoring Run Report</th>
+            <td>
+                <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report(websiteId=${notificationEvent.websiteId}, runId=${notificationEvent.monitoringRunId})}">
+                    Open monitoring run report
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <th>Filtered Notification List</th>
+            <td>
+                <a th:href="@{/notifications(websiteId=${notificationEvent.websiteId})}">
+                    View notifications for this website
+                </a>
+                <br>
+                <a th:href="@{/notifications(monitoringRunId=${notificationEvent.monitoringRunId})}">
+                    View notifications for this monitoring run
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Management action</h2>
+
+    <form th:if="${notificationEvent.status.name() == 'UNREAD'}"
+          th:action="@{/notifications/{notificationEventId}/mark-read(notificationEventId=${notificationEvent.id})}"
+          method="post">
+        <button type="submit">Mark as read</button>
+    </form>
+
+    <form th:if="${notificationEvent.status.name() == 'READ'}"
+          th:action="@{/notifications/{notificationEventId}/mark-unread(notificationEventId=${notificationEvent.id})}"
+          method="post">
+        <button type="submit">Mark as unread</button>
+    </form>
+
+    <p class="output-note">
+        This action only changes the notification event read/unread status.
+        It does not change monitoring runs, evidence, findings, risks, trust assessments, reports, or comparison output.
+    </p>
+</section>
+
+<section>
+    <h2>Technical detail</h2>
+
+    <table>
+        <tbody>
+        <tr>
+            <th>Notification Event ID</th>
+            <td th:text="${notificationEvent.id}">Notification Event ID</td>
+        </tr>
+
+        <tr>
+            <th>Website ID</th>
+            <td th:text="${notificationEvent.websiteId}">Website ID</td>
+        </tr>
+
+        <tr>
+            <th>Monitoring Run ID</th>
+            <td th:text="${notificationEvent.monitoringRunId}">Monitoring Run ID</td>
+        </tr>
+
+        <tr>
+            <th>Event Type</th>
+            <td th:text="${notificationEvent.eventType}">Event Type</td>
+        </tr>
+
+        <tr>
+            <th>Severity</th>
+            <td th:text="${notificationEvent.severity}">Severity</td>
+        </tr>
+
+        <tr>
+            <th>Status</th>
+            <td th:text="${notificationEvent.status}">Status</td>
+        </tr>
+
+        <tr>
+            <th>Deduplication Key</th>
+            <td class="raw-value-cell" th:text="${notificationEvent.deduplicationKey}">
+                Deduplication key
+            </td>
+        </tr>
+
+        <tr>
+            <th>Created At</th>
+            <td th:text="${notificationEvent.createdAt}">Created At</td>
+        </tr>
+
+        <tr>
+            <th>Updated At</th>
+            <td th:text="${notificationEvent.updatedAt}">Updated At</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+</body>
+</html>

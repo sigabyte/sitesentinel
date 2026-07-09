@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Management</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<h1>Notification Management</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/websites">Websites</a>
+</p>
+
+<section>
+    <h2>Management baseline</h2>
+
+    <p>
+        This page lists persisted in-application notification events.
+        It does not generate new notification events and does not deliver external notifications.
+    </p>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Selected Status</span>
+            <span class="summary-card-value"
+                  th:text="${selectedStatus != null ? selectedStatus : 'ALL'}">
+                ALL
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Selected Severity</span>
+            <span class="summary-card-value"
+                  th:text="${selectedSeverity != null ? selectedSeverity : 'ALL'}">
+                ALL
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Website Filter</span>
+            <span class="summary-card-value"
+                  th:text="${selectedWebsiteId != null ? selectedWebsiteId : 'ALL'}">
+                ALL
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Monitoring Run Filter</span>
+            <span class="summary-card-value"
+                  th:text="${selectedMonitoringRunId != null ? selectedMonitoringRunId : 'ALL'}">
+                ALL
+            </span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Filters</h2>
+
+    <form th:action="@{/notifications}" method="get">
+        <input th:if="${selectedWebsiteId != null}"
+               type="hidden"
+               name="websiteId"
+               th:value="${selectedWebsiteId}">
+
+        <input th:if="${selectedMonitoringRunId != null}"
+               type="hidden"
+               name="monitoringRunId"
+               th:value="${selectedMonitoringRunId}">
+
+        <p>
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">All statuses</option>
+                <option th:each="statusOption : ${statuses}"
+                        th:value="${statusOption}"
+                        th:selected="${selectedStatus != null && selectedStatus.name() == statusOption.name()}"
+                        th:text="${statusOption}">
+                    UNREAD
+                </option>
+            </select>
+        </p>
+
+        <p>
+            <label for="severity">Severity</label>
+            <select id="severity" name="severity">
+                <option value="">All severities</option>
+                <option th:each="severityOption : ${severities}"
+                        th:value="${severityOption}"
+                        th:selected="${selectedSeverity != null && selectedSeverity.name() == severityOption.name()}"
+                        th:text="${severityOption}">
+                    HIGH
+                </option>
+            </select>
+        </p>
+
+        <p>
+            <button type="submit">Apply filters</button>
+            <a href="/notifications">Clear filters</a>
+        </p>
+    </form>
+
+    <p class="output-note">
+        Website and monitoring run filters are preserved when this page is opened from a website or monitoring run context.
+    </p>
+</section>
+
+<section>
+    <h2>Notification events</h2>
+
+    <div th:if="${#lists.isEmpty(notificationEvents)}">
+        <p>No notification events match the selected filters.</p>
+        <p class="output-note">
+            Notification events are created only when the existing notification generation baseline detects important monitoring outcomes.
+        </p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(notificationEvents)}" class="notification-table">
+        <thead>
+        <tr>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Website</th>
+            <th>Monitoring Run</th>
+            <th>Created At</th>
+            <th>Open</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="event : ${notificationEvents}">
+            <td>
+                <span class="notification-severity"
+                      th:classappend="|notification-severity--${#strings.toLowerCase(event.severity)}|"
+                      th:text="${event.severity}">
+                    HIGH
+                </span>
+            </td>
+
+            <td th:text="${event.status}">UNREAD</td>
+
+            <td th:text="${event.eventType}">EVENT_TYPE</td>
+
+            <td>
+                <strong th:text="${event.title}">Notification title</strong>
+                <p class="output-note" th:text="${event.message}">Notification message</p>
+            </td>
+
+            <td>
+                <a th:if="${event.websiteId != null}"
+                   th:href="@{/websites/{websiteId}(websiteId=${event.websiteId})}"
+                   th:text="${event.websiteId}">
+                    Website ID
+                </a>
+                <span th:if="${event.websiteId == null}">-</span>
+            </td>
+
+            <td>
+                <a th:if="${event.websiteId != null && event.monitoringRunId != null}"
+                   th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${event.websiteId}, runId=${event.monitoringRunId})}"
+                   th:text="${event.monitoringRunId}">
+                    Monitoring Run ID
+                </a>
+                <span th:if="${event.websiteId == null || event.monitoringRunId == null}">-</span>
+            </td>
+
+            <td th:text="${event.createdAt}">Created</td>
+
+            <td>
+                <a th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
+                    Detail
+                </a>
+            </td>
+
+            <td>
+                <form th:if="${event.status.name() == 'UNREAD'}"
+                      th:action="@{/notifications/{notificationEventId}/mark-read(notificationEventId=${event.id})}"
+                      method="post">
+                    <button type="submit">Mark read</button>
+                </form>
+
+                <form th:if="${event.status.name() == 'READ'}"
+                      th:action="@{/notifications/{notificationEventId}/mark-unread(notificationEventId=${event.id})}"
+                      method="post">
+                    <button type="submit">Mark unread</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+</body>
+</html>

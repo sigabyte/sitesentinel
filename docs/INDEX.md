@@ -4,17 +4,17 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 6 is complete.
+Sprint 7 is complete.
 
-Sprint 7 is not open yet.
+Sprint 8 is not open yet.
 
 The current completed implementation scope is:
 
-Notification Event Baseline
+Notification Management Baseline
 
 The recommended next sprint scope is:
 
-Notification Management Baseline
+Notification Delivery Readiness Baseline
 
 The current implementation provides a working core assessment lifecycle with an explainable traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
 
@@ -50,7 +50,7 @@ MonitoringRun
 ↓
 Existing Assessment Lifecycle
 
-## Implemented Baseline Through Sprint 6
+## Implemented Baseline Through Sprint 7
 
 - Website registration
 - Website detail view
@@ -148,8 +148,65 @@ Existing Assessment Lifecycle
 - Website detail notification event visibility
 - Monitoring run detail notification event visibility
 - Monitoring run report notification event visibility
+- Notification event management list page
+- Notification event detail page
+- Status-based notification filtering
+- Severity-based notification filtering
+- Combined status and severity notification filtering
+- Website-context notification filtering
+- Monitoring-run-context notification filtering
+- Mark notification as read action
+- Mark notification as unread action
+- Dashboard navigation to notification management
+- Website detail navigation to website-filtered notification management
+- Monitoring run detail navigation to run-filtered notification management
+- Monitoring run report navigation to run-filtered notification management
+- Notification event detail links from dashboard, website detail, monitoring run detail, 
+and monitoring run report
 
 ## Latest Completed Sprint
+
+## Latest Completed Sprint
+
+### Sprint 7 — Notification Management Baseline
+
+Sprint 7 is complete.
+
+Sprint 7 introduced in-application notification management for persisted notification events.
+
+Sprint 7 added:
+
+- Notification event management list page.
+- Notification event detail page.
+- Status-based filtering.
+- Severity-based filtering.
+- Combined status and severity filtering.
+- Website-context notification filtering.
+- Monitoring-run-context notification filtering.
+- Mark notification as read action.
+- Mark notification as unread action.
+- Dashboard navigation to notification management.
+- Website detail navigation to website-filtered notification management.
+- Monitoring run detail navigation to run-filtered notification management.
+- Monitoring run report navigation to run-filtered notification management.
+- Notification event detail links from existing notification visibility tables.
+- Empty-state handling for notification management views.
+
+Sprint 7 did not add:
+
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- Notification recipient preferences.
+- User-specific notification routing.
+- Delivery retry tracking.
+- AI-generated notification summaries.
+- Authentication or user access control.
+
+The recommended next sprint is Sprint 8 — Notification Delivery Readiness Baseline.
+
+## Previous Completed Sprint
 
 ### Sprint 6 — Notification Event Baseline
 
@@ -194,8 +251,6 @@ Sprint 6 did not add:
 - Authentication or user access control.
 
 The recommended next sprint is Sprint 7 — Notification Management Baseline.
-
-## Previous Completed Sprint
 
 ### Sprint 5 — Monitoring Run Report Baseline
 
@@ -331,27 +386,27 @@ a browser-based monitoring run report baseline, and a persisted in-application n
 The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, 
 generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, 
 compare completed assessments against previous completed assessments, 
-execute recurring scheduled scans through the existing monitoring lifecycle, present monitoring run reports, 
-and persist important monitoring outcomes as notification events.
+execute recurring scheduled scans through the existing monitoring lifecycle, present monitoring run reports,
+and persist important monitoring outcomes as notification events, then manage those notification events through 
+an in-application notification management UI.
 
 ## Next Phase
 
 Recommended next scope:
 
-Sprint 7 — Notification Management Baseline
+Sprint 8 — Notification Delivery Readiness Baseline
 
-Sprint 7 should build on the completed notification event baseline by adding in-application notification management.
+Sprint 8 should prepare the architecture for future external notification delivery without sending real external notifications yet.
 
-Recommended Sprint 7 candidate blocks:
+Recommended Sprint 8 candidate blocks:
 
-- Notification event list page.
-- Notification event detail page.
-- Notification filtering by severity.
-- Notification filtering by status.
-- Mark notification as read control.
-- Mark notification as unread control.
-- Dashboard navigation to notification management.
-- Website-level navigation to notification management.
-- Notification management QA and sprint closure documentation.
+- Notification delivery channel enum.
+- Notification delivery attempt entity.
+- Delivery attempt repository.
+- Delivery attempt service.
+- Simulated delivery attempt recording.
+- Notification detail delivery attempt visibility.
+- Notification management delivery readiness documentation.
+- External delivery boundary preservation.
 
-Sprint 7 should not introduce real email, WhatsApp, Slack, or webhook delivery yet.
+Sprint 8 should still not send real emails, WhatsApp messages, Slack messages, or webhooks.

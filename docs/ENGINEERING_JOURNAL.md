@@ -1617,3 +1617,252 @@ Sprint 6 is complete.
 The platform now has a persisted, in-application notification event baseline.
 
 The recommended next sprint scope is Sprint 7 — Notification Management Baseline.
+
+---
+
+## Sprint 7 Opening — Notification Management Baseline
+
+### Status
+
+Sprint 7 is open.
+
+### Sprint Goal
+
+Sprint 7 introduces the Notification Management Baseline.
+
+Sprint 6 created persisted in-application notification events.
+
+Sprint 7 makes those notification events manageable from the UI.
+
+The purpose of Sprint 7 is to allow the user to review, filter, inspect, and update the read/unread state of existing notification events.
+
+Sprint 7 is not a notification delivery sprint.
+
+### Why Sprint 7 Exists
+
+The platform can now:
+
+- Execute monitoring runs.
+- Preserve lifecycle output.
+- Expose traceability.
+- Compare completed assessments.
+- Execute scheduled monitoring.
+- Present monitoring run reports.
+- Generate persisted notification events.
+
+The next product need is to make notification events operationally usable.
+
+Notification management should help the user answer:
+
+- Which notification events exist?
+- Which notification events are unread?
+- Which notification events are critical, high, warning, or informational?
+- Which website or monitoring run produced a notification?
+- What exactly does a notification event mean?
+- Has the notification already been reviewed?
+
+### Approved Notification Management Baseline
+
+Sprint 7 may add:
+
+- Notification event list page.
+- Notification event detail page.
+- Notification filtering by status.
+- Notification filtering by severity.
+- Notification filtering by status and severity together.
+- Notification read action.
+- Notification unread action.
+- Dashboard navigation to notification management.
+- Website-level navigation to notification management.
+- Monitoring run and report navigation to notification event detail pages.
+- Empty-state UI for notification management pages.
+
+### Architecture Boundary
+
+The notification management layer may:
+
+- Read notification event records.
+- Read website references linked to notification events.
+- Read monitoring run references linked to notification events.
+- Filter notification events by status.
+- Filter notification events by severity.
+- Display notification event detail.
+- Update notification event status between READ and UNREAD.
+- Link back to website detail pages.
+- Link back to monitoring run detail pages.
+- Link back to monitoring run report pages.
+
+The notification management layer must not:
+
+- Start monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring runs.
+- Modify evidence.
+- Modify normalized evidence.
+- Modify findings.
+- Modify risks.
+- Modify trust assessments.
+- Modify comparison output.
+- Generate monitoring reports.
+- Generate new notification event rules.
+- Change notification event generation logic.
+- Deliver external notifications.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Manage notification recipients.
+- Manage user preferences.
+- Generate AI-written notification summaries.
+
+### Explicitly Deferred From Sprint 7
+
+The following items remain deferred:
+
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- Notification recipient preferences.
+- User-specific notification routing.
+- Notification subscriptions.
+- Delivery retry policies.
+- Delivery status tracking.
+- Advanced notification policy engine.
+- AI-generated notification summaries.
+- Authentication and user access control.
+- PDF export.
+- CSV export.
+
+### Sprint 7 Candidate Blocks
+
+Sprint 7 should proceed in controlled blocks:
+
+- Block 7A — Documentation and notification management boundary opening.
+- Block 7B — Notification management query baseline.
+- Block 7C — Notification management controller.
+- Block 7D — Notification event list page.
+- Block 7E — Notification event detail page.
+- Block 7F — Notification management navigation integration.
+- Block 7G — QA and sprint closure documentation.
+
+### Sprint 7 Decision
+
+Sprint 7 starts with in-application notification management.
+
+The first implementation goal is reviewability, filtering, and read/unread management for existing notification events.
+
+External notification delivery remains outside the Sprint 7 boundary.
+
+---
+
+## Sprint 7 Closure — Notification Management Baseline
+
+### Status
+
+Sprint 7 is complete.
+
+### Completed Scope
+
+Sprint 7 implemented the Notification Management Baseline.
+
+The platform can now manage persisted in-application notification events created by the Sprint 6 notification event baseline.
+
+### Completed Capabilities
+
+Sprint 7 added:
+
+- Notification event management list page.
+- Notification event detail page.
+- Status-based filtering.
+- Severity-based filtering.
+- Combined status and severity filtering.
+- Website-context notification filtering.
+- Monitoring-run-context notification filtering.
+- Mark notification as read action.
+- Mark notification as unread action.
+- Dashboard navigation to notification management.
+- Website detail navigation to website-filtered notification management.
+- Monitoring run detail navigation to run-filtered notification management.
+- Monitoring run report navigation to run-filtered notification management.
+- Notification event detail links from existing notification visibility tables.
+- Empty-state handling for notification management views.
+
+### Implemented Files
+
+Sprint 7 added or updated:
+
+- `src/main/java/com/cigabyte/sitesentinel/notification/NotificationEventRepository.java`
+- `src/main/java/com/cigabyte/sitesentinel/notification/NotificationEventService.java`
+- `src/main/java/com/cigabyte/sitesentinel/notification/NotificationEventController.java`
+- `src/main/resources/templates/notifications/list.html`
+- `src/main/resources/templates/notifications/detail.html`
+- `src/main/resources/templates/dashboard/index.html`
+- `src/main/resources/templates/websites/detail.html`
+- `src/main/resources/templates/monitoring-runs/detail.html`
+- `src/main/resources/templates/reports/monitoring-run-report.html`
+
+### Preserved Architecture Boundaries
+
+Sprint 7 preserved the core SiteSentinel architecture.
+
+Sprint 7 did not:
+
+- Start monitoring runs from notification management.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring lifecycle output.
+- Modify comparison output.
+- Modify monitoring report generation.
+- Change notification event generation rules.
+- Add external notification delivery.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Add user-specific notification preferences.
+- Add recipient management.
+- Add notification subscriptions.
+- Add AI-generated notification summaries.
+
+### Validation Performed
+
+Sprint 7 validation covered:
+
+- Application compilation.
+- Dashboard notification management navigation.
+- Notification management list page.
+- Empty-state behavior.
+- Status filter.
+- Severity filter.
+- Combined status and severity filter.
+- Website-context filter.
+- Monitoring-run-context filter.
+- Notification detail page.
+- Website link from notification detail.
+- Monitoring run link from notification detail.
+- Monitoring run report link from notification detail.
+- Mark as read action.
+- Mark as unread action.
+- Dashboard unread notification count refresh.
+- Notification detail links from dashboard.
+- Notification detail links from website detail.
+- Notification detail links from monitoring run detail.
+- Notification detail links from monitoring run report.
+
+### Result
+
+Sprint 7 completed the in-application Notification Management Baseline.
+
+The notification event layer is now reviewable, filterable, inspectable, and operationally manageable from the UI.
+
+External notification delivery remains deferred.

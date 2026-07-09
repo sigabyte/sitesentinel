@@ -34,6 +34,10 @@
     <strong th:text="${unreadNotificationEventCount}">0</strong>
   </p>
 
+  <p>
+    <a href="/notifications">Open notification management</a>
+  </p>
+
   <div th:if="${#lists.isEmpty(latestNotificationEvents)}">
     <p>No notification events recorded yet.</p>
     <p class="output-note">
@@ -52,6 +56,7 @@
       <th>Website ID</th>
       <th>Monitoring Run ID</th>
       <th>Created At</th>
+      <th>Open</th>
     </tr>
     </thead>
     <tbody>
@@ -77,6 +82,11 @@
         </a>
       </td>
       <td th:text="${event.createdAt}">Created</td>
+      <td>
+        <a th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
+          Detail
+        </a>
+      </td>
     </tr>
     </tbody>
   </table>

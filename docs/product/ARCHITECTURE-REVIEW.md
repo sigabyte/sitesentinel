@@ -837,3 +837,268 @@ The project is ready to move to Sprint 7.
 Recommended Sprint 7 scope:
 
 Notification Management Baseline
+
+---
+
+# SiteSentinel Architecture Review-7 Opening
+
+## Sprint
+
+Sprint 7 Opening
+
+## Result
+
+APPROVED TO START
+
+## Product Owner
+
+Approved
+
+## Proposed Scope
+
+Notification Management Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented  
+Notification Management Baseline In Progress
+
+## Sprint 7 Architecture Intent
+
+Sprint 7 extends the persisted notification event baseline with in-application notification management.
+
+Sprint 7 does not change how notification events are generated.
+
+Sprint 7 does not introduce external delivery.
+
+Sprint 7 provides a user-facing management layer for already persisted notification events.
+
+## Approved Data Path
+
+The approved Sprint 7 data path is:
+
+NotificationEvent
+↓
+NotificationEventRepository
+↓
+NotificationEventService
+↓
+NotificationEventController
+↓
+Notification Management UI
+
+Optional navigation may link notification events back to:
+
+Website
+↓
+MonitoringRun
+↓
+Monitoring Run Report
+
+## Approved Sprint 7 Capabilities
+
+Sprint 7 may implement:
+
+- Notification event list page.
+- Notification event detail page.
+- Status-based filtering.
+- Severity-based filtering.
+- Combined status and severity filtering.
+- Mark notification as read.
+- Mark notification as unread.
+- Dashboard navigation to notification management.
+- Website detail navigation to notification management.
+- Monitoring run detail navigation to notification event detail.
+- Monitoring run report navigation to notification event detail.
+- Empty-state handling for notification management views.
+
+## Preserved Architecture Boundaries
+
+The Sprint 7 notification management layer may:
+
+- Read notification event records.
+- Read notification event website references.
+- Read notification event monitoring run references.
+- Display notification event fields.
+- Filter notification events.
+- Update notification event status.
+- Link to existing lifecycle and report pages.
+
+The Sprint 7 notification management layer must not:
+
+- Execute monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Generate monitoring reports.
+- Modify lifecycle output.
+- Modify comparison output.
+- Change notification generation rules.
+- Generate notification events outside the existing generation service.
+- Deliver external notifications.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Manage recipients.
+- Manage subscriptions.
+- Manage user-specific notification preferences.
+- Generate AI-written notification summaries.
+
+## External Delivery Boundary
+
+Sprint 7 is not an external notification delivery sprint.
+
+Email, WhatsApp, Slack, webhook, and other outbound delivery mechanisms remain outside the Sprint 7 boundary.
+
+Delivery should be considered only after notification management is stable.
+
+## Read/Unread Boundary
+
+Sprint 7 may update only the notification event status field.
+
+Allowed status transitions:
+
+- UNREAD to READ.
+- READ to UNREAD.
+
+Sprint 7 must not use read/unread state to change monitoring results, trust assessments, risks, findings, evidence, reports, or comparison output.
+
+## Result
+
+Sprint 7 is approved to start with the Notification Management Baseline.
+
+---
+
+# SiteSentinel Architecture Review-7 Closure
+
+## Sprint
+
+Sprint 7 Closure
+
+## Result
+
+APPROVED AS COMPLETE
+
+## Product Owner
+
+Approved
+
+## Completed Scope
+
+Notification Management Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented  
+Notification Management Baseline Implemented
+
+## Sprint 7 Architecture Result
+
+Sprint 7 completed the in-application notification management layer.
+
+The platform now supports user-facing management of persisted notification events.
+
+The notification management layer allows users to:
+
+- List notification events.
+- Filter notification events by status.
+- Filter notification events by severity.
+- Filter notification events by status and severity together.
+- Filter notification events by website context.
+- Filter notification events by monitoring run context.
+- Inspect notification event detail.
+- Mark notification events as read.
+- Mark notification events as unread.
+- Navigate from dashboard, website detail, monitoring run detail, and monitoring run report pages 
+into notification management.
+
+## Final Sprint 7 Data Path
+
+The implemented Sprint 7 data path is:
+
+NotificationEvent
+↓
+NotificationEventRepository
+↓
+NotificationEventService
+↓
+NotificationEventController
+↓
+Notification Management UI
+
+The notification management UI links back to:
+
+Website Detail  
+Monitoring Run Detail  
+Monitoring Run Report
+
+## Preserved Architecture Boundaries
+
+Sprint 7 preserved the existing monitoring lifecycle.
+
+Sprint 7 did not change:
+
+- Website monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Comparison generation.
+- Report generation.
+- Scheduled monitoring execution.
+- Notification event generation.
+
+Sprint 7 only introduced notification event review and status management.
+
+## Read/Unread Status Boundary
+
+Sprint 7 updates only the notification event status field.
+
+Allowed transitions implemented:
+
+- UNREAD to READ.
+- READ to UNREAD.
+
+These transitions do not modify monitoring runs, evidence, normalized evidence, findings, risks, 
+trust assessments, comparison output, or report output.
+
+## External Delivery Boundary
+
+Sprint 7 did not implement external notification delivery.
+
+The following remain deferred:
+
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhook delivery.
+- Recipient management.
+- User notification preferences.
+- Notification subscription rules.
+- Delivery retries.
+- Delivery status tracking.
+- AI-generated notification summaries.
+
+## Architecture Decision
+
+Notification management is now approved as a completed baseline.
+
+The recommended next architectural step is delivery readiness, not real delivery.
+
+Sprint 8 may introduce delivery attempt modeling and simulated delivery records while 
+preserving the no-external-delivery boundary.

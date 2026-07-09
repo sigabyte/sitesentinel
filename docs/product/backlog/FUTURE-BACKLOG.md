@@ -112,34 +112,33 @@ Reason: MVP sonrasında her kalite özelliği için
 
 - Add notification event baseline.
 
+### Completed Sprint 7 Item
+
+- Added notification management UI.
+- Added notification event list page.
+- Added notification event detail page.
+- Added mark notification as read/unread controls.
+- Added notification filtering by severity and status.
+- Added website-context notification filtering.
+- Added monitoring-run-context notification filtering.
+- Added notification management navigation from dashboard, website detail, 
+monitoring run detail, and monitoring run report pages.
+
 ### Future Candidate Items
 
-- Add manual re-run controls for specific assessment stages.
-- Add CSV export for assessment output.
-- Add PDF export for completed monitoring reports.
-- Add authentication and basic user access control.
-- Add advanced HTTP scanner signals.
-- Add link extraction baseline.
-- Add external resource inventory baseline.
-- Add script and third-party domain evidence collection.
-- Add suspicious redirect chain analysis.
-- Add DNS evidence collection.
-- Add TLS evidence collection.
-- Add notification management UI.
-- Add notification event list page.
-- Add notification event detail page.
-- Add mark notification as read/unread controls.
-- Add notification filtering by severity and status.
+- Add notification delivery readiness baseline.
+- Add notification delivery channel enum.
+- Add notification delivery attempt entity.
+- Add notification delivery attempt repository.
+- Add notification delivery attempt service.
+- Add simulated notification delivery attempt recording.
+- Add delivery attempt visibility on notification detail pages.
 - Add notification delivery for scheduled monitoring results.
 - Add email notification delivery.
 - Add WhatsApp notification delivery.
 - Add Slack notification delivery.
 - Add webhook notification delivery.
 - Add user-specific notification preferences.
-- Add scheduled monitoring report generation.
-- Add custom cron expression support for monitoring schedules.
-- Add retry policy dashboard for failed scheduled runs.
-- Add distributed locking for multi-node scheduled execution.
 
 ### Deferred Technical Hardening
 

@@ -46,6 +46,29 @@ public class NotificationEventService {
     }
 
     @Transactional(readOnly = true)
+    public List<NotificationEvent> findManagedEvents(
+            UUID websiteId,
+            UUID monitoringRunId,
+            NotificationEventStatus status,
+            NotificationEventSeverity severity
+    ) {
+        if (websiteId != null) {
+            validateWebsiteExists(websiteId);
+        }
+
+        if (monitoringRunId != null) {
+            validateMonitoringRunExists(monitoringRunId);
+        }
+
+        return notificationEventRepository.findManagedEvents(
+                websiteId,
+                monitoringRunId,
+                status,
+                severity
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<NotificationEvent> findByWebsiteId(UUID websiteId) {
         validateWebsiteExists(websiteId);
         return notificationEventRepository.findByWebsiteIdOrderByCreatedAtDesc(websiteId);
@@ -60,6 +83,11 @@ public class NotificationEventService {
     @Transactional(readOnly = true)
     public long countUnreadEvents() {
         return notificationEventRepository.countByStatus(NotificationEventStatus.UNREAD);
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationEvent findEvent(UUID notificationEventId) {
+        return findExistingEvent(notificationEventId);
     }
 
     @Transactional

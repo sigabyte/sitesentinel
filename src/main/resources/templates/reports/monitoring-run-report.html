@@ -16,6 +16,9 @@
   </a> |
   <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/comparison(websiteId=${website.id}, runId=${monitoringRun.id})}">
     View comparison
+  </a> |
+  <a th:href="@{/notifications(monitoringRunId=${monitoringRun.id})}">
+    Run notifications
   </a>
 </p>
 
@@ -106,6 +109,11 @@
 
 <section class="output-section">
   <h2>Notification events</h2>
+  <p>
+    <a th:href="@{/notifications(monitoringRunId=${monitoringRun.id})}">
+      Open notification management for this monitoring run
+    </a>
+  </p>
 
   <div th:if="${#lists.isEmpty(notificationEvents)}">
     <p>No notification events recorded for this monitoring run.</p>
@@ -123,6 +131,7 @@
       <th>Type</th>
       <th>Title</th>
       <th>Created At</th>
+      <th>Open</th>
     </tr>
     </thead>
     <tbody>
@@ -141,6 +150,11 @@
         <p class="output-note" th:text="${event.message}">Notification message</p>
       </td>
       <td th:text="${event.createdAt}">Created</td>
+      <td>
+        <a th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
+          Detail
+        </a>
+      </td>
     </tr>
     </tbody>
   </table>
