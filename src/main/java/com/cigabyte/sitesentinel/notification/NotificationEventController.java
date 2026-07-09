@@ -11,9 +11,14 @@ import java.util.UUID;
 public class NotificationEventController {
 
     private final NotificationEventService notificationEventService;
+    private final NotificationDeliveryAttemptService notificationDeliveryAttemptService;
 
-    public NotificationEventController(NotificationEventService notificationEventService) {
+    public NotificationEventController(
+            NotificationEventService notificationEventService,
+            NotificationDeliveryAttemptService notificationDeliveryAttemptService
+    ) {
         this.notificationEventService = notificationEventService;
+        this.notificationDeliveryAttemptService = notificationDeliveryAttemptService;
     }
 
     @GetMapping
@@ -49,6 +54,9 @@ public class NotificationEventController {
         model.addAttribute("notificationEvent", notificationEventService.findEvent(notificationEventId));
         model.addAttribute("statuses", NotificationEventStatus.values());
         model.addAttribute("severities", NotificationEventSeverity.values());
+        model.addAttribute("deliveryChannels", NotificationDeliveryChannel.values());
+        model.addAttribute("deliveryAttempts", notificationDeliveryAttemptService.findAttemptsForEvent(notificationEventId));
+        model.addAttribute("deliveryAttemptCount", notificationDeliveryAttemptService.countAttemptsForEvent(notificationEventId));
 
         return "notifications/detail";
     }
@@ -63,6 +71,36 @@ public class NotificationEventController {
     @PostMapping("/{notificationEventId}/mark-unread")
     public String markUnread(@PathVariable UUID notificationEventId) {
         notificationEventService.markUnread(notificationEventId);
+
+        return "redirect:/notifications/" + notificationEventId;
+    }
+
+    @PostMapping("/{notificationEventId}/delivery-attempts/simulate-success")
+    public String recordSimulatedDeliverySuccess(
+            @PathVariable UUID notificationEventId,
+            @RequestParam NotificationDeliveryChannel channel
+    ) {
+        notificationDeliveryAttemptService.recordSimulatedSuccess(notificationEventId, channel);
+
+        return "redirect:/notifications/" + notificationEventId;
+    }
+
+    @PostMapping("/{notificationEventId}/delivery-attempts/simulate-failure")
+    public String recordSimulatedDeliveryFailure(
+            @PathVariable UUID notificationEventId,
+            @RequestParam NotificationDeliveryChannel channel
+    ) {
+        notificationDeliveryAttemptService.recordSimulatedFailure(notificationEventId, channel);
+
+        return "redirect:/notifications/" + notificationEventId;
+    }
+
+    @PostMapping("/{notificationEventId}/delivery-attempts/skip")
+    public String recordSkippedDeliveryAttempt(
+            @PathVariable UUID notificationEventId,
+            @RequestParam NotificationDeliveryChannel channel
+    ) {
+        notificationDeliveryAttemptService.recordSkipped(notificationEventId, channel);
 
         return "redirect:/notifications/" + notificationEventId;
     }

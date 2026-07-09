@@ -1866,3 +1866,251 @@ Sprint 7 completed the in-application Notification Management Baseline.
 The notification event layer is now reviewable, filterable, inspectable, and operationally manageable from the UI.
 
 External notification delivery remains deferred.
+
+---
+
+## Sprint 8 Opening — Notification Delivery Readiness Baseline
+
+### Status
+
+Sprint 8 is open.
+
+### Sprint Goal
+
+Sprint 8 will introduce the Notification Delivery Readiness Baseline.
+
+The goal is to prepare SiteSentinel for future external notification delivery without sending real external notifications yet.
+
+Sprint 8 will model and record delivery attempts for existing notification events.
+
+### Planned Scope
+
+Sprint 8 may add:
+
+- Notification delivery channel model.
+- Notification delivery attempt status model.
+- Notification delivery attempt persistence.
+- Delivery attempt repository.
+- Delivery attempt service.
+- Simulated delivery attempt recording.
+- Delivery attempt visibility from notification detail pages.
+- Delivery readiness documentation.
+
+### Intended Data Path
+
+Sprint 8 will extend the notification layer with the following readiness path:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttempt  
+↓  
+NotificationDeliveryAttemptRepository  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+Notification Detail UI
+
+### Preserved Architecture Boundaries
+
+Sprint 8 must preserve the existing SiteSentinel monitoring lifecycle.
+
+Sprint 8 must not:
+
+- Start monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify comparison output.
+- Modify monitoring run report output.
+- Change notification event generation rules.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Call external delivery APIs.
+- Add recipient management.
+- Add user-specific notification preferences.
+- Add notification subscription rules.
+- Add delivery retry scheduling.
+- Add AI-generated notification summaries.
+
+### External Delivery Boundary
+
+Sprint 8 is not a real delivery sprint.
+
+Email, WhatsApp, Slack, webhook, and other outbound delivery mechanisms remain deferred.
+
+Sprint 8 may record simulated delivery attempts only.
+
+### Sprint 8 Candidate Blocks
+
+Sprint 8 is planned as:
+
+- Block 8A — Documentation opening.
+- Block 8B — Notification delivery attempt database baseline.
+- Block 8C — Notification delivery attempt domain model.
+- Block 8D — Notification delivery attempt service.
+- Block 8E — Manual simulated delivery attempt action.
+- Block 8F — Delivery attempt visibility on notification detail.
+- Block 8G — QA and sprint closure documentation.
+
+### Sprint 8 Decision
+
+Sprint 8 starts with delivery readiness, not real delivery.
+
+The first implementation goal is to model delivery attempts safely and make them visible from notification management.
+
+External notification delivery remains outside the Sprint 8 boundary.
+
+---
+
+## Sprint 8 Closure — Notification Delivery Readiness Baseline
+
+### Status
+
+Sprint 8 is complete.
+
+### Result
+
+Notification Delivery Readiness Baseline has been implemented.
+
+Sprint 8 introduced delivery attempt modeling, persistence, simulated delivery actions, 
+and delivery attempt visibility for notification events.
+
+### Implemented Scope
+
+Sprint 8 implemented:
+
+- Notification delivery channel enum.
+- Notification delivery attempt status enum.
+- Notification delivery attempt entity.
+- Notification delivery attempt repository.
+- Notification delivery attempt service.
+- Notification delivery attempt database table.
+- Manual simulated successful delivery attempt action.
+- Manual simulated failed delivery attempt action.
+- Manual skipped delivery attempt action.
+- Delivery attempt count on notification detail.
+- Delivery attempt history on notification detail.
+- TELEGRAM as a modeled delivery channel.
+- Flyway correction migration for TELEGRAM channel constraint.
+
+### Database Changes
+
+Sprint 8 added:
+
+- `notification_delivery_attempts`
+
+The table records delivery attempt readiness entries linked to existing notification events.
+
+Important migration note:
+
+- `V9__create_notification_delivery_attempts_table.sql` created the delivery attempt table.
+- `V10__allow_telegram_notification_delivery_channel.sql` exists as an empty local repair-alignment migration 
+because Flyway had already recorded version 10 with checksum 0 during local development.
+- `V11__allow_telegram_notification_delivery_channel.sql` is the effective migration that updates the delivery 
+channel check constraint to allow `TELEGRAM`.
+
+### Implemented Data Path
+
+Sprint 8 implemented the following readiness path:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttempt  
+↓  
+NotificationDeliveryAttemptRepository  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationEventController  
+↓  
+Notification Detail UI
+
+### Supported Modeled Delivery Channels
+
+Sprint 8 supports the following modeled delivery channels:
+
+- EMAIL
+- WHATSAPP
+- SLACK
+- WEBHOOK
+- IN_APP
+- TELEGRAM
+
+### Supported Attempt Statuses
+
+Sprint 8 supports the following delivery attempt statuses:
+
+- PENDING
+- SIMULATED_SUCCESS
+- SIMULATED_FAILURE
+- SKIPPED
+
+### TELEGRAM Decision
+
+TELEGRAM was added as a modeled notification delivery channel during Sprint 8.
+
+Sprint 8 does not send Telegram messages.
+
+Telegram Bot API integration remains deferred to a future delivery sprint.
+
+### Preserved Architecture Boundaries
+
+Sprint 8 preserved the monitoring lifecycle.
+
+Sprint 8 did not change:
+
+- Website monitoring execution.
+- Scheduled monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Comparison output.
+- Monitoring run report output.
+- Notification event generation rules.
+
+### External Delivery Boundary
+
+Sprint 8 did not implement real outbound notification delivery.
+
+Sprint 8 does not call:
+
+- SMTP providers.
+- WhatsApp APIs.
+- Telegram Bot API.
+- Slack APIs.
+- Webhook URLs.
+- External delivery APIs.
+
+All delivery actions in Sprint 8 are simulated internal readiness records only.
+
+### QA Result
+
+Sprint 8 QA passed.
+
+Verified behavior:
+
+- Notification detail page opens successfully.
+- Delivery readiness action is visible.
+- Delivery channel dropdown includes TELEGRAM.
+- Simulated success attempts are recorded.
+- Simulated failure attempts are recorded.
+- Skipped attempts are recorded.
+- Delivery attempt count updates correctly.
+- Delivery attempt history displays recorded attempts.
+- Delivery attempt history is ordered from newest to oldest.
+- Existing notification management actions still work.
+- No real external notification delivery occurs.
+
+### Sprint 8 Closure Decision
+
+Sprint 8 is complete.
+
+The system is now ready for a future real delivery sprint, but external delivery remains 
+intentionally deferred.

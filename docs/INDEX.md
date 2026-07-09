@@ -4,15 +4,15 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 7 is complete.
+Sprint 8 is complete.
 
-Sprint 8 is not open yet.
+Sprint 9 is not open yet.
 
 The current completed implementation scope is:
 
 Notification Management Baseline
 
-The recommended next sprint scope is:
+The current completed implementation scope is:
 
 Notification Delivery Readiness Baseline
 
@@ -165,6 +165,41 @@ Existing Assessment Lifecycle
 and monitoring run report
 
 ## Latest Completed Sprint
+
+### Sprint 8 — Notification Delivery Readiness Baseline
+
+Sprint 8 is complete.
+
+Sprint 8 prepares the notification layer for future external delivery without sending real external notifications yet.
+
+Sprint 8 may add:
+
+- Notification delivery channel enum.
+- Notification delivery attempt status enum.
+- Notification delivery attempt entity.
+- Delivery attempt repository.
+- Delivery attempt service.
+- Simulated delivery attempt recording.
+- Delivery attempt visibility on notification detail pages.
+
+Sprint 8 must not add:
+
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- External delivery API calls.
+- Recipient management.
+- User-specific notification preferences.
+- Notification subscription rules.
+- Delivery retry scheduling.
+- AI-generated notification summaries.
+
+Sprint 8 implemented internal delivery readiness only.
+
+No real external notification delivery was implemented.
+
+TELEGRAM is modeled as a delivery channel, but Telegram Bot API delivery remains deferred.
 
 ## Latest Completed Sprint
 
@@ -392,21 +427,21 @@ an in-application notification management UI.
 
 ## Next Phase
 
-Recommended next scope:
+## Recommended next scope:
 
-Sprint 8 — Notification Delivery Readiness Baseline
+Sprint 9 — Real Notification Delivery Provider Baseline
 
-Sprint 8 should prepare the architecture for future external notification delivery without sending real external notifications yet.
+Sprint 9 should implement the first controlled real outbound notification delivery provider.
 
-Recommended Sprint 8 candidate blocks:
+Recommended Sprint 9 candidate blocks:
 
-- Notification delivery channel enum.
-- Notification delivery attempt entity.
-- Delivery attempt repository.
-- Delivery attempt service.
-- Simulated delivery attempt recording.
-- Notification detail delivery attempt visibility.
-- Notification management delivery readiness documentation.
-- External delivery boundary preservation.
+- Block 9A — Sprint 9 opening documentation and delivery provider boundary.
+- Block 9B — Delivery provider configuration baseline.
+- Block 9C — Telegram provider interface and disabled-by-default configuration.
+- Block 9D — Safe Telegram test delivery action.
+- Block 9E — Delivery attempt status update from real provider result.
+- Block 9F — Provider failure handling and user-facing result visibility.
+- Block 9G — QA and sprint closure documentation.
 
-Sprint 8 should still not send real emails, WhatsApp messages, Slack messages, or webhooks.
+Sprint 9 should start with one controlled provider only. TELEGRAM is the recommended first real delivery provider
+because it is suitable for monitoring alerts and can be isolated behind a provider boundary.

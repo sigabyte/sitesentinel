@@ -137,6 +137,136 @@
 </section>
 
 <section>
+    <h2>Delivery readiness action</h2>
+
+    <p>
+        This section records simulated delivery attempts for this notification event.
+        It does not send real email, WhatsApp, Telegram, Slack, webhook, or external API messages.
+    </p>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Recorded Delivery Attempts</span>
+            <span class="summary-card-value"
+                  th:text="${deliveryAttemptCount}">
+                0
+            </span>
+        </div>
+    </div>
+
+    <div class="traceability-card">
+        <h3>Record simulated successful delivery</h3>
+
+        <form th:action="@{/notifications/{notificationEventId}/delivery-attempts/simulate-success(notificationEventId=${notificationEvent.id})}"
+              method="post">
+            <p>
+                <label for="successChannel">Channel</label>
+                <select id="successChannel" name="channel" required>
+                    <option th:each="channelOption : ${deliveryChannels}"
+                            th:value="${channelOption}"
+                            th:text="${channelOption}">
+                        EMAIL
+                    </option>
+                </select>
+            </p>
+
+            <button type="submit">Record simulated success</button>
+        </form>
+    </div>
+
+    <div class="traceability-card">
+        <h3>Record simulated failed delivery</h3>
+
+        <form th:action="@{/notifications/{notificationEventId}/delivery-attempts/simulate-failure(notificationEventId=${notificationEvent.id})}"
+              method="post">
+            <p>
+                <label for="failureChannel">Channel</label>
+                <select id="failureChannel" name="channel" required>
+                    <option th:each="channelOption : ${deliveryChannels}"
+                            th:value="${channelOption}"
+                            th:text="${channelOption}">
+                        EMAIL
+                    </option>
+                </select>
+            </p>
+
+            <button type="submit">Record simulated failure</button>
+        </form>
+    </div>
+
+    <div class="traceability-card">
+        <h3>Record skipped delivery</h3>
+
+        <form th:action="@{/notifications/{notificationEventId}/delivery-attempts/skip(notificationEventId=${notificationEvent.id})}"
+              method="post">
+            <p>
+                <label for="skippedChannel">Channel</label>
+                <select id="skippedChannel" name="channel" required>
+                    <option th:each="channelOption : ${deliveryChannels}"
+                            th:value="${channelOption}"
+                            th:text="${channelOption}">
+                        EMAIL
+                    </option>
+                </select>
+            </p>
+
+            <button type="submit">Record skipped attempt</button>
+        </form>
+    </div>
+
+    <p class="output-note">
+        TELEGRAM is available as a modeled delivery channel.
+        Sprint 8 records readiness attempts only and does not call the Telegram Bot API.
+    </p>
+</section>
+<section>
+    <h2>Delivery attempt history</h2>
+
+    <p>
+        These records show simulated delivery attempts for this notification event.
+        They are internal readiness records only.
+    </p>
+
+    <div th:if="${#lists.isEmpty(deliveryAttempts)}">
+        <p class="output-note">
+            No delivery attempts have been recorded for this notification event yet.
+        </p>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(deliveryAttempts)}">
+        <table>
+            <thead>
+            <tr>
+                <th>Channel</th>
+                <th>Status</th>
+                <th>Attempted At</th>
+                <th>Completed At</th>
+                <th>Result Message</th>
+                <th>Technical Detail</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attempt : ${deliveryAttempts}">
+                <td th:text="${attempt.channel}">TELEGRAM</td>
+                <td th:text="${attempt.status}">SIMULATED_SUCCESS</td>
+                <td th:text="${attempt.attemptedAt}">2026-07-09T16:25:54</td>
+                <td th:text="${attempt.completedAt != null ? attempt.completedAt : '-'}">2026-07-09T16:25:54</td>
+                <td th:text="${attempt.resultMessage != null ? attempt.resultMessage : '-'}">
+                    Simulated telegram delivery attempt recorded successfully.
+                </td>
+                <td th:text="${attempt.technicalDetail != null ? attempt.technicalDetail : '-'}">
+                    Sprint 8 simulation only. No external telegram provider was called.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="output-note">
+        Delivery attempts are ordered from newest to oldest.
+    </p>
+</section>
+<section>
     <h2>Technical detail</h2>
 
     <table>

@@ -164,3 +164,104 @@ monitoring run detail, and monitoring run report pages.
 - Decide whether optional resource failures should affect trust score.
 - Decide how historical trend changes should be displayed.
 - Decide which scanner signals should be visible by default and which should be advanced-only.
+
+---
+
+## Post-Sprint 8 Backlog — Real Notification Delivery
+
+### Status
+
+Deferred.
+
+### Context
+
+Sprint 8 implemented Notification Delivery Readiness Baseline.
+
+The system can now record simulated delivery attempts for notification events.
+
+Real external delivery remains deferred.
+
+### Candidate Future Sprint
+
+Sprint 9 — Real Notification Delivery Provider Baseline
+
+### Recommended First Provider
+
+TELEGRAM is the recommended first real outbound delivery provider.
+
+Reason:
+
+- Suitable for monitoring alerts.
+- Fast to test.
+- Does not require email deliverability setup.
+- Can be isolated through a provider interface.
+- Useful for personal/admin alerting.
+- Lower operational complexity than WhatsApp.
+- Better real-time behavior than email for critical monitoring events.
+
+### Future Scope Candidates
+
+A future delivery sprint may add:
+
+- Delivery provider interface.
+- Provider configuration model.
+- TELEGRAM bot configuration.
+- Disabled-by-default outbound delivery.
+- Safe test delivery action.
+- Real delivery attempt status update.
+- Provider response capture.
+- Provider failure capture.
+- Delivery failure visibility.
+- External delivery audit trail.
+- Delivery enable/disable switch.
+
+### Deferred Provider Options
+
+The following provider options remain deferred:
+
+- Email provider.
+- WhatsApp provider.
+- Telegram provider.
+- Slack provider.
+- Webhook provider.
+
+### Provider Boundary Requirement
+
+Real provider integration must be isolated behind a provider boundary.
+
+Controllers and notification services must not call external APIs directly.
+
+Expected future pattern:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationDeliveryProvider  
+↓  
+Specific Provider Adapter  
+↓  
+External API
+
+### Safety Boundary
+
+Real delivery must be disabled by default.
+
+A future sprint must not accidentally send outbound messages during normal local testing.
+
+Provider calls should require explicit configuration and explicit user action first.
+
+### Out of Scope Until Explicitly Started
+
+The following remain out of scope until a real delivery sprint starts:
+
+- Production Telegram bot delivery.
+- Production email delivery.
+- Production WhatsApp delivery.
+- Production Slack delivery.
+- Production webhook delivery.
+- Recipient preference management.
+- User subscription rules.
+- Retry scheduler.
+- Escalation policies.
+- AI-generated notification messages.
