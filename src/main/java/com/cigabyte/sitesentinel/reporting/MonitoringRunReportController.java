@@ -7,17 +7,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
+import com.cigabyte.sitesentinel.notification.NotificationEventService;
 
 @Controller
 @RequestMapping("/websites/{websiteId}/monitoring-runs/{runId}/report")
 public class MonitoringRunReportController {
 
     private final MonitoringRunReportService monitoringRunReportService;
+    private final NotificationEventService notificationEventService;
 
     public MonitoringRunReportController(
-            MonitoringRunReportService monitoringRunReportService
+            MonitoringRunReportService monitoringRunReportService,
+            NotificationEventService notificationEventService
     ) {
         this.monitoringRunReportService = monitoringRunReportService;
+        this.notificationEventService = notificationEventService;
     }
 
     @GetMapping
@@ -35,6 +39,7 @@ public class MonitoringRunReportController {
         model.addAttribute("website", report.getWebsite());
         model.addAttribute("monitoringRun", report.getMonitoringRun());
         model.addAttribute("comparison", report.getComparison());
+        model.addAttribute("notificationEvents", notificationEventService.findByMonitoringRunId(runId));
 
         return "reports/monitoring-run-report";
     }

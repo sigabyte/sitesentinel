@@ -4,17 +4,17 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 5 is complete.
+Sprint 6 is complete.
 
-Sprint 6 is not open yet.
+Sprint 7 is not open yet.
 
 The current completed implementation scope is:
 
-Monitoring Run Report Baseline
+Notification Event Baseline
 
 The recommended next sprint scope is:
 
-Notification Event Baseline
+Notification Management Baseline
 
 The current implementation provides a working core assessment lifecycle with an explainable traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
 
@@ -50,7 +50,7 @@ MonitoringRun
 ↓
 Existing Assessment Lifecycle
 
-## Implemented Baseline Through Sprint 4
+## Implemented Baseline Through Sprint 6
 
 - Website registration
 - Website detail view
@@ -129,8 +129,73 @@ Existing Assessment Lifecycle
 - Report navigation from latest scheduled run area
 - Report navigation from latest assessment comparison area
 - Report navigation from comparison detail
+- Notification event persistence
+- Notification event domain model
+- Notification event repository
+- Notification event service
+- Notification event create-if-absent behavior
+- Notification event deduplication key support
+- Notification read/unread status model
+- Notification event generation rules
+- Monitoring run failed notification event generation
+- High-risk trust assessment notification event generation
+- Trust status changed notification event generation
+- Trust score declined notification event generation
+- New risk type detected notification event generation
+- Lifecycle-safe notification generation after completed monitoring runs
+- Lifecycle-safe notification generation after failed monitoring runs
+- Dashboard notification event visibility
+- Website detail notification event visibility
+- Monitoring run detail notification event visibility
+- Monitoring run report notification event visibility
 
 ## Latest Completed Sprint
+
+### Sprint 6 — Notification Event Baseline
+
+Sprint 6 is complete.
+
+Sprint 6 introduced persisted in-application notification events for important monitoring outcomes.
+
+Sprint 6 added:
+
+- Notification event persistence.
+- Notification event domain model.
+- Notification event repository.
+- Notification event service.
+- Notification event create-if-absent behavior.
+- Notification event deduplication key support.
+- Notification read/unread status model.
+- Notification event generation rules.
+- Monitoring run failed notification event generation.
+- High-risk trust assessment notification event generation.
+- Trust status changed notification event generation.
+- Trust score declined notification event generation.
+- New risk type detected notification event generation.
+- Lifecycle-safe notification generation after completed monitoring runs.
+- Lifecycle-safe notification generation after failed monitoring runs.
+- Dashboard notification event visibility.
+- Website detail notification event visibility.
+- Monitoring run detail notification event visibility.
+- Monitoring run report notification event visibility.
+
+Sprint 6 did not add:
+
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- Notification management page.
+- Notification detail page.
+- Mark as read/unread UI controls.
+- User-specific notification preferences.
+- Delivery retry tracking.
+- AI-generated notification summaries.
+- Authentication or user access control.
+
+The recommended next sprint is Sprint 7 — Notification Management Baseline.
+
+## Previous Completed Sprint
 
 ### Sprint 5 — Monitoring Run Report Baseline
 
@@ -259,26 +324,34 @@ It does not create new findings, risks, trust assessments, or evidence.
 
 ## Current Baseline
 
-SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, a historical assessment comparison baseline, a controlled scheduled monitoring baseline, and a browser-based monitoring run report baseline.
+SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, a historical 
+assessment comparison baseline, a controlled scheduled monitoring baseline, 
+a browser-based monitoring run report baseline, and a persisted in-application notification event baseline.
 
-The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, compare completed assessments against previous completed assessments, and execute recurring scheduled scans through the existing monitoring lifecycle.
+The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, 
+generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, 
+compare completed assessments against previous completed assessments, 
+execute recurring scheduled scans through the existing monitoring lifecycle, present monitoring run reports, 
+and persist important monitoring outcomes as notification events.
 
 ## Next Phase
 
 Recommended next scope:
 
-Sprint 6 — Notification Event Baseline
+Sprint 7 — Notification Management Baseline
 
-Sprint 6 should build on the completed scheduled monitoring and report baselines by introducing an internal notification event baseline.
+Sprint 7 should build on the completed notification event baseline by adding in-application notification management.
 
-Recommended Sprint 6 candidate blocks:
+Recommended Sprint 7 candidate blocks:
 
-- Notification event read/write model.
-- Notification event creation after scheduled monitoring completion.
-- Notification event creation after scheduled monitoring failure.
 - Notification event list page.
 - Notification event detail page.
-- Notification event status lifecycle.
-- Notification event QA and sprint closure documentation.
+- Notification filtering by severity.
+- Notification filtering by status.
+- Mark notification as read control.
+- Mark notification as unread control.
+- Dashboard navigation to notification management.
+- Website-level navigation to notification management.
+- Notification management QA and sprint closure documentation.
 
-Sprint 6 should not introduce real email, WhatsApp, Slack, or webhook delivery yet.
+Sprint 7 should not introduce real email, WhatsApp, Slack, or webhook delivery yet.

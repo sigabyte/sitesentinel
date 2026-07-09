@@ -525,3 +525,315 @@ The project is ready to move to Sprint 6.
 Recommended Sprint 6 scope:
 
 Notification Event Baseline
+
+---
+
+# SiteSentinel Architecture Review-6
+
+## Sprint
+
+Sprint 6 Opening
+
+## Proposed Scope
+
+Notification Event Baseline
+
+## Architecture Status Before Sprint 6
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented
+
+## Approved Direction
+
+Sprint 6 should introduce a persisted notification event layer.
+
+The notification event layer should record important monitoring outcomes as structured in-application events.
+
+The approved notification event data path is:
+
+MonitoringRun
+↓
+Existing Persisted Lifecycle Output
+↓
+Existing Assessment Comparison Output
+↓
+NotificationEventGenerationService
+↓
+NotificationEvent
+↓
+Dashboard / Website Detail / Monitoring Run Detail Visibility
+
+## Architecture Intent
+
+Notification events should improve operational visibility without changing the assessment lifecycle.
+
+The system should be able to answer:
+
+- Did an important monitoring event happen?
+- Which website is affected?
+- Which monitoring run caused the event?
+- What type of event occurred?
+- How severe is the event?
+- Has the same event already been recorded?
+
+## Approved Notification Boundary
+
+The notification event layer may:
+
+- Read website metadata.
+- Read monitoring run metadata.
+- Read trust assessments.
+- Read risks.
+- Read findings.
+- Read assessment comparisons.
+- Persist notification event records.
+- Display notification event records.
+
+The notification event layer must not:
+
+- Execute monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify lifecycle output.
+- Modify comparison output.
+- Generate monitoring reports.
+- Deliver external notifications.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+
+## Delivery Boundary Decision
+
+Sprint 6 is not a delivery sprint.
+
+Email, WhatsApp, Slack, and webhook notification delivery remain outside the Sprint 6 boundary.
+
+This decision keeps the current sprint focused on:
+
+- Event persistence.
+- Event generation.
+- Event deduplication.
+- Event visibility.
+
+Delivery can be added later after the event model is stable.
+
+## Initial Event Rule Boundary
+
+Sprint 6 should begin with a small rule set.
+
+Approved baseline event rules:
+
+- Monitoring run failed.
+- High-risk trust assessment detected.
+- Trust status changed.
+- Trust score declined.
+- New risk type detected.
+
+Additional rules should be deferred until the first event model is validated.
+
+## Deduplication Boundary
+
+Sprint 6 should include basic notification event deduplication.
+
+The deduplication goal is to prevent scheduled monitoring from creating repeated identical notifications for the same website, run, or assessment condition.
+
+Advanced notification policy logic remains deferred.
+
+## Deferred Items
+
+Sprint 6 intentionally defers:
+
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhooks.
+- User notification preferences.
+- Recipient management.
+- Notification subscriptions.
+- Delivery retries.
+- Delivery failure tracking.
+- Advanced notification policy engine.
+- AI-generated notification text.
+- Authentication.
+- User access control.
+- PDF export.
+- CSV export.
+
+## Result
+
+Sprint 6 is approved to start with the Notification Event Baseline.
+
+---
+
+# SiteSentinel Architecture Review-6 Closure
+
+## Sprint
+
+Sprint 6 Closure
+
+## Result
+
+APPROVED
+
+## Product Owner
+
+Approved
+
+## Final Scope
+
+Notification Event Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented
+
+## Implementation Status
+
+Sprint 6 introduced a persisted in-application notification event layer.
+
+The notification event layer records important monitoring outcomes as structured events without changing the existing assessment lifecycle.
+
+The implemented notification event data path is:
+
+MonitoringRun
+↓
+Existing Persisted Lifecycle Output
+↓
+Existing Assessment Comparison Output
+↓
+NotificationEventGenerationService
+↓
+NotificationEventService
+↓
+NotificationEvent
+↓
+Dashboard / Website Detail / Monitoring Run Detail / Monitoring Run Report Visibility
+
+## Sprint 6 Completion Notes
+
+Sprint 6 completed the following architecture-aligned implementation areas:
+
+- Notification event persistence.
+- Notification event domain model.
+- Notification event repository.
+- Notification event service.
+- Notification event create-if-absent behavior.
+- Notification event deduplication.
+- Notification read/unread status model.
+- Notification event generation rules.
+- Failed monitoring run notification generation.
+- High-risk trust assessment notification generation.
+- Trust status changed notification generation.
+- Trust score declined notification generation.
+- New risk type detected notification generation.
+- Lifecycle-safe notification generation after completed runs.
+- Lifecycle-safe notification generation after failed runs.
+- Dashboard notification visibility.
+- Website detail notification visibility.
+- Monitoring run detail notification visibility.
+- Monitoring run report notification visibility.
+
+## Preserved Architecture Boundaries
+
+Sprint 6 preserved the existing SiteSentinel architecture boundaries.
+
+The notification event layer may:
+
+- Read website metadata.
+- Read monitoring run metadata.
+- Read trust assessments.
+- Read comparison summaries.
+- Read risk comparison output.
+- Persist notification event records.
+- Deduplicate notification events by deduplication key.
+- Expose notification events to UI pages.
+
+The notification event layer must not:
+
+- Execute monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify lifecycle output.
+- Modify comparison output.
+- Generate monitoring reports.
+- Deliver external notifications.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+
+## Lifecycle Safety Review
+
+Notification event generation is integrated after a monitoring run reaches a completed or failed state.
+
+Notification event generation is intentionally isolated from monitoring lifecycle failure.
+
+If notification event generation fails, the monitoring run result remains completed or failed according to the monitoring lifecycle result.
+
+## Implemented Event Rules
+
+Sprint 6 implemented baseline rules for:
+
+- Monitoring run failed.
+- High-risk trust assessment detected.
+- Trust status changed.
+- Trust score declined.
+- New risk type detected.
+
+## UI Review
+
+Notification events are visible in:
+
+- Dashboard.
+- Website detail.
+- Monitoring run detail.
+- Monitoring run report.
+
+## Deferred Architecture Items
+
+The following remain intentionally deferred:
+
+- Notification management page.
+- Notification detail page.
+- Mark as read/unread UI controls.
+- Notification filtering by severity and status.
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- User notification preferences.
+- Recipient management.
+- Notification subscriptions.
+- Delivery retries.
+- Delivery failure tracking.
+- Advanced notification policy engine.
+- AI-generated notification text.
+- Authentication.
+- User access control.
+
+## Result
+
+Sprint 6 is approved and may be marked complete.
+
+The project is ready to move to Sprint 7.
+
+Recommended Sprint 7 scope:
+
+Notification Management Baseline

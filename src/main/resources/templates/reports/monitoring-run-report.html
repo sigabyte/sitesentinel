@@ -105,6 +105,48 @@
 </section>
 
 <section class="output-section">
+  <h2>Notification events</h2>
+
+  <div th:if="${#lists.isEmpty(notificationEvents)}">
+    <p>No notification events recorded for this monitoring run.</p>
+    <p class="output-note">
+      Notification events are generated from persisted lifecycle output and comparison output.
+      The report only displays existing notification event records.
+    </p>
+  </div>
+
+  <table th:if="${!#lists.isEmpty(notificationEvents)}" class="notification-table">
+    <thead>
+    <tr>
+      <th>Severity</th>
+      <th>Status</th>
+      <th>Type</th>
+      <th>Title</th>
+      <th>Created At</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="event : ${notificationEvents}">
+      <td>
+        <span class="notification-severity"
+              th:classappend="|notification-severity--${#strings.toLowerCase(event.severity)}|"
+              th:text="${event.severity}">
+          HIGH
+        </span>
+      </td>
+      <td th:text="${event.status}">UNREAD</td>
+      <td th:text="${event.eventType}">EVENT_TYPE</td>
+      <td>
+        <strong th:text="${event.title}">Notification title</strong>
+        <p class="output-note" th:text="${event.message}">Notification message</p>
+      </td>
+      <td th:text="${event.createdAt}">Created</td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="output-section">
   <h2>Lifecycle output counts</h2>
 
   <div class="summary-grid">

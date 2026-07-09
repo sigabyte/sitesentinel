@@ -1342,3 +1342,278 @@ Sprint 5 intentionally deferred:
 Sprint 5 is approved and complete.
 
 The project can move to Sprint 6.
+
+---
+
+## Sprint 6 Opening — Notification Event Baseline
+
+### Status
+
+Sprint 6 is opened.
+
+### Approved Sprint 6 Scope
+
+Sprint 6 will introduce the Notification Event Baseline.
+
+The goal of Sprint 6 is to persist important SiteSentinel platform events as in-application notification events and make them visible in the user interface.
+
+Sprint 6 is not a notification delivery sprint.
+
+### Why Sprint 6 Exists
+
+The platform can now:
+
+- Execute monitoring runs.
+- Preserve lifecycle output.
+- Expose traceability.
+- Compare completed assessments.
+- Execute scheduled monitoring.
+- Present monitoring run reports.
+
+The next product need is to make important monitoring outcomes visible as structured notification events.
+
+Notification events should help users notice important changes without reading every run detail manually.
+
+### Approved Notification Event Baseline
+
+Sprint 6 may add:
+
+- Notification event persistence.
+- Notification event domain model.
+- Notification event repository.
+- Notification event service.
+- Notification event generation rules.
+- Notification events linked to websites.
+- Notification events linked to monitoring runs.
+- Notification event visibility on dashboard.
+- Notification event visibility on website detail.
+- Notification event visibility on monitoring run detail or report pages.
+- Basic deduplication to avoid repeated event spam from scheduled monitoring.
+
+### Initial Notification Event Types
+
+Sprint 6 may introduce baseline events for:
+
+- Monitoring run failed.
+- High-risk trust assessment detected.
+- Trust status changed.
+- Trust score declined.
+- New risk type detected.
+
+The initial rule set should remain small and explainable.
+
+### Architecture Boundary
+
+The notification event layer may:
+
+- Read monitoring run metadata.
+- Read website metadata.
+- Read trust assessment output.
+- Read risk output.
+- Read finding output.
+- Read assessment comparison output.
+- Persist notification event records.
+- Display notification event records in the UI.
+
+The notification event layer must not:
+
+- Start monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring runs.
+- Modify evidence.
+- Modify findings.
+- Modify risks.
+- Modify trust assessments.
+- Generate reports.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Generate AI-written notification text.
+
+### Explicitly Deferred From Sprint 6
+
+The following items remain deferred:
+
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- Notification recipient preferences.
+- User-specific notification routing.
+- Authentication and user access control.
+- Notification retry policies.
+- Delivery status tracking.
+- AI-generated notification summaries.
+- Advanced notification policy engine.
+- PDF export.
+- CSV export.
+
+### Initial Sprint 6 Candidate Blocks
+
+Sprint 6 should proceed in controlled blocks:
+
+- Block 6A — Documentation and notification boundary approval.
+- Block 6B — Notification event persistence baseline.
+- Block 6C — Notification event service baseline.
+- Block 6D — Notification event generation rules.
+- Block 6E — Monitoring lifecycle integration.
+- Block 6F — Notification event UI visibility.
+- Block 6G — QA and sprint closure documentation.
+
+### Sprint 6 Decision
+
+Sprint 6 will start with persisted in-application notification events.
+
+The first implementation goal is visibility, traceability preservation, and lifecycle-safe 
+notification event generation.
+
+---
+
+## Sprint 6 Closure — Notification Event Baseline
+
+### Status
+
+Sprint 6 is complete.
+
+### Completed Scope
+
+Sprint 6 introduced the Notification Event Baseline.
+
+The platform can now persist important monitoring outcomes as structured in-application notification events and display them in the user interface.
+
+Sprint 6 did not introduce external notification delivery.
+
+### Completed Blocks
+
+Sprint 6 completed the following blocks:
+
+- Block 6A — Documentation and notification boundary approval.
+- Block 6B — Notification event persistence baseline.
+- Block 6C — Notification event service baseline.
+- Block 6D — Notification event generation rules.
+- Block 6E — Monitoring lifecycle integration.
+- Block 6F — Notification event UI visibility.
+- Block 6G — QA and sprint closure documentation.
+
+### Implemented Capabilities
+
+Sprint 6 added:
+
+- Notification event database table.
+- Notification event domain model.
+- Notification event type enum.
+- Notification event severity enum.
+- Notification event status enum.
+- Notification event repository.
+- Notification event create request model.
+- Notification event service.
+- Notification event create-if-absent behavior.
+- Notification event deduplication key support.
+- Notification read/unread state model.
+- Notification event generation service.
+- Monitoring run failed notification rule.
+- High-risk trust assessment notification rule.
+- Trust status changed notification rule.
+- Trust score declined notification rule.
+- New risk type detected notification rule.
+- Lifecycle-safe notification generation after completed monitoring runs.
+- Lifecycle-safe notification generation after failed monitoring runs.
+- Dashboard notification event visibility.
+- Website detail notification event visibility.
+- Monitoring run detail notification event visibility.
+- Monitoring run report notification event visibility.
+- Basic notification event styling.
+
+### Implemented Notification Event Types
+
+Sprint 6 implemented the following notification event types:
+
+- MONITORING_RUN_FAILED
+- HIGH_RISK_TRUST_ASSESSMENT
+- TRUST_STATUS_CHANGED
+- TRUST_SCORE_DECLINED
+- NEW_RISK_TYPE_DETECTED
+
+### Architecture Boundary Preserved
+
+The notification event layer reads existing persisted lifecycle output and comparison output.
+
+The notification event layer does not:
+
+- Start monitoring runs.
+- Execute scheduled monitoring.
+- Collect evidence.
+- Normalize evidence.
+- Generate findings.
+- Evaluate risks.
+- Generate trust assessments.
+- Modify monitoring runs.
+- Modify evidence.
+- Modify findings.
+- Modify risks.
+- Modify trust assessments.
+- Modify comparison output.
+- Generate monitoring reports.
+- Deliver external notifications.
+- Send emails.
+- Send WhatsApp messages.
+- Send Slack messages.
+- Send webhooks.
+- Generate AI-written notification text.
+
+### Lifecycle Safety
+
+Notification event generation is called after monitoring runs are marked completed or failed.
+
+Notification generation failures are isolated from the monitoring lifecycle.
+
+If notification generation fails, the monitoring run result remains completed or failed according to the core lifecycle result.
+
+### QA Notes
+
+The expected QA result is:
+
+- Existing monitoring lifecycle remains stable.
+- Manual monitoring runs continue to complete or fail as before.
+- Scheduled monitoring continues to execute as before.
+- Notification event generation does not break monitoring execution.
+- Notification events are visible in the dashboard.
+- Notification events are visible on website detail pages.
+- Notification events are visible on monitoring run detail pages.
+- Notification events are visible on monitoring run report pages.
+- Empty notification states are displayed when no events exist.
+- External notification delivery is not present.
+
+### Deferred Items
+
+The following remain deferred:
+
+- Notification management page.
+- Notification detail page.
+- Mark as read/unread UI controls.
+- Notification filtering by severity.
+- Notification filtering by status.
+- Email notification delivery.
+- WhatsApp notification delivery.
+- Slack notification delivery.
+- Webhook delivery.
+- Notification recipient preferences.
+- User-specific notification routing.
+- Delivery retry policies.
+- Delivery status tracking.
+- Advanced notification policy engine.
+- AI-generated notification summaries.
+
+### Sprint 6 Decision
+
+Sprint 6 is complete.
+
+The platform now has a persisted, in-application notification event baseline.
+
+The recommended next sprint scope is Sprint 7 — Notification Management Baseline.

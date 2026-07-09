@@ -104,10 +104,17 @@ Reason: MVP sonrasında her kalite özelliği için
 
 - Add scheduled monitoring runs.
 
+### Completed Sprint 5 Item
+
+- Add browser-based monitoring run reports.
+
+### Completed Sprint 6 Item
+
+- Add notification event baseline.
+
 ### Future Candidate Items
 
 - Add manual re-run controls for specific assessment stages.
-- Add report generation for completed monitoring runs.
 - Add CSV export for assessment output.
 - Add PDF export for completed monitoring reports.
 - Add authentication and basic user access control.
@@ -118,8 +125,17 @@ Reason: MVP sonrasında her kalite özelliği için
 - Add suspicious redirect chain analysis.
 - Add DNS evidence collection.
 - Add TLS evidence collection.
-- Add notification hooks for high-risk trust assessments.
+- Add notification management UI.
+- Add notification event list page.
+- Add notification event detail page.
+- Add mark notification as read/unread controls.
+- Add notification filtering by severity and status.
 - Add notification delivery for scheduled monitoring results.
+- Add email notification delivery.
+- Add WhatsApp notification delivery.
+- Add Slack notification delivery.
+- Add webhook notification delivery.
+- Add user-specific notification preferences.
 - Add scheduled monitoring report generation.
 - Add custom cron expression support for monitoring schedules.
 - Add retry policy dashboard for failed scheduled runs.

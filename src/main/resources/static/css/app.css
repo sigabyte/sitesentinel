@@ -255,3 +255,36 @@ th {
     border-color: #bbbbbb;
     background: #f7f7f7;
 }
+
+.notification-table {
+    margin-top: 12px;
+}
+
+.notification-severity {
+    display: inline-block;
+    border: 1px solid #cccccc;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #fafafa;
+}
+
+.notification-severity--info {
+    border-color: #bbbbbb;
+    background: #f7f7f7;
+}
+
+.notification-severity--warning {
+    border-color: #d6bd75;
+    background: #fff9e8;
+}
+
+.notification-severity--high {
+    border-color: #d99a9a;
+    background: #fff3f3;
+}
+
+.notification-severity--critical {
+    border-color: #bb7777;
+    background: #ffecec;
+}

@@ -17,6 +17,7 @@ import com.cigabyte.sitesentinel.comparison.AssessmentComparisonSummary;
 import com.cigabyte.sitesentinel.scheduling.MonitoringScheduleService;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
 import com.cigabyte.sitesentinel.scheduling.MonitoringSchedule;
+import com.cigabyte.sitesentinel.notification.NotificationEventService;
 
 @Controller
 @RequestMapping("/websites")
@@ -30,6 +31,7 @@ public class WebsiteController {
     private final TrustAssessmentService trustAssessmentService;
     private final AssessmentComparisonService assessmentComparisonService;
     private final MonitoringScheduleService monitoringScheduleService;
+    private final NotificationEventService notificationEventService;
 
 
     public WebsiteController(
@@ -40,7 +42,8 @@ public class WebsiteController {
             RiskService riskService,
             TrustAssessmentService trustAssessmentService,
             AssessmentComparisonService assessmentComparisonService,
-            MonitoringScheduleService monitoringScheduleService
+            MonitoringScheduleService monitoringScheduleService,
+            NotificationEventService notificationEventService
     ) {
         this.websiteService = websiteService;
         this.monitoringRunService = monitoringRunService;
@@ -50,6 +53,7 @@ public class WebsiteController {
         this.trustAssessmentService = trustAssessmentService;
         this.assessmentComparisonService = assessmentComparisonService;
         this.monitoringScheduleService = monitoringScheduleService;
+        this.notificationEventService = notificationEventService;
     }
 
     @GetMapping
@@ -111,6 +115,7 @@ public class WebsiteController {
 
         model.addAttribute("monitoringSchedule", monitoringSchedule);
         model.addAttribute("latestScheduledRun", latestScheduledRun);
+        model.addAttribute("notificationEvents", notificationEventService.findByWebsiteId(id));
 
         model.addAttribute("monitoringRunCount", monitoringRunService.countByWebsiteId(id));
         model.addAttribute("collectedEvidenceCount", evidenceService.countCollectedEvidenceByWebsiteId(id));

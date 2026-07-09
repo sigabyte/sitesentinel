@@ -8,6 +8,8 @@ import com.cigabyte.sitesentinel.website.WebsiteStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.cigabyte.sitesentinel.notification.NotificationEventService;
+
 
 @Controller
 public class DashboardController {
@@ -15,15 +17,18 @@ public class DashboardController {
     private final WebsiteRepository websiteRepository;
     private final MonitoringRunRepository monitoringRunRepository;
     private final TrustAssessmentRepository trustAssessmentRepository;
+    private final NotificationEventService notificationEventService;
 
     public DashboardController(
             WebsiteRepository websiteRepository,
             MonitoringRunRepository monitoringRunRepository,
-            TrustAssessmentRepository trustAssessmentRepository
+            TrustAssessmentRepository trustAssessmentRepository,
+            NotificationEventService notificationEventService
     ) {
         this.websiteRepository = websiteRepository;
         this.monitoringRunRepository = monitoringRunRepository;
         this.trustAssessmentRepository = trustAssessmentRepository;
+        this.notificationEventService = notificationEventService;
     }
 
     @GetMapping("/")
@@ -51,6 +56,8 @@ public class DashboardController {
 
         model.addAttribute("latestMonitoringRuns", monitoringRunRepository.findTop10ByOrderByCreatedAtDesc());
         model.addAttribute("latestTrustAssessments", trustAssessmentRepository.findTop10ByOrderByCreatedAtDesc());
+        model.addAttribute("latestNotificationEvents", notificationEventService.findLatestEvents());
+        model.addAttribute("unreadNotificationEventCount", notificationEventService.countUnreadEvents());
 
         return "dashboard/index";
     }

@@ -19,6 +19,7 @@ import com.cigabyte.sitesentinel.finding.Finding;
 import com.cigabyte.sitesentinel.evidence.CollectedEvidence;
 import com.cigabyte.sitesentinel.evidence.NormalizedEvidence;
 import com.cigabyte.sitesentinel.risk.Risk;
+import com.cigabyte.sitesentinel.notification.NotificationEventService;
 
 
 @Controller
@@ -32,6 +33,7 @@ public class MonitoringRunController {
     private final RiskService riskService;
     private final TrustAssessmentService trustAssessmentService;
     private final MonitoringExecutionService monitoringExecutionService;
+    private final NotificationEventService notificationEventService;
 
     public MonitoringRunController(
             MonitoringRunService monitoringRunService,
@@ -40,7 +42,8 @@ public class MonitoringRunController {
             EvidenceService evidenceService,
             FindingService findingService,
             RiskService riskService,
-            TrustAssessmentService trustAssessmentService
+            TrustAssessmentService trustAssessmentService,
+            NotificationEventService notificationEventService
     ) {
         this.monitoringRunService = monitoringRunService;
         this.monitoringExecutionService = monitoringExecutionService;
@@ -49,6 +52,7 @@ public class MonitoringRunController {
         this.findingService = findingService;
         this.riskService = riskService;
         this.trustAssessmentService = trustAssessmentService;
+        this.notificationEventService = notificationEventService;
     }
 
     @PostMapping
@@ -72,6 +76,7 @@ public class MonitoringRunController {
 
         model.addAttribute("website", websiteService.findById(websiteId));
         model.addAttribute("monitoringRun", monitoringRun);
+        model.addAttribute("notificationEvents", notificationEventService.findByMonitoringRunId(runId));
 
         List<CollectedEvidence> collectedEvidence = evidenceService.findCollectedEvidence(runId);
         List<NormalizedEvidence> normalizedEvidence = evidenceService.findNormalizedEvidence(runId);
