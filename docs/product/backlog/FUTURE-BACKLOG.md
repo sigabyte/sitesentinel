@@ -106,11 +106,11 @@ Reason: MVP sonrasında her kalite özelliği için
 
 ### Completed Sprint 5 Item
 
-- Add browser-based monitoring run reports.
+- Add browser-based monitoring run reports
 
 ### Completed Sprint 6 Item
 
-- Add notification event baseline.
+- Add notification event baseline
 
 ### Completed Sprint 7 Item
 
@@ -124,21 +124,35 @@ Reason: MVP sonrasında her kalite özelliği için
 - Added notification management navigation from dashboard, website detail, 
 monitoring run detail, and monitoring run report pages.
 
+### Completed Sprint 8 Item
+
+- Added notification delivery readiness baseline.
+- Added notification delivery channel enum.
+- Added notification delivery attempt entity.
+- Added notification delivery attempt repository.
+- Added notification delivery attempt service.
+- Added simulated notification delivery attempt recording.
+- Added delivery attempt visibility on notification detail pages.
+- Added TELEGRAM as a modeled delivery channel.
+
 ### Future Candidate Items
 
-- Add notification delivery readiness baseline.
-- Add notification delivery channel enum.
-- Add notification delivery attempt entity.
-- Add notification delivery attempt repository.
-- Add notification delivery attempt service.
-- Add simulated notification delivery attempt recording.
-- Add delivery attempt visibility on notification detail pages.
 - Add notification delivery for scheduled monitoring results.
+- Add automatic notification dispatch.
 - Add email notification delivery.
 - Add WhatsApp notification delivery.
 - Add Slack notification delivery.
 - Add webhook notification delivery.
 - Add user-specific notification preferences.
+- Add recipient management.
+- Add notification subscription rules.
+- Add delivery retry scheduler.
+- Add escalation policies.
+- Add secure environment-variable based delivery secret handling.
+- Add notification delivery settings page.
+- Add Telegram provider health check.
+- Add automatic notification dispatch.
+- Add automatic Telegram dispatch after scheduled monitoring completion.
 
 ### Deferred Technical Hardening
 
@@ -167,11 +181,11 @@ monitoring run detail, and monitoring run report pages.
 
 ---
 
-## Post-Sprint 8 Backlog — Real Notification Delivery
+## Completed Sprint 9 Scope — Controlled Telegram Delivery Provider Baseline
 
 ### Status
 
-Deferred.
+Completed in Sprint 9.
 
 ### Context
 
@@ -181,9 +195,9 @@ The system can now record simulated delivery attempts for notification events.
 
 Real external delivery remains deferred.
 
-### Candidate Future Sprint
+### Completed Sprint
 
-Sprint 9 — Real Notification Delivery Provider Baseline
+Sprint 9 — Controlled Telegram Delivery Provider Baseline
 
 ### Recommended First Provider
 
@@ -199,21 +213,25 @@ Reason:
 - Lower operational complexity than WhatsApp.
 - Better real-time behavior than email for critical monitoring events.
 
-### Future Scope Candidates
+### Completed Sprint 9 Items
 
-A future delivery sprint may add:
+Sprint 9 added:
 
-- Delivery provider interface.
-- Provider configuration model.
-- TELEGRAM bot configuration.
-- Disabled-by-default outbound delivery.
-- Safe test delivery action.
-- Real delivery attempt status update.
-- Provider response capture.
-- Provider failure capture.
-- Delivery failure visibility.
-- External delivery audit trail.
-- Delivery enable/disable switch.
+- Telegram delivery configuration properties.
+- Disabled-by-default Telegram delivery safety switch.
+- Telegram bot token configuration.
+- Telegram chat id configuration.
+- Telegram API base URL configuration.
+- Notification delivery provider interface.
+- Notification delivery provider result model.
+- Telegram notification delivery provider implementation.
+- Telegram sendMessage API call.
+- Telegram delivery attempt success recording.
+- Telegram delivery attempt failure recording.
+- Telegram disabled-provider result recording.
+- Telegram configuration-missing result recording.
+- Manual Telegram test delivery endpoint.
+- Manual Telegram test delivery UI action.
 
 ### Deferred Provider Options
 
@@ -221,9 +239,12 @@ The following provider options remain deferred:
 
 - Email provider.
 - WhatsApp provider.
-- Telegram provider.
 - Slack provider.
 - Webhook provider.
+
+Telegram provider baseline was completed in Sprint 9.
+
+Automatic Telegram dispatch remains deferred.
 
 ### Provider Boundary Requirement
 
@@ -251,11 +272,11 @@ A future sprint must not accidentally send outbound messages during normal local
 
 Provider calls should require explicit configuration and explicit user action first.
 
-### Out of Scope Until Explicitly Started
+### Out of Scope During Sprint 9
 
-The following remain out of scope until a real delivery sprint starts:
+The following remain out of scope during Sprint 9:
 
-- Production Telegram bot delivery.
+- Automatic production Telegram dispatch.
 - Production email delivery.
 - Production WhatsApp delivery.
 - Production Slack delivery.

@@ -104,4 +104,13 @@ public class NotificationEventController {
 
         return "redirect:/notifications/" + notificationEventId;
     }
+
+    @PostMapping("/{notificationEventId}/delivery-attempts/telegram-test")
+    public String recordRealTelegramTestDelivery(
+            @PathVariable UUID notificationEventId
+    ) {
+        notificationDeliveryAttemptService.recordRealTelegramTestDelivery(notificationEventId);
+
+        return "redirect:/notifications/" + notificationEventId;
+    }
 }

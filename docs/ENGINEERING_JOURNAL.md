@@ -6,7 +6,8 @@
 
 Sprint 1 implementation is complete.
 
-The core SiteSentinel assessment lifecycle has been implemented from website registration through real HTTP evidence collection, evidence analysis, risk evaluation, and trust assessment.
+The core SiteSentinel assessment lifecycle has been implemented from website registration through 
+real HTTP evidence collection, evidence analysis, risk evaluation, and trust assessment.
 
 ### Implemented Scope
 
@@ -150,7 +151,8 @@ Completed.
 - Linked normalized evidence to its source collected evidence.
 - Displayed normalized evidence records produced from the same collected evidence source.
 - Displayed findings related through the same collected evidence source.
-- Added repository and service methods to safely load normalized evidence, collected evidence, and related findings within website and monitoring run boundaries.
+- Added repository and service methods to safely load normalized evidence, collected evidence, 
+and related findings within website and monitoring run boundaries.
 
 ### Traceability Coverage
 
@@ -282,7 +284,8 @@ Completed.
 - Displayed source findings behind each risk linked to a trust assessment.
 - Displayed source collected evidence behind each finding.
 - Displayed normalized evidence produced from each collected evidence item.
-- Added repository and service methods to safely load trust assessments and risks within website and monitoring run boundaries.
+- Added repository and service methods to safely load trust assessments and risks within website 
+and monitoring run boundaries.
 
 ### Traceability Coverage
 
@@ -377,7 +380,8 @@ Completed.
 - Added overall traceability status description for QA visibility.
 - Standardized coverage status rendering in the traceability summary table.
 - Added visual distinction for AVAILABLE, PARTIAL, MISSING, and NO_SOURCE_DATA coverage states.
-- Added QA note explaining that PARTIAL or MISSING coverage may be valid for records that are not expected to produce downstream lifecycle output.
+- Added QA note explaining that PARTIAL or MISSING coverage may be valid for records that are not 
+expected to produce downstream lifecycle output.
 
 ### Overall Traceability Status Values
 
@@ -641,7 +645,8 @@ Sprint 3 is complete.
 
 Sprint 3 introduced the first historical comparison baseline for SiteSentinel.
 
-The system can now compare a completed monitoring run against the previous completed monitoring run for the same website.
+The system can now compare a completed monitoring run against the previous completed monitoring 
+run for the same website.
 
 ### Implemented Blocks
 
@@ -746,7 +751,8 @@ Verified behaviours:
 
 ### Outcome
 
-Sprint 3 establishes the historical assessment comparison foundation required before scheduled monitoring, notification, and reporting features.
+Sprint 3 establishes the historical assessment comparison foundation required before scheduled monitoring, 
+notification, and reporting features.
 
 The product can now answer:
 
@@ -787,7 +793,8 @@ Sprint 4 is open.
 
 Sprint 4 introduces the first scheduled monitoring baseline for SiteSentinel.
 
-The goal is to allow websites to be monitored on a recurring schedule while preserving the existing Sprint 1 lifecycle, Sprint 2 traceability layer, and Sprint 3 comparison baseline.
+The goal is to allow websites to be monitored on a recurring schedule while preserving the existing 
+Sprint 1 lifecycle, Sprint 2 traceability layer, and Sprint 3 comparison baseline.
 
 Sprint 4 should not create a new assessment engine.
 
@@ -951,7 +958,8 @@ Sprint 4 is complete.
 
 Sprint 4 introduced the scheduled monitoring baseline for SiteSentinel.
 
-The implementation added website-level recurring monitoring configuration while preserving the existing assessment lifecycle, traceability layer, and comparison baseline.
+The implementation added website-level recurring monitoring configuration while preserving the 
+existing assessment lifecycle, traceability layer, and comparison baseline.
 
 ### Implemented Capabilities
 
@@ -1054,7 +1062,8 @@ Scheduled runs are started by the scheduled monitoring worker.
 Sprint 4 introduced the following scheduled execution safety rules:
 
 - A scheduled run must not start if the same website has an active pending or running monitoring run.
-- A stale pending or running monitoring run may be recovered as failed when it exceeds the configured stale active run timeout.
+- A stale pending or running monitoring run may be recovered as failed when it exceeds the configured stale active 
+run timeout.
 - Scheduled execution must always enter the existing monitoring lifecycle through MonitoringExecutionService.
 - Scheduled execution must not bypass lifecycle persistence.
 - Scheduled execution must not bypass traceability generation.
@@ -1062,13 +1071,15 @@ Sprint 4 introduced the following scheduled execution safety rules:
 
 ### Stale Active Run Recovery
 
-Sprint 4 added stale active run recovery to prevent old pending or running runs from blocking scheduled monitoring forever.
+Sprint 4 added stale active run recovery to prevent old pending or running runs from blocking scheduled 
+monitoring forever.
 
 The configured baseline timeout is:
 
 60 minutes
 
-If an active run is older than the configured timeout, the scheduler marks it as failed with a recovery reason before attempting scheduled execution again.
+If an active run is older than the configured timeout, the scheduler marks it as failed with a recovery reason 
+before attempting scheduled execution again.
 
 This protects the system from development interruptions, process shutdowns, and unfinished monitoring runs.
 
@@ -1137,7 +1148,8 @@ Sprint 5 is open.
 
 Sprint 5 will introduce a read-only monitoring run report baseline.
 
-The report baseline should make existing monitoring output easier to review without changing the assessment lifecycle or generating new assessment data.
+The report baseline should make existing monitoring output easier to review without changing the assessment 
+lifecycle or generating new assessment data.
 
 ### Product Goal
 
@@ -1232,7 +1244,8 @@ Sprint 5 is complete.
 
 Sprint 5 introduced a browser-based, read-only monitoring run report baseline.
 
-The report baseline summarizes existing persisted lifecycle output without changing the assessment lifecycle, traceability layer, comparison layer, or scheduled monitoring baseline.
+The report baseline summarizes existing persisted lifecycle output without changing the assessment lifecycle, 
+traceability layer, comparison layer, or scheduled monitoring baseline.
 
 ### Completed Blocks
 
@@ -1355,7 +1368,8 @@ Sprint 6 is opened.
 
 Sprint 6 will introduce the Notification Event Baseline.
 
-The goal of Sprint 6 is to persist important SiteSentinel platform events as in-application notification events and make them visible in the user interface.
+The goal of Sprint 6 is to persist important SiteSentinel platform events as in-application notification events 
+and make them visible in the user interface.
 
 Sprint 6 is not a notification delivery sprint.
 
@@ -1485,7 +1499,8 @@ Sprint 6 is complete.
 
 Sprint 6 introduced the Notification Event Baseline.
 
-The platform can now persist important monitoring outcomes as structured in-application notification events and display them in the user interface.
+The platform can now persist important monitoring outcomes as structured in-application notification events 
+and display them in the user interface.
 
 Sprint 6 did not introduce external notification delivery.
 
@@ -1573,7 +1588,8 @@ Notification event generation is called after monitoring runs are marked complet
 
 Notification generation failures are isolated from the monitoring lifecycle.
 
-If notification generation fails, the monitoring run result remains completed or failed according to the core lifecycle result.
+If notification generation fails, the monitoring run result remains completed or failed according 
+to the core lifecycle result.
 
 ### QA Notes
 
@@ -1634,7 +1650,8 @@ Sprint 6 created persisted in-application notification events.
 
 Sprint 7 makes those notification events manageable from the UI.
 
-The purpose of Sprint 7 is to allow the user to review, filter, inspect, and update the read/unread state of existing notification events.
+The purpose of Sprint 7 is to allow the user to review, filter, inspect, and update the read/unread 
+state of existing notification events.
 
 Sprint 7 is not a notification delivery sprint.
 
@@ -1771,7 +1788,8 @@ Sprint 7 is complete.
 
 Sprint 7 implemented the Notification Management Baseline.
 
-The platform can now manage persisted in-application notification events created by the Sprint 6 notification event baseline.
+The platform can now manage persisted in-application notification events created by the Sprint 6 
+notification event baseline.
 
 ### Completed Capabilities
 
@@ -1879,7 +1897,8 @@ Sprint 8 is open.
 
 Sprint 8 will introduce the Notification Delivery Readiness Baseline.
 
-The goal is to prepare SiteSentinel for future external notification delivery without sending real external notifications yet.
+The goal is to prepare SiteSentinel for future external notification delivery without sending real external 
+notifications yet.
 
 Sprint 8 will model and record delivery attempts for existing notification events.
 
@@ -2114,3 +2133,251 @@ Sprint 8 is complete.
 
 The system is now ready for a future real delivery sprint, but external delivery remains 
 intentionally deferred.
+
+---
+
+## Sprint 9 Opening — Controlled Telegram Delivery Provider Baseline
+
+### Status
+
+Sprint 9 is open.
+
+### Planned Scope
+
+Controlled Telegram Delivery Provider Baseline.
+
+### Context
+
+Sprint 8 completed the Notification Delivery Readiness Baseline.
+
+The system can now model notification delivery channels, persist delivery attempts, record simulated 
+delivery outcomes, and display delivery attempt history from notification detail pages.
+
+TELEGRAM is already modeled as a supported notification delivery channel.
+
+Sprint 9 will introduce the first real external delivery provider boundary, starting with Telegram.
+
+### Sprint 9 Goal
+
+Sprint 9 will add a controlled Telegram delivery provider baseline.
+
+The purpose is to allow SiteSentinel to send a real Telegram test delivery for an existing notification 
+event only when Telegram delivery is explicitly enabled and correctly configured.
+
+Sprint 9 must remain safe for local development.
+
+Real Telegram delivery must be disabled by default.
+
+### Approved Sprint 9 Data Path
+
+Sprint 9 will extend the Sprint 8 delivery readiness path as follows:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttempt  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationDeliveryProvider  
+↓  
+TelegramNotificationDeliveryProvider  
+↓  
+Telegram Bot API
+
+### Approved Scope
+
+Sprint 9 may add:
+
+- Telegram delivery configuration properties.
+- Telegram delivery enabled/disabled switch.
+- Telegram bot token configuration.
+- Telegram chat id configuration.
+- Delivery provider interface.
+- Telegram delivery provider implementation.
+- Safe real Telegram test delivery action.
+- Delivery attempt statuses for real delivery outcomes.
+- Provider response capture.
+- Provider failure capture.
+- Configuration-missing delivery result handling.
+- Disabled-provider delivery result handling.
+- Telegram delivery result visibility in notification detail pages.
+
+### Explicitly Deferred From Sprint 9
+
+Sprint 9 must not add:
+
+- Automatic notification dispatch.
+- Automatic delivery after scheduled monitoring.
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhook delivery.
+- Retry scheduler.
+- Escalation policies.
+- Recipient management.
+- User notification preferences.
+- Notification subscription rules.
+- Multi-recipient delivery.
+- Production delivery automation.
+- AI-generated notification messages.
+
+### Safety Boundary
+
+Telegram delivery must be disabled by default.
+
+If Telegram delivery is disabled, the system must not call Telegram Bot API.
+
+If Telegram delivery is enabled but required configuration is missing, the system must not call Telegram Bot API.
+
+A failed Telegram API call must be recorded as a delivery attempt failure without breaking the notification detail 
+page or monitoring lifecycle.
+
+### Preserved Architecture Boundaries
+
+Sprint 9 must not change:
+
+- Website monitoring execution.
+- Scheduled monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Assessment comparison generation.
+- Monitoring run report generation.
+- Notification event generation rules.
+- Notification read/unread management.
+
+### Sprint 9 Candidate Blocks
+
+Sprint 9 should proceed in controlled blocks:
+
+- Block 9A — Opening documentation.
+- Block 9B — Telegram delivery configuration baseline.
+- Block 9C — Delivery provider boundary.
+- Block 9D — Real delivery attempt status model.
+- Block 9E — Controlled Telegram test delivery service.
+- Block 9F — Notification detail UI action and result visibility.
+- Block 9G — QA and sprint closure documentation.
+
+### Sprint 9 Decision
+
+Sprint 9 starts with controlled Telegram delivery, not automatic notification dispatch.
+
+The first external provider integration must be explicit, disabled by default, 
+and isolated behind a provider boundary.
+
+---
+
+## Sprint 9 Closure — Controlled Telegram Delivery Provider Baseline
+
+### Status
+
+Sprint 9 is complete.
+
+### Completed Scope
+
+Controlled Telegram Delivery Provider Baseline.
+
+### Summary
+
+Sprint 9 introduced the first controlled real external notification delivery provider boundary for SiteSentinel.
+
+TELEGRAM is now supported as the first real provider baseline.
+
+The implementation remains safe for local development because Telegram delivery is disabled by default and 
+configuration-protected.
+
+### Completed Implementation
+
+Sprint 9 added:
+
+- Telegram delivery configuration properties.
+- Disabled-by-default Telegram delivery safety switch.
+- Telegram bot token configuration.
+- Telegram chat id configuration.
+- Telegram API base URL configuration.
+- Telegram connection timeout configuration.
+- Telegram request timeout configuration.
+- Notification delivery provider interface.
+- Notification delivery provider result model.
+- Telegram notification delivery provider implementation.
+- Real delivery attempt statuses:
+    - SENT
+    - FAILED
+    - CONFIGURATION_MISSING
+    - DISABLED
+- Flyway migration for real delivery attempt statuses.
+- Controlled real Telegram test delivery service method.
+- Telegram Bot API sendMessage integration.
+- Manual Telegram test delivery endpoint.
+- Manual Telegram test delivery button on notification detail pages.
+- Delivery attempt history support for controlled Telegram test delivery results.
+
+### Preserved Sprint 8 Behavior
+
+Sprint 8 simulated delivery actions remain available:
+
+- Simulated successful delivery attempt.
+- Simulated failed delivery attempt.
+- Skipped delivery attempt.
+- Delivery attempt history visibility.
+- Delivery attempt count visibility.
+
+### Safety Behavior Confirmed
+
+Sprint 9 preserves the approved safety boundary:
+
+- When Telegram delivery is disabled, Telegram Bot API is not called.
+- When Telegram delivery is enabled but required configuration is missing, Telegram Bot API is not called.
+- When Telegram API call fails, the failure is recorded as a delivery attempt and does not break notification 
+detail pages.
+- Real Telegram delivery is manual only.
+- No automatic notification dispatch was added.
+
+### QA Result
+
+The following Sprint 9 QA scenarios were validated:
+
+- Application starts successfully after Telegram configuration baseline.
+- Notification detail page opens successfully.
+- Manual Telegram test delivery button appears.
+- Disabled Telegram configuration records DISABLED delivery attempt.
+- Missing Telegram configuration records CONFIGURATION_MISSING delivery attempt.
+- Telegram provider failure records FAILED delivery attempt.
+- Successful Telegram provider call can record SENT delivery attempt when valid configuration is provided.
+- Simulated successful delivery attempt still works.
+- Simulated failed delivery attempt still works.
+- Skipped delivery attempt still works.
+- Delivery attempt history remains visible.
+- Scheduled monitoring behavior remains unchanged.
+- Notification event generation remains unchanged.
+- No automatic external notification delivery occurs.
+
+### Explicitly Not Implemented
+
+Sprint 9 did not add:
+
+- Automatic notification dispatch.
+- Automatic Telegram delivery after scheduled monitoring.
+- Email delivery provider.
+- WhatsApp delivery provider.
+- Slack delivery provider.
+- Webhook delivery provider.
+- Retry scheduler.
+- Recipient management.
+- User notification preferences.
+- Notification subscription rules.
+- Escalation policies.
+- Multi-recipient routing.
+- AI-generated notification messages.
+
+### Architecture Decision
+
+Sprint 9 is accepted as complete.
+
+SiteSentinel now has a controlled first-provider external delivery baseline using Telegram.
+
+The next sprint may build on this by introducing safer configuration handling, delivery settings visibility, 
+provider health checks, recipient management, or automatic dispatch rules, but automatic delivery should not be 
+enabled without an explicit Product Owner decision.

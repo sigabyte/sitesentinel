@@ -1,5 +1,7 @@
 package com.cigabyte.sitesentinel.notification;
 
+import com.cigabyte.sitesentinel.notification.delivery.NotificationDeliveryProvider;
+import com.cigabyte.sitesentinel.notification.delivery.NotificationDeliveryProviderResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,13 +16,16 @@ public class NotificationDeliveryAttemptService {
 
     private final NotificationDeliveryAttemptRepository notificationDeliveryAttemptRepository;
     private final NotificationEventRepository notificationEventRepository;
+    private final List<NotificationDeliveryProvider> notificationDeliveryProviders;
 
     public NotificationDeliveryAttemptService(
             NotificationDeliveryAttemptRepository notificationDeliveryAttemptRepository,
-            NotificationEventRepository notificationEventRepository
+            NotificationEventRepository notificationEventRepository,
+            List<NotificationDeliveryProvider> notificationDeliveryProviders
     ) {
         this.notificationDeliveryAttemptRepository = notificationDeliveryAttemptRepository;
         this.notificationEventRepository = notificationEventRepository;
+        this.notificationDeliveryProviders = notificationDeliveryProviders;
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +101,92 @@ public class NotificationDeliveryAttemptService {
         );
     }
 
+    @Transactional
+    public NotificationDeliveryAttempt recordRealTelegramTestDelivery(UUID notificationEventId) {
+        NotificationEvent notificationEvent = findExistingNotificationEvent(notificationEventId);
+        OffsetDateTime attemptedAt = OffsetDateTime.now();
+
+        NotificationDeliveryProvider provider = findProvider(NotificationDeliveryChannel.TELEGRAM);
+
+        if (provider == null) {
+            return recordAttempt(
+                    notificationEventId,
+                    NotificationDeliveryChannel.TELEGRAM,
+                    NotificationDeliveryAttemptStatus.FAILED,
+                    "Telegram delivery provider is not registered.",
+                    "No NotificationDeliveryProvider bean was found for channel TELEGRAM.",
+                    attemptedAt,
+                    OffsetDateTime.now()
+            );
+        }
+
+        NotificationDeliveryProviderResult providerResult = deliverSafely(provider, notificationEvent);
+
+        return recordAttempt(
+                notificationEventId,
+                NotificationDeliveryChannel.TELEGRAM,
+                resolveAttemptStatus(providerResult),
+                resolveResultMessage(providerResult),
+                resolveTechnicalDetail(providerResult),
+                attemptedAt,
+                OffsetDateTime.now()
+        );
+    }
+
+    private NotificationDeliveryProviderResult deliverSafely(
+            NotificationDeliveryProvider provider,
+            NotificationEvent notificationEvent
+    ) {
+        try {
+            return provider.deliver(notificationEvent);
+        } catch (RuntimeException exception) {
+            return NotificationDeliveryProviderResult.failure(
+                    "Telegram delivery failed before the provider returned a result.",
+                    exception.getClass().getSimpleName() + ": " + safeMessage(exception.getMessage())
+            );
+        }
+    }
+
+    private NotificationDeliveryProvider findProvider(NotificationDeliveryChannel channel) {
+        if (notificationDeliveryProviders == null || notificationDeliveryProviders.isEmpty()) {
+            return null;
+        }
+
+        for (NotificationDeliveryProvider provider : notificationDeliveryProviders) {
+            if (provider.supports(channel)) {
+                return provider;
+            }
+        }
+
+        return null;
+    }
+
+    private NotificationDeliveryAttemptStatus resolveAttemptStatus(
+            NotificationDeliveryProviderResult providerResult
+    ) {
+        if (providerResult == null || providerResult.getAttemptStatus() == null) {
+            return NotificationDeliveryAttemptStatus.FAILED;
+        }
+
+        return providerResult.getAttemptStatus();
+    }
+
+    private String resolveResultMessage(NotificationDeliveryProviderResult providerResult) {
+        if (providerResult == null || providerResult.getResultMessage() == null) {
+            return "Telegram delivery provider returned no result message.";
+        }
+
+        return providerResult.getResultMessage();
+    }
+
+    private String resolveTechnicalDetail(NotificationDeliveryProviderResult providerResult) {
+        if (providerResult == null || providerResult.getTechnicalDetail() == null) {
+            return "Telegram delivery provider returned no technical detail.";
+        }
+
+        return providerResult.getTechnicalDetail();
+    }
+
     private NotificationDeliveryAttempt recordAttempt(
             UUID notificationEventId,
             NotificationDeliveryChannel channel,
@@ -105,17 +196,48 @@ public class NotificationDeliveryAttemptService {
     ) {
         OffsetDateTime now = OffsetDateTime.now();
 
+        return recordAttempt(
+                notificationEventId,
+                channel,
+                status,
+                resultMessage,
+                technicalDetail,
+                now,
+                now
+        );
+    }
+
+    private NotificationDeliveryAttempt recordAttempt(
+            UUID notificationEventId,
+            NotificationDeliveryChannel channel,
+            NotificationDeliveryAttemptStatus status,
+            String resultMessage,
+            String technicalDetail,
+            OffsetDateTime attemptedAt,
+            OffsetDateTime completedAt
+    ) {
         NotificationDeliveryAttempt attempt = new NotificationDeliveryAttempt(
                 notificationEventId,
                 channel,
                 status,
-                now,
-                now,
+                attemptedAt,
+                completedAt,
                 truncateResultMessage(resultMessage),
                 technicalDetail
         );
 
         return notificationDeliveryAttemptRepository.save(attempt);
+    }
+
+    private NotificationEvent findExistingNotificationEvent(UUID notificationEventId) {
+        if (notificationEventId == null) {
+            throw new IllegalArgumentException("Notification event id is required.");
+        }
+
+        return notificationEventRepository.findById(notificationEventId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Notification event not found: " + notificationEventId
+                ));
     }
 
     private void validateNotificationEventExists(UUID notificationEventId) {
@@ -144,6 +266,14 @@ public class NotificationDeliveryAttemptService {
         }
 
         return value.substring(0, MAX_RESULT_MESSAGE_LENGTH);
+    }
+
+    private String safeMessage(String value) {
+        if (value == null || value.isBlank()) {
+            return "No technical message was provided.";
+        }
+
+        return value;
     }
 
     private String formatChannel(NotificationDeliveryChannel channel) {

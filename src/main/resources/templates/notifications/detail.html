@@ -137,12 +137,14 @@
 </section>
 
 <section>
-    <h2>Delivery readiness action</h2>
+    <section>
+        <h2>Delivery action</h2>
 
-    <p>
-        This section records simulated delivery attempts for this notification event.
-        It does not send real email, WhatsApp, Telegram, Slack, webhook, or external API messages.
-    </p>
+        <p>
+            This section records delivery attempts for this notification event.
+            Simulated actions remain internal readiness records.
+            The Telegram test action is controlled, manual, and configuration-protected.
+        </p>
 
     <div class="summary-grid">
         <div class="summary-card">
@@ -213,19 +215,38 @@
             <button type="submit">Record skipped attempt</button>
         </form>
     </div>
+        <div class="traceability-card">
+            <h3>Send real Telegram test delivery</h3>
 
-    <p class="output-note">
-        TELEGRAM is available as a modeled delivery channel.
-        Sprint 8 records readiness attempts only and does not call the Telegram Bot API.
-    </p>
+            <p>
+                This action attempts a real Telegram delivery only when Telegram delivery is enabled
+                and the required Telegram bot token and chat id are configured.
+            </p>
+
+            <form th:action="@{/notifications/{notificationEventId}/delivery-attempts/telegram-test(notificationEventId=${notificationEvent.id})}"
+                  method="post">
+                <button type="submit">Send Telegram test delivery</button>
+            </form>
+
+            <p class="output-note">
+                If Telegram delivery is disabled, this action records a DISABLED attempt and does not call Telegram Bot API.
+                If configuration is missing, it records a CONFIGURATION_MISSING attempt and does not call Telegram Bot API.
+            </p>
+        </div>
+
+        <p class="output-note">
+            TELEGRAM is available as the controlled Sprint 9 first-provider baseline.
+            Real Telegram delivery is manual and disabled by default.
+        </p>
 </section>
 <section>
-    <h2>Delivery attempt history</h2>
+    <section>
+        <h2>Delivery attempt history</h2>
 
-    <p>
-        These records show simulated delivery attempts for this notification event.
-        They are internal readiness records only.
-    </p>
+        <p>
+            These records show simulated delivery attempts and controlled Telegram test delivery attempts
+            for this notification event.
+        </p>
 
     <div th:if="${#lists.isEmpty(deliveryAttempts)}">
         <p class="output-note">

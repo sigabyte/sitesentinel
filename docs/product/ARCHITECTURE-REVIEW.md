@@ -284,7 +284,8 @@ Scheduled Monitoring & Recurring Scan Baseline Implemented
 
 Sprint 4 introduced controlled scheduled monitoring for SiteSentinel.
 
-The scheduled monitoring baseline allows a website to have a recurring monitoring schedule while preserving the existing assessment lifecycle, traceability layer, and comparison baseline.
+The scheduled monitoring baseline allows a website to have a recurring monitoring schedule 
+while preserving the existing assessment lifecycle, traceability layer, and comparison baseline.
 
 The approved scheduled execution path is:
 
@@ -419,7 +420,8 @@ Monitoring Run Report Baseline Implemented
 
 Sprint 5 introduced a read-only monitoring run report baseline.
 
-The report baseline gives users a browser-based report view for an existing monitoring run while preserving the existing lifecycle and traceability boundaries.
+The report baseline gives users a browser-based report view for an existing monitoring 
+run while preserving the existing lifecycle and traceability boundaries.
 
 The approved report data path is:
 
@@ -643,7 +645,8 @@ Additional rules should be deferred until the first event model is validated.
 
 Sprint 6 should include basic notification event deduplication.
 
-The deduplication goal is to prevent scheduled monitoring from creating repeated identical notifications for the same website, run, or assessment condition.
+The deduplication goal is to prevent scheduled monitoring from creating repeated identical 
+notifications for the same website, run, or assessment condition.
 
 Advanced notification policy logic remains deferred.
 
@@ -704,7 +707,8 @@ Notification Event Baseline Implemented
 
 Sprint 6 introduced a persisted in-application notification event layer.
 
-The notification event layer records important monitoring outcomes as structured events without changing the existing assessment lifecycle.
+The notification event layer records important monitoring outcomes as structured events without 
+changing the existing assessment lifecycle.
 
 The implemented notification event data path is:
 
@@ -785,7 +789,8 @@ Notification event generation is integrated after a monitoring run reaches a com
 
 Notification event generation is intentionally isolated from monitoring lifecycle failure.
 
-If notification event generation fails, the monitoring run result remains completed or failed according to the monitoring lifecycle result.
+If notification event generation fails, the monitoring run result remains completed or 
+failed according to the monitoring lifecycle result.
 
 ## Implemented Event Rules
 
@@ -970,7 +975,8 @@ Allowed status transitions:
 - UNREAD to READ.
 - READ to UNREAD.
 
-Sprint 7 must not use read/unread state to change monitoring results, trust assessments, risks, findings, evidence, reports, or comparison output.
+Sprint 7 must not use read/unread state to change monitoring results, trust assessments, 
+risks, findings, evidence, reports, or comparison output.
 
 ## Result
 
@@ -1370,3 +1376,282 @@ The recommended next architectural step is delivery readiness, not real delivery
 
 Sprint 8 may introduce delivery attempt modeling and simulated delivery records while 
 preserving the no-external-delivery boundary.
+
+---
+
+# SiteSentinel Architecture Review-9 Opening
+
+## Sprint
+
+Sprint 9 Opening
+
+## Result
+
+APPROVED TO START
+
+## Product Owner
+
+Approved
+
+## Planned Scope
+
+Controlled Telegram Delivery Provider Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented  
+Notification Management Baseline Implemented  
+Notification Delivery Readiness Baseline Implemented  
+Controlled Telegram Delivery Provider Baseline Opening
+
+## Sprint 9 Architecture Goal
+
+Sprint 9 introduces the first real external notification delivery provider boundary.
+
+The provider selected for the first controlled delivery baseline is TELEGRAM.
+
+Sprint 9 does not introduce automatic dispatch.
+
+Sprint 9 does not turn notification events into automatically delivered outbound messages.
+
+The goal is controlled manual Telegram test delivery for existing notification events.
+
+## Approved Sprint 9 Data Path
+
+The approved Sprint 9 data path is:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttempt  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationDeliveryProvider  
+↓  
+TelegramNotificationDeliveryProvider  
+↓  
+Telegram Bot API
+
+## Provider Boundary Requirement
+
+External delivery must be isolated behind a provider boundary.
+
+Controllers must not call Telegram Bot API directly.
+
+Notification management UI must not call Telegram Bot API directly.
+
+Notification event generation must not call Telegram Bot API directly.
+
+The provider boundary must protect the existing monitoring lifecycle from external delivery failures.
+
+## Approved Sprint 9 Components
+
+Sprint 9 may introduce:
+
+- Telegram delivery configuration properties.
+- Telegram delivery enabled/disabled switch.
+- Telegram bot token configuration.
+- Telegram chat id configuration.
+- NotificationDeliveryProvider interface.
+- TelegramNotificationDeliveryProvider implementation.
+- Real Telegram test delivery action.
+- Real delivery attempt status values.
+- Provider response capture.
+- Provider failure capture.
+- Configuration-missing result handling.
+- Disabled-provider result handling.
+
+## Safety Boundary
+
+Telegram delivery must be disabled by default.
+
+When Telegram delivery is disabled, the system must not call Telegram Bot API.
+
+When required Telegram configuration is missing, the system must not call Telegram Bot API.
+
+Telegram delivery must require explicit user action during Sprint 9.
+
+No automatic external delivery is approved in Sprint 9.
+
+## Preserved Architecture Boundaries
+
+Sprint 9 must preserve the existing SiteSentinel lifecycle.
+
+Sprint 9 must not change:
+
+- Website monitoring execution.
+- Scheduled monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Assessment comparison generation.
+- Monitoring run report generation.
+- Notification event generation.
+- Notification read/unread management.
+
+## Explicitly Deferred
+
+The following remain deferred:
+
+- Automatic notification dispatch.
+- Delivery after scheduled monitoring completion.
+- Email delivery.
+- WhatsApp delivery.
+- Slack delivery.
+- Webhook delivery.
+- Retry scheduler.
+- Escalation policies.
+- Recipient management.
+- User notification preferences.
+- Notification subscriptions.
+- Multi-recipient routing.
+- AI-generated notification messages.
+
+## Architecture Decision
+
+Sprint 9 is approved to start as Controlled Telegram Delivery Provider Baseline.
+
+The first implementation step is Telegram delivery configuration, disabled by default.
+
+---
+
+# SiteSentinel Architecture Review-9 Closure
+
+## Sprint
+
+Sprint 9
+
+## Result
+
+APPROVED AS COMPLETE
+
+## Product Owner
+
+Approved
+
+## Completed Scope
+
+Controlled Telegram Delivery Provider Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented  
+Notification Management Baseline Implemented  
+Notification Delivery Readiness Baseline Implemented  
+Controlled Telegram Delivery Provider Baseline Implemented
+
+## Sprint 9 Architecture Result
+
+Sprint 9 successfully introduced the first external notification delivery provider boundary.
+
+Telegram is now implemented as the controlled first-provider baseline.
+
+The provider is isolated behind the notification delivery provider interface.
+
+Controllers do not call Telegram Bot API directly.
+
+Notification event generation does not call Telegram Bot API directly.
+
+Scheduled monitoring does not call Telegram Bot API directly.
+
+Telegram delivery is available only through explicit manual test action during Sprint 9.
+
+## Implemented Data Path
+
+The implemented Sprint 9 delivery path is:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationDeliveryProvider  
+↓  
+TelegramNotificationDeliveryProvider  
+↓  
+Telegram Bot API  
+↓  
+NotificationDeliveryAttempt
+
+## Implemented Safety Boundary
+
+Telegram delivery remains disabled by default.
+
+When disabled, Telegram Bot API is not called.
+
+When required Telegram configuration is missing, Telegram Bot API is not called.
+
+Provider failures are captured as delivery attempt records.
+
+External delivery failure does not interrupt:
+
+- Monitoring execution.
+- Scheduled monitoring execution.
+- Notification event generation.
+- Notification management UI.
+- Monitoring run report generation.
+
+## Implemented Provider Result Model
+
+The implemented provider result model supports:
+
+- SENT
+- FAILED
+- CONFIGURATION_MISSING
+- DISABLED
+
+These statuses preserve auditability for both real delivery attempts and safe no-call outcomes.
+
+## Preserved Architecture Boundaries
+
+Sprint 9 did not change:
+
+- Website monitoring execution.
+- Scheduled monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Assessment comparison generation.
+- Monitoring run report generation.
+- Notification event generation rules.
+- Notification read/unread management.
+
+## Deferred Architecture Items
+
+The following remain deferred:
+
+- Automatic notification dispatch.
+- Delivery after scheduled monitoring completion.
+- Email delivery provider.
+- WhatsApp delivery provider.
+- Slack delivery provider.
+- Webhook delivery provider.
+- Retry scheduler.
+- Escalation policies.
+- Recipient management.
+- User notification preferences.
+- Notification subscriptions.
+- Multi-recipient routing.
+- AI-generated notification messages.
+
+## Architecture Decision
+
+Sprint 9 is approved as complete.
+
+The controlled Telegram provider baseline is accepted.
+
+Future delivery automation must be introduced only after explicit delivery rules, 
+recipient management, retry behavior, and configuration safety are designed.

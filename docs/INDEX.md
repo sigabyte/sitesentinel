@@ -4,17 +4,17 @@ This index lists the active documentation set for the SiteSentinel project.
 
 ## Current Implementation Status
 
-Sprint 8 is complete.
+## Current Implementation Status
 
-Sprint 9 is not open yet.
+## Current Implementation Status
+
+Sprint 9 is complete.
+
+Sprint 10 is not open yet.
 
 The current completed implementation scope is:
 
-Notification Management Baseline
-
-The current completed implementation scope is:
-
-Notification Delivery Readiness Baseline
+Controlled Telegram Delivery Provider Baseline
 
 The current implementation provides a working core assessment lifecycle with an explainable traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
 
@@ -50,7 +50,7 @@ MonitoringRun
 ↓
 Existing Assessment Lifecycle
 
-## Implemented Baseline Through Sprint 7
+## Implemented Baseline Through Sprint 9
 
 - Website registration
 - Website detail view
@@ -163,6 +163,33 @@ Existing Assessment Lifecycle
 - Monitoring run report navigation to run-filtered notification management
 - Notification event detail links from dashboard, website detail, monitoring run detail, 
 and monitoring run report
+- Notification delivery channel model
+- Notification delivery attempt status model
+- Notification delivery attempt persistence
+- Notification delivery attempt repository
+- Notification delivery attempt service
+- Manual simulated successful delivery attempt action
+- Manual simulated failed delivery attempt action
+- Manual skipped delivery attempt action
+- Delivery attempt count visibility on notification detail pages
+- Delivery attempt history visibility on notification detail pages
+- TELEGRAM modeled as a notification delivery channel
+- Flyway migration support for notification delivery attempts
+- Flyway migration support for TELEGRAM delivery channel constraint
+- Telegram delivery configuration properties
+- Disabled-by-default Telegram delivery safety switch
+- Telegram bot token configuration
+- Telegram chat id configuration
+- Telegram API base URL configuration
+- Telegram delivery provider interface
+- Telegram delivery provider result model
+- Telegram notification delivery provider implementation
+- Real delivery attempt status support
+- Controlled real Telegram test delivery service method
+- Telegram Bot API sendMessage integration
+- Manual Telegram test delivery endpoint
+- Manual Telegram test delivery UI action
+- Delivery attempt history support for SENT, FAILED, CONFIGURATION_MISSING, and DISABLED results
 
 ## Latest Completed Sprint
 
@@ -172,7 +199,7 @@ Sprint 8 is complete.
 
 Sprint 8 prepares the notification layer for future external delivery without sending real external notifications yet.
 
-Sprint 8 may add:
+Sprint 8 added:
 
 - Notification delivery channel enum.
 - Notification delivery attempt status enum.
@@ -201,7 +228,7 @@ No real external notification delivery was implemented.
 
 TELEGRAM is modeled as a delivery channel, but Telegram Bot API delivery remains deferred.
 
-## Latest Completed Sprint
+## Previous Completed Sprint
 
 ### Sprint 7 — Notification Management Baseline
 
@@ -239,7 +266,7 @@ Sprint 7 did not add:
 - AI-generated notification summaries.
 - Authentication or user access control.
 
-The recommended next sprint is Sprint 8 — Notification Delivery Readiness Baseline.
+The current active sprint is Sprint 9 — Controlled Telegram Delivery Provider Baseline.
 
 ## Previous Completed Sprint
 
@@ -445,3 +472,39 @@ Recommended Sprint 9 candidate blocks:
 
 Sprint 9 should start with one controlled provider only. TELEGRAM is the recommended first real delivery provider
 because it is suitable for monitoring alerts and can be isolated behind a provider boundary.
+
+---
+
+## Latest Completed Sprint
+
+### Sprint 9 — Controlled Telegram Delivery Provider Baseline
+
+Sprint 9 introduced the first controlled real external delivery provider boundary for SiteSentinel.
+
+Telegram delivery is now available as a manual, configuration-protected test action from notification detail pages.
+
+Sprint 9 added:
+
+- Telegram delivery configuration.
+- Disabled-by-default real delivery safety.
+- Notification delivery provider interface.
+- Telegram delivery provider implementation.
+- Real delivery attempt statuses.
+- Telegram Bot API sendMessage integration.
+- Manual Telegram test delivery endpoint.
+- Manual Telegram test delivery UI action.
+- Delivery attempt history support for real Telegram outcomes.
+
+Sprint 9 preserved:
+
+- Simulated delivery readiness actions.
+- Notification event generation.
+- Notification management.
+- Scheduled monitoring.
+- Monitoring run reporting.
+- Assessment comparison.
+- Trust assessment lifecycle.
+
+Sprint 9 explicitly did not add automatic notification dispatch.
+
+The recommended next sprint is Sprint 10, to be scoped separately.
