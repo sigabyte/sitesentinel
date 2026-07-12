@@ -2136,139 +2136,6 @@ intentionally deferred.
 
 ---
 
-## Sprint 9 Opening — Controlled Telegram Delivery Provider Baseline
-
-### Status
-
-Sprint 9 is open.
-
-### Planned Scope
-
-Controlled Telegram Delivery Provider Baseline.
-
-### Context
-
-Sprint 8 completed the Notification Delivery Readiness Baseline.
-
-The system can now model notification delivery channels, persist delivery attempts, record simulated 
-delivery outcomes, and display delivery attempt history from notification detail pages.
-
-TELEGRAM is already modeled as a supported notification delivery channel.
-
-Sprint 9 will introduce the first real external delivery provider boundary, starting with Telegram.
-
-### Sprint 9 Goal
-
-Sprint 9 will add a controlled Telegram delivery provider baseline.
-
-The purpose is to allow SiteSentinel to send a real Telegram test delivery for an existing notification 
-event only when Telegram delivery is explicitly enabled and correctly configured.
-
-Sprint 9 must remain safe for local development.
-
-Real Telegram delivery must be disabled by default.
-
-### Approved Sprint 9 Data Path
-
-Sprint 9 will extend the Sprint 8 delivery readiness path as follows:
-
-NotificationEvent  
-↓  
-NotificationDeliveryAttempt  
-↓  
-NotificationDeliveryAttemptService  
-↓  
-NotificationDeliveryProvider  
-↓  
-TelegramNotificationDeliveryProvider  
-↓  
-Telegram Bot API
-
-### Approved Scope
-
-Sprint 9 may add:
-
-- Telegram delivery configuration properties.
-- Telegram delivery enabled/disabled switch.
-- Telegram bot token configuration.
-- Telegram chat id configuration.
-- Delivery provider interface.
-- Telegram delivery provider implementation.
-- Safe real Telegram test delivery action.
-- Delivery attempt statuses for real delivery outcomes.
-- Provider response capture.
-- Provider failure capture.
-- Configuration-missing delivery result handling.
-- Disabled-provider delivery result handling.
-- Telegram delivery result visibility in notification detail pages.
-
-### Explicitly Deferred From Sprint 9
-
-Sprint 9 must not add:
-
-- Automatic notification dispatch.
-- Automatic delivery after scheduled monitoring.
-- Email delivery.
-- WhatsApp delivery.
-- Slack delivery.
-- Webhook delivery.
-- Retry scheduler.
-- Escalation policies.
-- Recipient management.
-- User notification preferences.
-- Notification subscription rules.
-- Multi-recipient delivery.
-- Production delivery automation.
-- AI-generated notification messages.
-
-### Safety Boundary
-
-Telegram delivery must be disabled by default.
-
-If Telegram delivery is disabled, the system must not call Telegram Bot API.
-
-If Telegram delivery is enabled but required configuration is missing, the system must not call Telegram Bot API.
-
-A failed Telegram API call must be recorded as a delivery attempt failure without breaking the notification detail 
-page or monitoring lifecycle.
-
-### Preserved Architecture Boundaries
-
-Sprint 9 must not change:
-
-- Website monitoring execution.
-- Scheduled monitoring execution.
-- Evidence collection.
-- Evidence normalization.
-- Finding generation.
-- Risk evaluation.
-- Trust assessment generation.
-- Assessment comparison generation.
-- Monitoring run report generation.
-- Notification event generation rules.
-- Notification read/unread management.
-
-### Sprint 9 Candidate Blocks
-
-Sprint 9 should proceed in controlled blocks:
-
-- Block 9A — Opening documentation.
-- Block 9B — Telegram delivery configuration baseline.
-- Block 9C — Delivery provider boundary.
-- Block 9D — Real delivery attempt status model.
-- Block 9E — Controlled Telegram test delivery service.
-- Block 9F — Notification detail UI action and result visibility.
-- Block 9G — QA and sprint closure documentation.
-
-### Sprint 9 Decision
-
-Sprint 9 starts with controlled Telegram delivery, not automatic notification dispatch.
-
-The first external provider integration must be explicit, disabled by default, 
-and isolated behind a provider boundary.
-
----
-
 ## Sprint 9 Closure — Controlled Telegram Delivery Provider Baseline
 
 ### Status
@@ -2381,3 +2248,75 @@ SiteSentinel now has a controlled first-provider external delivery baseline usin
 The next sprint may build on this by introducing safer configuration handling, delivery settings visibility, 
 provider health checks, recipient management, or automatic dispatch rules, but automatic delivery should not be 
 enabled without an explicit Product Owner decision.
+
+---
+
+# Sprint 10 — Notification Delivery Operations Baseline
+
+## Status
+
+COMPLETED
+
+## Objective
+
+Introduce an operational management layer for the existing Telegram notification delivery 
+provider while preserving the manual-only delivery model.
+
+## Implemented Components
+
+Sprint 10 introduced:
+
+- Notification delivery provider operational status model.
+- Notification delivery mode model.
+- Provider readiness status model.
+- Telegram configuration readiness service.
+- Provider operational health-check model.
+- Provider health-check persistence.
+- Telegram provider connectivity verification.
+- Notification delivery settings controller.
+- Notification delivery settings page.
+- Manual provider health-check action.
+- Provider health-check history.
+- Secret-safe configuration visibility.
+
+## Modules Added
+
+- Notification delivery operations.
+- Provider readiness evaluation.
+- Provider health-check persistence.
+- Delivery settings UI.
+
+## QA Summary
+
+Verified:
+
+- Provider readiness evaluation.
+- Disabled provider behavior.
+- Missing configuration detection.
+- Telegram connectivity verification.
+- Provider health-check persistence.
+- Manual health-check execution.
+- Secret-safe UI rendering.
+- Separation between provider checks and notification delivery attempts.
+
+## Known Limitation
+
+The current Telegram connectivity verification returns a boolean result.
+
+Detailed classification of timeout, authentication failure, network failure, 
+and provider unavailability is deferred.
+
+## Deferred Items
+
+- Automatic notification dispatch.
+- Recipient management.
+- Delivery retry policies.
+- Additional notification providers.
+- Multi-provider routing.
+
+## Result
+
+Sprint 10 completed successfully.
+
+SiteSentinel now includes a dedicated operational layer for notification delivery providers 
+while preserving the existing notification lifecycle.

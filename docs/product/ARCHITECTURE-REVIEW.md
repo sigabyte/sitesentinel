@@ -1655,3 +1655,66 @@ The controlled Telegram provider baseline is accepted.
 
 Future delivery automation must be introduced only after explicit delivery rules, 
 recipient management, retry behavior, and configuration safety are designed.
+
+---
+
+# Architecture Review — Sprint 10
+
+## Status
+
+APPROVED
+
+## Scope
+
+Notification Delivery Operations Baseline
+
+## Architecture Decision
+
+Sprint 10 extends the notification delivery subsystem with operational visibility while preserving 
+the existing notification delivery boundary.
+
+## New Architectural Components
+
+Sprint 10 introduced:
+
+- Provider operational status model.
+- Provider readiness evaluation.
+- Provider health-check model.
+- Provider health-check persistence.
+- Notification delivery settings UI.
+
+## Preserved Boundaries
+
+Sprint 10 preserves the separation between:
+
+- Notification events.
+- Notification delivery attempts.
+- Provider operational checks.
+- Provider configuration readiness.
+
+Provider health checks remain independent from notification delivery attempts.
+
+## Accepted Constraints
+
+The current architecture intentionally keeps:
+
+- Telegram disabled by default.
+- Manual-only Telegram delivery.
+- Environment-based secret configuration.
+- Secret-safe operational visibility.
+
+## Known Architectural Limitation
+
+Telegram connectivity verification currently returns a boolean result.
+
+Future versions may introduce a richer provider connectivity model capable of distinguishing 
+authentication failures, network failures, timeouts, and provider unavailability.
+
+This limitation is accepted for the Sprint 10 baseline.
+
+## Result
+
+Sprint 10 architecture is approved.
+
+The notification delivery subsystem now provides operational visibility without changing 
+the existing notification lifecycle or delivery boundaries.

@@ -2,21 +2,20 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-## Current Implementation Status
+The current active sprint is Sprint 10 — Notification Delivery Operations Baseline.
 
 ## Current Implementation Status
 
-## Current Implementation Status
+Sprint 10 is complete.
 
-Sprint 9 is complete.
+No new sprint is currently open.
 
-Sprint 10 is not open yet.
+The latest completed implementation scope is:
 
-The current completed implementation scope is:
+Sprint 10 — Notification Delivery Operations Baseline
 
-Controlled Telegram Delivery Provider Baseline
-
-The current implementation provides a working core assessment lifecycle with an explainable traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
+The current implementation provides a working core assessment lifecycle with an explainable 
+traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
 
 Website
 ↓
@@ -191,42 +190,39 @@ and monitoring run report
 - Manual Telegram test delivery UI action
 - Delivery attempt history support for SENT, FAILED, CONFIGURATION_MISSING, and DISABLED results
 
-## Latest Completed Sprint
+## Previous Completed Sprint
 
 ### Sprint 8 — Notification Delivery Readiness Baseline
 
 Sprint 8 is complete.
 
-Sprint 8 prepares the notification layer for future external delivery without sending real external notifications yet.
+Sprint 8 introduced the internal notification delivery readiness model without performing real external delivery.
 
 Sprint 8 added:
 
 - Notification delivery channel enum.
 - Notification delivery attempt status enum.
 - Notification delivery attempt entity.
-- Delivery attempt repository.
-- Delivery attempt service.
-- Simulated delivery attempt recording.
-- Delivery attempt visibility on notification detail pages.
+- Notification delivery attempt repository.
+- Notification delivery attempt service.
+- Simulated successful delivery attempt recording.
+- Simulated failed delivery attempt recording.
+- Skipped delivery attempt recording.
+- Delivery attempt history visibility on notification detail pages.
+- TELEGRAM as a modeled notification delivery channel.
 
-Sprint 8 must not add:
+Sprint 8 did not add:
 
-- Email notification delivery.
-- WhatsApp notification delivery.
-- Slack notification delivery.
-- Webhook delivery.
-- External delivery API calls.
+- Real external notification delivery.
+- Automatic notification dispatch.
 - Recipient management.
-- User-specific notification preferences.
+- User notification preferences.
 - Notification subscription rules.
 - Delivery retry scheduling.
-- AI-generated notification summaries.
+- Escalation policies.
+- AI-generated notification messages.
 
-Sprint 8 implemented internal delivery readiness only.
-
-No real external notification delivery was implemented.
-
-TELEGRAM is modeled as a delivery channel, but Telegram Bot API delivery remains deferred.
+Sprint 8 established the delivery-attempt audit baseline used by Sprint 9.
 
 ## Previous Completed Sprint
 
@@ -265,8 +261,6 @@ Sprint 7 did not add:
 - Delivery retry tracking.
 - AI-generated notification summaries.
 - Authentication or user access control.
-
-The current active sprint is Sprint 9 — Controlled Telegram Delivery Provider Baseline.
 
 ## Previous Completed Sprint
 
@@ -362,7 +356,8 @@ Sprint 5 did not add:
 
 Sprint 4 is complete.
 
-Sprint 4 introduced controlled scheduled monitoring while preserving the existing lifecycle, traceability, and comparison boundaries.
+Sprint 4 introduced controlled scheduled monitoring while preserving the existing lifecycle,
+traceability, and comparison boundaries.
 
 Sprint 4 added:
 
@@ -390,7 +385,8 @@ Sprint 4 did not add:
 
 Sprint 3 is complete.
 
-Sprint 3 added a read-only comparison layer that compares a completed monitoring run against the previous completed monitoring run for the same website.
+Sprint 3 added a read-only comparison layer that compares a completed monitoring run against 
+the previous completed monitoring run for the same website.
 
 The comparison layer answers:
 
@@ -416,7 +412,8 @@ It does not create new findings, risks, trust assessments, or evidence.
 - `docs/architecture/specifications/SSAS-v1.0.md` — SiteSentinel Software Architecture Specification.
 - `docs/architecture/decisions/ADR-0001-product-positioning.md` — Product positioning decision.
 - `docs/architecture/decisions/ADR-0002-agentless-v1.md` — V1 agentless architecture decision.
-- `docs/architecture/decisions/ADR-0003-trust-engine-centered-architecture.md` — Trust-engine-centered architecture decision.
+- `docs/architecture/decisions/ADR-0003-trust-engine-centered-architecture.md` — Trust-engine-centered 
+architecture decision.
 - `docs/architecture/decisions/ADR-0004-ai-analysis-boundary.md` — AI analysis boundary decision.
 
 ### Product
@@ -441,70 +438,139 @@ It does not create new findings, risks, trust assessments, or evidence.
 
 ## Current Baseline
 
-SiteSentinel now has a functional real-scan baseline, an explainable traceability review layer, a historical 
-assessment comparison baseline, a controlled scheduled monitoring baseline, 
-a browser-based monitoring run report baseline, and a persisted in-application notification event baseline.
+Implemented platform capabilities:
 
-The system can register a public website, execute a real HTTP scan, persist collected evidence, normalize evidence, 
-generate findings, evaluate risks, produce a trust assessment, expose traceability across the persisted lifecycle, 
-compare completed assessments against previous completed assessments, 
-execute recurring scheduled scans through the existing monitoring lifecycle, present monitoring run reports,
-and persist important monitoring outcomes as notification events, then manage those notification events through 
-an in-application notification management UI.
+- Website assessment lifecycle.
+- Evidence traceability.
+- Historical assessment comparison.
+- Scheduled monitoring.
+- Monitoring reports.
+- Notification event management.
+- Notification delivery attempts.
+- Controlled Telegram delivery provider.
+- Notification delivery operations.
+
+## Current Repository State
+
+Latest completed sprint:
+
+Sprint 10 — Notification Delivery Operations Baseline
+
+Repository baseline:
+
+Stable
+
+## Next Approved Work
+
+No additional sprint has been approved.
+
+
+The implemented notification delivery path is:
+
+NotificationEvent  
+↓  
+NotificationDeliveryAttemptService  
+↓  
+NotificationDeliveryProvider  
+↓  
+TelegramNotificationDeliveryProvider  
+↓  
+Telegram Bot API  
+↓  
+NotificationDeliveryAttempt
+
+Real Telegram delivery remains:
+
+- Explicitly configuration-protected.
+- Disabled by default.
+- Manual only.
+- Isolated from monitoring execution.
+- Isolated from notification event generation.
+- Auditable through notification delivery attempts.
+
+Automatic notification dispatch has not been implemented.
 
 ## Next Phase
 
-## Recommended next scope:
+Sprint 10 is complete.
 
-Sprint 9 — Real Notification Delivery Provider Baseline
+The next sprint scope has not yet been approved.
 
-Sprint 9 should implement the first controlled real outbound notification delivery provider.
+Recommended next-sprint planning should evaluate:
 
-Recommended Sprint 9 candidate blocks:
+- Notification recipient modeling.
+- Delivery destination ownership.
+- Recipient activation and deactivation.
+- Per-website notification routing.
+- Dispatch rule boundaries.
+- Duplicate delivery prevention.
+- Manual and automatic delivery governance.
+- Retry and failure classification requirements.
 
-- Block 9A — Sprint 9 opening documentation and delivery provider boundary.
-- Block 9B — Delivery provider configuration baseline.
-- Block 9C — Telegram provider interface and disabled-by-default configuration.
-- Block 9D — Safe Telegram test delivery action.
-- Block 9E — Delivery attempt status update from real provider result.
-- Block 9F — Provider failure handling and user-facing result visibility.
-- Block 9G — QA and sprint closure documentation.
-
-Sprint 9 should start with one controlled provider only. TELEGRAM is the recommended first real delivery provider
-because it is suitable for monitoring alerts and can be isolated behind a provider boundary.
+Automatic notification dispatch must not be implemented until recipient, routing, 
+idempotency, retry, and security decisions are documented and approved.
 
 ---
 
 ## Latest Completed Sprint
 
-### Sprint 9 — Controlled Telegram Delivery Provider Baseline
+### Sprint 10 — Notification Delivery Operations Baseline
 
-Sprint 9 introduced the first controlled real external delivery provider boundary for SiteSentinel.
+Sprint 10 is complete.
 
-Telegram delivery is now available as a manual, configuration-protected test action from notification detail pages.
+Sprint 10 introduced:
 
-Sprint 9 added:
+- Notification delivery mode modeling.
+- Provider readiness status modeling.
+- Provider operational status modeling.
+- Telegram configuration readiness evaluation.
+- Separate provider health check persistence.
+- Controlled Telegram Bot API health check.
+- Notification delivery settings page.
+- Manual provider health check action.
+- Latest provider check visibility.
+- Recent provider check history.
+- Secret-safe configuration state visibility.
+- Notification delivery operations navigation.
 
-- Telegram delivery configuration.
-- Disabled-by-default real delivery safety.
-- Notification delivery provider interface.
-- Telegram delivery provider implementation.
-- Real delivery attempt statuses.
-- Telegram Bot API sendMessage integration.
-- Manual Telegram test delivery endpoint.
-- Manual Telegram test delivery UI action.
-- Delivery attempt history support for real Telegram outcomes.
+The completed provider readiness path is:
 
-Sprint 9 preserved:
+TelegramDeliveryProperties  
+↓  
+TelegramDeliveryReadinessService  
+↓  
+NotificationDeliveryProviderStatus  
+↓  
+NotificationDeliverySettingsController  
+↓  
+Notification Delivery Settings UI
 
-- Simulated delivery readiness actions.
-- Notification event generation.
-- Notification management.
-- Scheduled monitoring.
-- Monitoring run reporting.
-- Assessment comparison.
-- Trust assessment lifecycle.
+The completed provider health check path is:
 
-Sprint 9 explicitly did not add automatic notification dispatch.
+Notification Delivery Settings UI  
+↓  
+TelegramProviderHealthCheckService  
+↓  
+TelegramNotificationDeliveryProvider.verifyConnection()  
+↓  
+Telegram Bot API getMe  
+↓  
+NotificationDeliveryProviderCheck
 
-The recommended next sprint is Sprint 10, to be scoped separately.
+Sprint 10 preserved:
+
+- Manual-only real Telegram delivery.
+- Disabled-by-default Telegram configuration.
+- Notification event isolation.
+- Notification delivery attempt isolation.
+- Monitoring lifecycle isolation.
+- Secret-safe UI visibility.
+
+Sprint 10 did not add:
+
+- Automatic notification dispatch.
+- Recipient management.
+- Retry scheduling.
+- Escalation rules.
+- Additional real delivery providers.
+- UI-based secret management.

@@ -35,7 +35,53 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
 
     @Override
     public NotificationDeliveryChannel getChannel() {
+
         return NotificationDeliveryChannel.TELEGRAM;
+    }
+
+    public boolean verifyConnection() {
+        if (!telegramDeliveryProperties.isEnabled()) {
+            return false;
+        }
+
+        if (!telegramDeliveryProperties.hasRequiredConfiguration()) {
+            return false;
+        }
+
+        String telegramApiUrl =
+                telegramDeliveryProperties.getNormalizedApiBaseUrl()
+                        + "/bot"
+                        + telegramDeliveryProperties.getBotToken()
+                        + "/getMe";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(telegramApiUrl))
+                .timeout(Duration.ofSeconds(
+                        telegramDeliveryProperties.getRequestTimeoutSeconds()
+                ))
+                .GET()
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            int statusCode = response.statusCode();
+
+            return statusCode >= 200
+                    && statusCode < 300
+                    && response.body() != null
+                    && response.body().contains("\"ok\":true");
+
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return false;
+
+        } catch (IOException | IllegalArgumentException exception) {
+            return false;
+        }
     }
 
     @Override

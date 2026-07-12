@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notification Delivery Settings</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<h1>Notification Delivery Settings</h1>
+
+<p>
+    <a href="/">Dashboard</a> |
+    <a href="/notifications">Notification Management</a> |
+    <a href="/websites">Websites</a>
+</p>
+
+<section>
+    <h2>Delivery operations baseline</h2>
+
+    <p>
+        This page shows the operational readiness of configured notification
+        delivery providers.
+    </p>
+
+    <p class="output-note">
+        Telegram real delivery remains manual only.
+        Automatic notification dispatch is not enabled.
+    </p>
+</section>
+
+<section th:if="${healthCheckMessage != null}">
+    <h2>Health-check result</h2>
+
+    <div class="traceability-card">
+        <h3 th:text="${healthCheckStatus}">
+            HEALTHY
+        </h3>
+
+        <p th:text="${healthCheckMessage}">
+            Telegram provider connection verified.
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>Telegram provider status</h2>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <span class="summary-card-label">Channel</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.channel}">
+                TELEGRAM
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Provider Status</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.enabled ? 'ENABLED' : 'DISABLED'}">
+                DISABLED
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Readiness</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.readinessStatus}">
+                READY
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Delivery Mode</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.deliveryMode}">
+                MANUAL_ONLY
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Configuration</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.configurationComplete ? 'COMPLETE' : 'INCOMPLETE'}">
+                INCOMPLETE
+            </span>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-card-label">Operationally Ready</span>
+            <span class="summary-card-value"
+                  th:text="${settingsView.providerStatus.ready ? 'YES' : 'NO'}">
+                NO
+            </span>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Configuration readiness</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Configuration Item</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <th>Telegram Bot Token</th>
+            <td th:text="${settingsView.providerStatus.credentialConfigured ? 'CONFIGURED' : 'MISSING'}">
+                MISSING
+            </td>
+        </tr>
+
+        <tr>
+            <th>Telegram Chat ID</th>
+            <td th:text="${settingsView.providerStatus.destinationConfigured ? 'CONFIGURED' : 'MISSING'}">
+                MISSING
+            </td>
+        </tr>
+
+        <tr>
+            <th>Telegram API Base URL</th>
+            <td th:text="${settingsView.providerStatus.endpointConfigured ? 'CONFIGURED' : 'MISSING'}">
+                CONFIGURED
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="output-note">
+        Secret values are not displayed.
+        This page shows only whether required configuration is present.
+    </p>
+</section>
+
+<section>
+    <h2>Provider health check</h2>
+
+    <div class="traceability-card">
+        <h3>Run Telegram health check</h3>
+
+        <p>
+            This action verifies Telegram provider configuration and bot API
+            connectivity.
+        </p>
+
+        <form th:action="@{/notifications/delivery/settings/telegram/health-check}"
+              method="post">
+            <button type="submit">
+                Run Telegram Health Check
+            </button>
+        </form>
+
+        <p class="output-note">
+            This health check does not send a Telegram message,
+            create a notification event, or create a delivery attempt.
+        </p>
+    </div>
+</section>
+
+<section>
+    <h2>Latest health check</h2>
+
+    <div th:if="${!settingsView.hasLatestCheck()}">
+        <p class="output-note">
+            No Telegram provider health check has been recorded yet.
+        </p>
+    </div>
+
+    <table th:if="${settingsView.hasLatestCheck()}">
+        <tbody>
+        <tr>
+            <th>Channel</th>
+            <td th:text="${settingsView.latestCheck.channel}">
+                TELEGRAM
+            </td>
+        </tr>
+
+        <tr>
+            <th>Status</th>
+            <td th:text="${settingsView.latestCheck.status}">
+                HEALTHY
+            </td>
+        </tr>
+
+        <tr>
+            <th>Checked At</th>
+            <td th:text="${settingsView.latestCheck.checkedAt}">
+                2026-07-11T15:00:00
+            </td>
+        </tr>
+
+        <tr>
+            <th>Result Message</th>
+            <td th:text="${settingsView.latestCheck.resultMessage}">
+                Telegram provider connection verified.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Recent health checks</h2>
+
+    <div th:if="${!settingsView.hasRecentChecks()}">
+        <p class="output-note">
+            No provider health-check history is available.
+        </p>
+    </div>
+
+    <table th:if="${settingsView.hasRecentChecks()}">
+        <thead>
+        <tr>
+            <th>Channel</th>
+            <th>Status</th>
+            <th>Checked At</th>
+            <th>Result Message</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="providerCheck : ${settingsView.recentChecks}">
+            <td th:text="${providerCheck.channel}">
+                TELEGRAM
+            </td>
+
+            <td th:text="${providerCheck.status}">
+                HEALTHY
+            </td>
+
+            <td th:text="${providerCheck.checkedAt}">
+                2026-07-11T15:00:00
+            </td>
+
+            <td th:text="${providerCheck.resultMessage}">
+                Telegram provider connection verified.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="output-note">
+        Provider health checks are ordered from newest to oldest.
+        A maximum of ten records is displayed.
+    </p>
+</section>
+
+</body>
+</html>

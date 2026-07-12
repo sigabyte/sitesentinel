@@ -1,288 +1,223 @@
 # SiteSentinel Future Backlog
 
-Ideas intentionally excluded from the current sprint.
+This document contains ideas and capabilities that are intentionally deferred from the current implementation baseline.
 
-These ideas have not been approved for implementation.
-
-They exist to preserve valuable ideas without disrupting sprint discipline.
+Items listed here are not approved for implementation unless they are explicitly selected during a future sprint opening.
 
 ---
 
-## FB-001
+## Architecture and Platform
 
-Presentation Layer abstraction
+### FB-001 — Presentation Layer Abstraction
 
-Description
+Evaluate whether reporting should become part of a broader presentation layer.
 
-Evaluate whether Reporting should eventually become part of a broader Presentation Layer.
-
-Reason
-Current architecture is sufficient.
-No implementation required for Sprint 0.
-Review after core architecture is complete.
-
----
-
-## FB-002
-
-Monitoring Context
+### FB-002 — Monitoring Context
 
 Evaluate whether Website should eventually own a Monitoring Context aggregate.
 
-Reason
+### FB-003 — Reusable Engineering Framework
 
-Current association model is sufficient.
+Generalize the engineering methodology developed during SiteSentinel into a reusable framework.
 
-No architectural need exists during Sprint 0.
+### FB-004 — Monitoring Lifecycle Diagram
 
-## FB-003
+Add a single end-to-end monitoring lifecycle reference diagram to the architecture documentation.
 
-Engineering Framework
+### FB-005 — Architecture Overview Diagram
 
-Generalize the engineering methodology developed during SiteSentinel into a
-reusable framework.
+Add a high-level single-page architecture overview diagram.
 
-Reason
+### FB-006 — API Versioning Strategy
 
-Outside current product scope.
+Define API versioning, backward compatibility, and deprecation rules.
 
-Evaluate after SiteSentinel MVP.
+### FB-007 — Workspace-Oriented UI Architecture
 
-# FB-004
+Evaluate a workspace-oriented user interface after the MVP UI structure is stable.
 
-Monitoring Lifecycle Diagram
+### FB-008 — Quality Attribute Metrics
 
-Reason: SSAS sonunda platformun uçtan uca yaşam döngüsünü gösteren tek bir
-referans diyagramı eklenebilir. Bu, mevcut mimariyi değiştirmez; yalnızca 
-dokümantasyonun okunabilirliğini artırır.
+Define measurable targets for response time, uptime, monitoring throughput, and failure rates.
 
-## FB-005
+---
 
-Architecture Overview Diagram
+## Notification Dispatch
 
-Reason: Sprint 0 tamamlandıktan sonra, SSAS'ın ilk sayfalarına tüm mimariyi tek sayfada gösteren
-üst düzey bir referans diyagramı eklenebilir. Bu yalnızca dokümantasyonun okunabilirliğini artırır; 
-mimariyi değiştirmez.
+- Design automatic notification dispatch rules.
+- Define eligible notification event types.
+- Define severity-based dispatch rules.
+- Define manual and automatic dispatch boundaries.
+- Define scheduled monitoring dispatch behavior.
+- Prevent duplicate automatic dispatch.
+- Define delivery idempotency requirements.
+- Add automatic Telegram delivery after monitoring completion.
 
-## FB-006
+---
 
-API Versioning Strategy
+## Recipient Management
 
-Reason: API versiyonlama, geriye dönük uyumluluk ve deprecations için ayrı bir mimari kararı gerektirebilir. 
-Sprint 0 kapsamında gerekli değil; API tasarımı olgunlaştıktan sonra değerlendirilmeli.
+- Add notification recipient domain model.
+- Add recipient creation and management.
+- Add active and inactive recipient status.
+- Add channel-specific recipient destinations.
+- Add per-website recipient configuration.
+- Add organization-level recipient configuration.
+- Add recipient validation.
+- Add recipient audit history.
+- Add multi-recipient routing.
 
-## FB-007
+---
 
-Workspace-Oriented UI Information Architecture
+## Notification Subscriptions and Preferences
 
-Suggested Review: After MVP UI Design
-
-## FB-008
-
-Quality Attribute Metrics
-
-Reason: MVP sonrasında her kalite özelliği için 
-ölçülebilir hedefler (ör. response time, uptime, scan throughput) tanımlanabilir.
-
-## Added After Sprint 1
-
-### Completed in Sprint 2
-
-- Added finding detail pages with linked source evidence.
-- Added normalized evidence detail pages with source collected evidence and related findings.
-- Added collected evidence detail pages with normalized evidence and related findings.
-- Added risk detail pages with linked findings and source evidence chain.
-- Added trust assessment detail pages with linked risks, findings, and evidence chain.
-- Added monitoring run traceability summary dashboard.
-- Added traceability QA status and coverage labels.
-
-### Completed Sprint 3 Item
-
-- Add scan history comparison per website.
-
-### Completed Sprint 4 Item
-
-- Add scheduled monitoring runs.
-
-### Completed Sprint 5 Item
-
-- Add browser-based monitoring run reports
-
-### Completed Sprint 6 Item
-
-- Add notification event baseline
-
-### Completed Sprint 7 Item
-
-- Added notification management UI.
-- Added notification event list page.
-- Added notification event detail page.
-- Added mark notification as read/unread controls.
-- Added notification filtering by severity and status.
-- Added website-context notification filtering.
-- Added monitoring-run-context notification filtering.
-- Added notification management navigation from dashboard, website detail, 
-monitoring run detail, and monitoring run report pages.
-
-### Completed Sprint 8 Item
-
-- Added notification delivery readiness baseline.
-- Added notification delivery channel enum.
-- Added notification delivery attempt entity.
-- Added notification delivery attempt repository.
-- Added notification delivery attempt service.
-- Added simulated notification delivery attempt recording.
-- Added delivery attempt visibility on notification detail pages.
-- Added TELEGRAM as a modeled delivery channel.
-
-### Future Candidate Items
-
-- Add notification delivery for scheduled monitoring results.
-- Add automatic notification dispatch.
-- Add email notification delivery.
-- Add WhatsApp notification delivery.
-- Add Slack notification delivery.
-- Add webhook notification delivery.
-- Add user-specific notification preferences.
-- Add recipient management.
 - Add notification subscription rules.
-- Add delivery retry scheduler.
+- Add event-type subscriptions.
+- Add severity preferences.
+- Add website-level subscriptions.
+- Add channel preferences.
+- Add quiet hours.
+- Add user-specific notification preferences.
+
+---
+
+## Delivery Retry and Failure Handling
+
+- Add delivery retry policy.
+- Classify retryable and non-retryable failures.
+- Add exponential backoff.
+- Add maximum retry count.
+- Add dead-letter handling.
+- Add manual retry action.
+- Add retry audit visibility.
+- Add delivery queue support.
+
+---
+
+## Provider Connectivity Improvements
+
+- Replace boolean Telegram connectivity verification with a typed result.
+- Distinguish authentication failure.
+- Distinguish connection timeout.
+- Distinguish DNS or network failure.
+- Distinguish Telegram API unavailability.
+- Distinguish unexpected provider responses.
+- Capture safe provider response metadata without exposing secrets.
+
+---
+
+## Additional Delivery Providers
+
+- Add Email delivery provider.
+- Add WhatsApp delivery provider.
+- Add Slack delivery provider.
+- Add Webhook delivery provider.
+- Add provider-specific configuration readiness checks.
+- Add provider-specific health checks.
+- Add provider-specific operational settings visibility.
+
+---
+
+## Advanced Delivery Operations
+
+- Add delivery analytics.
+- Add provider success-rate reporting.
+- Add provider latency reporting.
+- Add failure trend reporting.
+- Add provider rate limiting.
+- Add provider circuit breaker.
+- Add provider failover.
+- Add multi-provider routing.
 - Add escalation policies.
-- Add secure environment-variable based delivery secret handling.
-- Add notification delivery settings page.
-- Add Telegram provider health check.
-- Add automatic notification dispatch.
-- Add automatic Telegram dispatch after scheduled monitoring completion.
 
-### Deferred Technical Hardening
+---
 
-- Add database-level uniqueness constraints for idempotent assessment outputs.
-- Add service tests for website registration and scanner safety validation.
-- Add integration tests for monitoring run execution lifecycle.
-- Add test coverage for evidence analysis, risk evaluation, and trust evaluation engines.
+## Secret Management
+
+- Evaluate external secret manager integration.
+- Define production secret rotation.
+- Define provider credential revocation procedures.
+- Preserve environment-based configuration until a dedicated secret management design is approved.
+- Prevent application UI from exposing or editing raw provider secrets.
+
+---
+
+## Monitoring and Scanner Hardening
+
 - Add request rate limiting.
 - Add scan queue controls.
 - Add configurable maximum response body size.
 - Add structured logging for scan execution.
-- Add error classification for scanner failures.
+- Add scanner failure classification.
 - Add retry policy for transient scanner failures.
-- Add monitoring run cancellation support.
-- Add operational metrics for scan duration and failure rate.
-
-### Deferred Product Decisions
-
-- Define user-facing trust score explanation format.
-- Define report format for business users.
-- Define severity language for non-technical users.
-- Decide whether trust assessments should be produced when no risks are found.
-- Decide whether optional resource failures should affect trust score.
-- Decide how historical trend changes should be displayed.
-- Decide which scanner signals should be visible by default and which should be advanced-only.
+- Add monitoring run cancellation.
+- Add operational metrics for scan duration and failure rates.
+- Add advanced scanner signals.
+- Add external reputation integrations.
 
 ---
 
-## Completed Sprint 9 Scope — Controlled Telegram Delivery Provider Baseline
+## Data Integrity and Idempotency
 
-### Status
+- Add database-level uniqueness constraints for idempotent assessment outputs.
+- Define notification dispatch idempotency.
+- Define delivery attempt uniqueness rules.
+- Define duplicate provider check handling.
 
-Completed in Sprint 9.
+---
 
-### Context
+## Testing
 
-Sprint 8 implemented Notification Delivery Readiness Baseline.
+- Add service tests for website registration.
+- Add scanner safety validation tests.
+- Add monitoring lifecycle integration tests.
+- Add evidence analysis tests.
+- Add risk evaluation tests.
+- Add trust evaluation tests.
+- Add notification event generation tests.
+- Add notification delivery provider tests.
+- Add Telegram readiness and health-check tests.
+- Add notification delivery operations integration tests.
 
-The system can now record simulated delivery attempts for notification events.
+---
 
-Real external delivery remains deferred.
+## Reporting and Export
 
-### Completed Sprint
+- Add PDF report export.
+- Add CSV export.
+- Define business-user report format.
+- Add report versioning.
+- Add report approval workflow.
+- Evaluate AI-assisted report summaries.
 
-Sprint 9 — Controlled Telegram Delivery Provider Baseline
+---
 
-### Recommended First Provider
+## Security and Access Control
 
-TELEGRAM is the recommended first real outbound delivery provider.
+- Add authentication.
+- Add user accounts.
+- Add role-based access control.
+- Add organization-level access boundaries.
+- Add audit logging for privileged actions.
+- Define provider secret access rules.
 
-Reason:
+---
 
-- Suitable for monitoring alerts.
-- Fast to test.
-- Does not require email deliverability setup.
-- Can be isolated through a provider interface.
-- Useful for personal/admin alerting.
-- Lower operational complexity than WhatsApp.
-- Better real-time behavior than email for critical monitoring events.
+## UI Maintenance
 
-### Completed Sprint 9 Items
+- Clean redundant nested section elements in the notification detail template.
+- Standardize notification operations navigation.
+- Evaluate shared Thymeleaf fragments for repeated navigation.
+- Evaluate shared summary-card components.
+- Define non-technical severity language.
+- Define user-facing trust score explanations.
 
-Sprint 9 added:
+---
 
-- Telegram delivery configuration properties.
-- Disabled-by-default Telegram delivery safety switch.
-- Telegram bot token configuration.
-- Telegram chat id configuration.
-- Telegram API base URL configuration.
-- Notification delivery provider interface.
-- Notification delivery provider result model.
-- Telegram notification delivery provider implementation.
-- Telegram sendMessage API call.
-- Telegram delivery attempt success recording.
-- Telegram delivery attempt failure recording.
-- Telegram disabled-provider result recording.
-- Telegram configuration-missing result recording.
-- Manual Telegram test delivery endpoint.
-- Manual Telegram test delivery UI action.
+## Product Decisions
 
-### Deferred Provider Options
-
-The following provider options remain deferred:
-
-- Email provider.
-- WhatsApp provider.
-- Slack provider.
-- Webhook provider.
-
-Telegram provider baseline was completed in Sprint 9.
-
-Automatic Telegram dispatch remains deferred.
-
-### Provider Boundary Requirement
-
-Real provider integration must be isolated behind a provider boundary.
-
-Controllers and notification services must not call external APIs directly.
-
-Expected future pattern:
-
-NotificationEvent  
-↓  
-NotificationDeliveryAttemptService  
-↓  
-NotificationDeliveryProvider  
-↓  
-Specific Provider Adapter  
-↓  
-External API
-
-### Safety Boundary
-
-Real delivery must be disabled by default.
-
-A future sprint must not accidentally send outbound messages during normal local testing.
-
-Provider calls should require explicit configuration and explicit user action first.
-
-### Out of Scope During Sprint 9
-
-The following remain out of scope during Sprint 9:
-
-- Automatic production Telegram dispatch.
-- Production email delivery.
-- Production WhatsApp delivery.
-- Production Slack delivery.
-- Production webhook delivery.
-- Recipient preference management.
-- User subscription rules.
-- Retry scheduler.
-- Escalation policies.
-- AI-generated notification messages.
+- Decide whether trust assessments should be produced when no risks are found.
+- Decide whether optional resource failures should affect trust score.
+- Decide how historical trend changes should be displayed.
+- Decide which scanner signals should be visible by default.
+- Define future AI-assisted analysis boundaries.
