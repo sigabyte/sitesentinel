@@ -69,6 +69,13 @@ public class NotificationDeliverySettingsController {
                 result.getMessage()
         );
 
+        if (result.getHttpStatusCode() != null) {
+            redirectAttributes.addFlashAttribute(
+                    "healthCheckHttpStatusCode",
+                    result.getHttpStatusCode()
+            );
+        }
+
         return "redirect:/notifications/delivery/settings";
     }
 }

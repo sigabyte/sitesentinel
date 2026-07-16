@@ -54,34 +54,60 @@ public class TelegramProviderHealthCheckService {
             );
         }
 
-        // Telegram API validation will be added below.
+        TelegramConnectivityResult connectivityResult =
+                provider.checkConnectivity();
 
-        boolean connected = provider.verifyConnection();
+        NotificationDeliveryProviderCheckStatus checkStatus =
+                mapConnectivityStatus(
+                        connectivityResult.getStatus()
+                );
 
-        if (connected) {
+        String resultMessage =
+                connectivityResult.getDiagnosticMessage();
 
-            checkService.record(
-                    status.getChannel(),
-                    NotificationDeliveryProviderCheckStatus.HEALTHY,
-                    "Telegram provider connection verified."
-            );
-
-            return new TelegramProviderHealthCheckResult(
-                    NotificationDeliveryProviderCheckStatus.HEALTHY,
-                    "Telegram provider connection verified."
-            );
-        }
+        Integer httpStatusCode =
+                connectivityResult.getHttpStatusCode();
 
         checkService.record(
                 status.getChannel(),
-                NotificationDeliveryProviderCheckStatus.AUTHENTICATION_FAILED,
-                "Telegram provider authentication failed."
+                checkStatus,
+                resultMessage,
+                httpStatusCode
         );
 
         return new TelegramProviderHealthCheckResult(
-                NotificationDeliveryProviderCheckStatus.AUTHENTICATION_FAILED,
-                "Telegram provider authentication failed."
+                checkStatus,
+                resultMessage,
+                httpStatusCode
         );
+    }
+
+    private NotificationDeliveryProviderCheckStatus mapConnectivityStatus(
+            TelegramConnectivityStatus connectivityStatus
+    ) {
+        return switch (connectivityStatus) {
+
+            case HEALTHY ->
+                    NotificationDeliveryProviderCheckStatus.HEALTHY;
+
+            case AUTHENTICATION_FAILED ->
+                    NotificationDeliveryProviderCheckStatus.AUTHENTICATION_FAILED;
+
+            case TIMEOUT ->
+                    NotificationDeliveryProviderCheckStatus.TIMEOUT;
+
+            case UNREACHABLE ->
+                    NotificationDeliveryProviderCheckStatus.UNREACHABLE;
+
+            case INVALID_RESPONSE ->
+                    NotificationDeliveryProviderCheckStatus.INVALID_RESPONSE;
+
+            case INTERRUPTED ->
+                    NotificationDeliveryProviderCheckStatus.INTERRUPTED;
+
+            case FAILED ->
+                    NotificationDeliveryProviderCheckStatus.FAILED;
+        };
     }
 
 }

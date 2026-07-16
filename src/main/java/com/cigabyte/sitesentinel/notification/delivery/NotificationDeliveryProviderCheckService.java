@@ -25,12 +25,28 @@ public class NotificationDeliveryProviderCheckService {
             NotificationDeliveryProviderCheckStatus status,
             String resultMessage
     ) {
+        return record(
+                channel,
+                status,
+                resultMessage,
+                null
+        );
+    }
+
+    @Transactional
+    public NotificationDeliveryProviderCheck record(
+            NotificationDeliveryChannel channel,
+            NotificationDeliveryProviderCheckStatus status,
+            String resultMessage,
+            Integer httpStatusCode
+    ) {
         NotificationDeliveryProviderCheck check =
                 new NotificationDeliveryProviderCheck(
                         channel,
                         status,
                         OffsetDateTime.now(),
-                        resultMessage
+                        resultMessage,
+                        httpStatusCode
                 );
 
         return repository.save(check);

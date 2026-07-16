@@ -2,17 +2,17 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-The current active sprint is Sprint 10 — Notification Delivery Operations Baseline.
+No sprint is currently open.
 
 ## Current Implementation Status
 
-Sprint 10 is complete.
-
-No new sprint is currently open.
+Sprint 11 is complete.
 
 The latest completed implementation scope is:
 
-Sprint 10 — Notification Delivery Operations Baseline
+Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
+
+No new sprint has been approved.
 
 The current implementation provides a working core assessment lifecycle with an explainable 
 traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
@@ -49,7 +49,7 @@ MonitoringRun
 ↓
 Existing Assessment Lifecycle
 
-## Implemented Baseline Through Sprint 9
+## Implemented Baseline Through Sprint 11
 
 - Website registration
 - Website detail view
@@ -189,6 +189,47 @@ and monitoring run report
 - Manual Telegram test delivery endpoint
 - Manual Telegram test delivery UI action
 - Delivery attempt history support for SENT, FAILED, CONFIGURATION_MISSING, and DISABLED results
+- Notification delivery provider operational status model
+- Notification delivery mode model
+- Provider readiness status model
+- Telegram configuration readiness evaluation
+- Separate provider health-check persistence
+- Notification delivery settings page
+- Manual Telegram provider health-check action
+- Latest provider-check visibility
+- Recent provider-check history
+- Secret-safe provider configuration visibility
+- Telegram Bot API client interface
+- JDK Telegram Bot API client implementation
+- Separation of Telegram provider behavior from HTTP communication
+- Typed Telegram connectivity status model
+- Typed Telegram connectivity result model
+- Authentication failure classification
+- Timeout classification
+- DNS and network failure classification
+- Invalid provider response classification
+- Interrupted request classification
+- Generic provider failure classification
+- Typed provider health-check status persistence
+- Optional provider-check HTTP status persistence
+- Provider-check HTTP status visibility
+- Structured Telegram JSON response parsing
+- Secret-safe connectivity diagnostics
+- Secret-safe delivery failure diagnostics
+- Raw Telegram response body persistence prevention
+- Telegram notification message length hardening
+- Unicode-safe Telegram message truncation
+- Provider-check diagnostic length hardening
+- Provider-check HTTP status validation
+- Telegram provider unit-test baseline
+- Telegram HTTP request construction tests
+- Telegram timeout and interruption tests
+- Provider health-check service tests
+- Provider-check persistence tests
+- Provider-check repository ordering integration tests
+- Disabled-by-default readiness tests
+- Manual provider diagnostic QA for disabled, missing configuration, healthy, 
+authentication failure, timeout, unreachable, and invalid-response states
 
 ## Previous Completed Sprint
 
@@ -445,25 +486,61 @@ Implemented platform capabilities:
 - Historical assessment comparison.
 - Scheduled monitoring.
 - Monitoring reports.
-- Notification event management.
-- Notification delivery attempts.
+- Notification event generation and management.
+- Notification delivery attempt audit baseline.
 - Controlled Telegram delivery provider.
 - Notification delivery operations.
+- Typed Telegram provider diagnostics.
+- Provider health-check persistence.
+- Secret-safe provider operational visibility.
+- Automated Telegram provider safety verification.
+
+Telegram delivery remains:
+
+- Disabled by default.
+- Configuration-protected.
+- Manual only.
+- Isolated from monitoring execution.
+- Isolated from notification event generation.
+- Auditable through notification delivery attempts.
+- Operationally observable through separate provider-check records.
+- Independent from provider health-check records.
+- Protected by typed and secret-safe provider diagnostics.
 
 ## Current Repository State
 
 Latest completed sprint:
 
-Sprint 10 — Notification Delivery Operations Baseline
+Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
 
 Repository baseline:
 
-Stable
+Stable after Sprint 11 final regression and documentation closure.
 
 ## Next Approved Work
 
 No additional sprint has been approved.
 
+Future sprint planning may evaluate:
+
+- Notification recipient domain modeling.
+- Delivery destination ownership.
+- Recipient activation and deactivation.
+- Per-website notification routing.
+- Notification subscription rules.
+- Automatic dispatch governance.
+- Delivery idempotency.
+- Duplicate automatic delivery prevention.
+- Retry and backoff policies.
+- Delivery queue boundaries.
+- Dead-letter handling.
+- Provider rate limiting.
+- Provider analytics.
+- Additional delivery providers.
+- External secret manager integration.
+
+Automatic notification dispatch must not be implemented until recipient ownership, routing,
+idempotency, retry, duplicate prevention, and security boundaries are documented and explicitly approved.
 
 The implemented notification delivery path is:
 
@@ -479,40 +556,133 @@ Telegram Bot API
 ↓  
 NotificationDeliveryAttempt
 
-Real Telegram delivery remains:
-
-- Explicitly configuration-protected.
-- Disabled by default.
-- Manual only.
-- Isolated from monitoring execution.
-- Isolated from notification event generation.
-- Auditable through notification delivery attempts.
-
-Automatic notification dispatch has not been implemented.
-
 ## Next Phase
 
-Sprint 10 is complete.
+Sprint 11 is complete.
 
 The next sprint scope has not yet been approved.
 
-Recommended next-sprint planning should evaluate:
-
-- Notification recipient modeling.
-- Delivery destination ownership.
-- Recipient activation and deactivation.
-- Per-website notification routing.
-- Dispatch rule boundaries.
-- Duplicate delivery prevention.
-- Manual and automatic delivery governance.
-- Retry and failure classification requirements.
-
-Automatic notification dispatch must not be implemented until recipient, routing, 
-idempotency, retry, and security decisions are documented and approved.
+Automatic notification dispatch remains outside the approved implementation boundary.
 
 ---
 
 ## Latest Completed Sprint
+
+### Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
+
+Sprint 11 is complete.
+
+Sprint 11 replaced the boolean Telegram connectivity baseline with a typed, testable,
+secret-safe provider diagnostic model.
+
+Sprint 11 introduced:
+
+- `TelegramBotApiClient` HTTP communication boundary.
+- `JdkTelegramBotApiClient` implementation.
+- Typed `TelegramConnectivityStatus`.
+- Typed `TelegramConnectivityResult`.
+- Authentication failure classification.
+- Timeout classification.
+- DNS and network failure classification.
+- Invalid provider response classification.
+- Interrupted request classification.
+- Generic provider failure classification.
+- Typed provider-check persistence.
+- Nullable provider-check HTTP status.
+- Provider-check HTTP status visibility.
+- Structured Telegram JSON response parsing.
+- Secret-safe provider diagnostics.
+- Secret-safe delivery failure diagnostics.
+- Telegram message length hardening.
+- Unicode-safe message truncation.
+- Provider-check diagnostic normalization.
+- Provider-check repository ordering integration tests.
+- Automated Telegram provider safety tests.
+
+The completed provider connectivity path is:
+
+TelegramProviderHealthCheckService  
+↓  
+TelegramNotificationDeliveryProvider.checkConnectivity()  
+↓  
+TelegramBotApiClient.getMe()  
+↓  
+TelegramConnectivityResult  
+↓  
+NotificationDeliveryProviderCheckService  
+↓  
+NotificationDeliveryProviderCheck
+
+Supported connectivity statuses:
+
+- HEALTHY
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+- INTERRUPTED
+- FAILED
+
+Supported provider-check statuses:
+
+- HEALTHY
+- DISABLED
+- CONFIGURATION_MISSING
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+- INTERRUPTED
+- FAILED
+
+Sprint 11 added the following Flyway migrations:
+
+- `V14__expand_notification_delivery_provider_check_statuses.sql`
+- `V15__add_http_status_code_to_notification_delivery_provider_checks.sql`
+
+Final verification:
+
+- Tests run: 74
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Maven test: BUILD SUCCESS
+- Maven compile: BUILD SUCCESS
+
+Manual QA verified:
+
+- DISABLED
+- CONFIGURATION_MISSING
+- HEALTHY
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+
+Sprint 11 preserved:
+
+- Disabled-by-default Telegram configuration.
+- Manual-only Telegram delivery.
+- Environment-based secret configuration.
+- Notification event isolation.
+- Notification delivery attempt isolation.
+- Provider health-check isolation.
+- Monitoring lifecycle isolation.
+- Scheduled monitoring isolation.
+- Secret-safe operational visibility.
+
+Sprint 11 did not add:
+
+- Automatic notification dispatch.
+- Recipient management.
+- Notification subscriptions.
+- Retry scheduling.
+- Delivery queue.
+- Additional real delivery providers.
+- UI-based secret editing.
+- AI-generated notification messages.
+
+## Previous Completed Sprint
 
 ### Sprint 10 — Notification Delivery Operations Baseline
 
@@ -545,17 +715,10 @@ NotificationDeliverySettingsController
 ↓  
 Notification Delivery Settings UI
 
-The completed provider health check path is:
+Sprint 10 originally used a boolean Telegram connectivity verification boundary.
 
-Notification Delivery Settings UI  
-↓  
-TelegramProviderHealthCheckService  
-↓  
-TelegramNotificationDeliveryProvider.verifyConnection()  
-↓  
-Telegram Bot API getMe  
-↓  
-NotificationDeliveryProviderCheck
+Sprint 11 replaced that boundary with the typed provider health-check path documented
+in the latest completed sprint section above.
 
 Sprint 10 preserved:
 

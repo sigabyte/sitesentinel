@@ -1718,3 +1718,454 @@ Sprint 10 architecture is approved.
 
 The notification delivery subsystem now provides operational visibility without changing 
 the existing notification lifecycle or delivery boundaries.
+
+---
+
+# SiteSentinel Architecture Review-11 Closure
+
+## Sprint
+
+Sprint 11 Closure
+
+## Result
+
+APPROVED AS COMPLETE
+
+## Product Owner
+
+Approved
+
+## Completed Scope
+
+Notification Provider Diagnostics and Safety Verification Baseline
+
+## Architecture Status
+
+Core Assessment Lifecycle Implemented  
+Explainable Traceability Layer Implemented  
+Assessment History & Change Comparison Baseline Implemented  
+Scheduled Monitoring & Recurring Scan Baseline Implemented  
+Monitoring Run Report Baseline Implemented  
+Notification Event Baseline Implemented  
+Notification Management Baseline Implemented  
+Notification Delivery Readiness Baseline Implemented  
+Controlled Telegram Delivery Provider Baseline Implemented  
+Notification Delivery Operations Baseline Implemented  
+Notification Provider Diagnostics and Safety Verification Baseline Implemented
+
+## Architecture Decision
+
+Sprint 11 replaces the Sprint 10 boolean Telegram connectivity baseline with a typed, testable,
+secret-safe provider diagnostic architecture.
+
+The implementation preserves the existing provider operations and manual delivery boundaries.
+
+Sprint 11 does not introduce automatic notification delivery.
+
+## Approved Telegram Client Boundary
+
+Sprint 11 introduced a dedicated Telegram Bot API client boundary:
+
+TelegramNotificationDeliveryProvider  
+↓  
+TelegramBotApiClient  
+↓  
+JdkTelegramBotApiClient  
+↓  
+Telegram Bot API
+
+The responsibilities are separated as follows.
+
+### TelegramNotificationDeliveryProvider
+
+Responsible for:
+
+- Provider readiness enforcement.
+- Notification delivery business behavior.
+- Telegram notification message construction.
+- Delivery result classification.
+- Connectivity response classification.
+- Connectivity exception classification.
+- Secret-safe diagnostic output.
+
+### TelegramBotApiClient
+
+Defines the Telegram HTTP communication contract:
+
+- `getMe`
+- `sendMessage`
+
+### JdkTelegramBotApiClient
+
+Responsible for:
+
+- Telegram API endpoint construction.
+- HTTP request construction.
+- Form encoding.
+- Connect timeout enforcement.
+- Request timeout enforcement.
+- HTTP response capture.
+- Technical exception wrapping.
+- Thread interruption restoration.
+
+Controllers, notification event generation, monitoring execution, and scheduled monitoring do not call
+Telegram Bot API directly.
+
+## Typed Connectivity Architecture
+
+Sprint 11 introduced:
+
+- `TelegramConnectivityStatus`
+- `TelegramConnectivityResult`
+
+Approved connectivity statuses:
+
+- HEALTHY
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+- INTERRUPTED
+- FAILED
+
+The typed result may include:
+
+- Connectivity status.
+- Secret-safe diagnostic message.
+- Optional HTTP status code.
+
+It must not include:
+
+- Bot token.
+- Chat ID.
+- Full Telegram endpoint.
+- Request body.
+- Notification payload.
+- Raw Telegram response body.
+- Client exception message.
+- Exception cause detail.
+
+## Readiness and Connectivity Separation
+
+Provider readiness and provider connectivity remain separate architectural concerns.
+
+Readiness represents configuration state:
+
+- DISABLED
+- CONFIGURATION_MISSING
+- READY
+
+Connectivity represents the result of an external provider check:
+
+- HEALTHY
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+- INTERRUPTED
+- FAILED
+
+A provider may be `READY` because required configuration is present while still failing connectivity.
+
+`READY` must not be interpreted as `HEALTHY`.
+
+`HEALTHY` requires a successful provider health check.
+
+## Approved Health-Check Path
+
+The completed Sprint 11 health-check path is:
+
+Notification Delivery Settings UI  
+↓  
+TelegramProviderHealthCheckService  
+↓  
+TelegramNotificationDeliveryProvider.checkConnectivity()  
+↓  
+TelegramBotApiClient.getMe()  
+↓  
+TelegramConnectivityResult  
+↓  
+NotificationDeliveryProviderCheckService  
+↓  
+NotificationDeliveryProviderCheck
+
+The Sprint 10 legacy boolean method:
+
+`verifyConnection()`
+
+has been removed.
+
+## Provider Health-Check Persistence
+
+Sprint 11 expanded provider-check persistence.
+
+Approved provider-check statuses:
+
+- HEALTHY
+- DISABLED
+- CONFIGURATION_MISSING
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+- INTERRUPTED
+- FAILED
+
+Sprint 11 added:
+
+- Typed provider-check status persistence.
+- Optional HTTP status persistence.
+- Latest provider-check visibility.
+- Recent provider-check history.
+- Safe diagnostic visibility.
+
+The provider-check model remains independent from notification delivery attempts.
+
+A health check must not create:
+
+- Notification events.
+- Notification delivery attempts.
+- Telegram messages.
+
+## Database Changes
+
+Sprint 11 added:
+
+- `V14__expand_notification_delivery_provider_check_statuses.sql`
+- `V15__add_http_status_code_to_notification_delivery_provider_checks.sql`
+
+V14 expands the provider-check status constraint.
+
+V15 adds nullable:
+
+`http_status_code`
+
+The approved HTTP status constraint is:
+
+- NULL when no HTTP response exists.
+- Otherwise between 100 and 599.
+
+Examples:
+
+- HEALTHY → normally 200
+- AUTHENTICATION_FAILED → normally 401 or 403
+- INVALID_RESPONSE → actual response status
+- TIMEOUT → NULL
+- UNREACHABLE → NULL
+- INTERRUPTED → NULL
+- DISABLED → NULL
+- CONFIGURATION_MISSING → NULL
+
+## Structured Provider Response Boundary
+
+Telegram response success is determined through structured JSON parsing.
+
+A response is successful only when:
+
+- HTTP status is 2xx.
+- Response body is valid JSON.
+- JSON root is an object.
+- Top-level `ok` field is boolean `true`.
+
+The following are not successful responses:
+
+- `ok=false`
+- `"ok":"true"`
+- Nested `ok=true`
+- Text containing an embedded `"ok":true` marker
+- Malformed JSON
+- Empty response body
+- Array-root JSON
+- Non-2xx response with `ok=true`
+
+Substring-based and regex-based success classification are no longer part of the approved architecture.
+
+## Secret-Safety Boundary
+
+Sprint 11 strengthened the provider diagnostic boundary.
+
+Persisted and UI-visible diagnostics must not expose:
+
+- Telegram bot token.
+- Telegram chat ID.
+- Full Telegram API URL.
+- Request body.
+- Notification content.
+- Raw provider response body.
+- Client exception message.
+- Exception cause details.
+
+Allowed operational metadata includes:
+
+- Typed provider status.
+- Controlled diagnostic message.
+- Optional HTTP status code.
+- Provider-check timestamp.
+
+Provider secrets remain environment-based.
+
+The application UI must not display or edit raw provider credentials.
+
+## Message Boundary Decision
+
+Telegram notification messages use a maximum application-level length of 3900 UTF-16 code units.
+
+The truncation suffix is included within this limit.
+
+The implementation must not split Unicode surrogate pairs.
+
+Provider-check diagnostic messages use a maximum application-level length of 500 UTF-16 code units,
+remaining within the database `VARCHAR(500)` boundary.
+
+Diagnostic normalization includes:
+
+- Safe default for null or blank values.
+- Trimming surrounding whitespace.
+- Unicode-safe truncation.
+- Truncation suffix included within the database limit.
+
+## Automated Verification Architecture
+
+Sprint 11 established a provider-focused automated test baseline.
+
+Coverage includes:
+
+- Disabled provider short-circuit.
+- Missing configuration short-circuit.
+- Readiness evaluation.
+- Disabled-by-default configuration.
+- Manual-only delivery mode.
+- Typed connectivity classification.
+- Authentication failure.
+- Timeout.
+- DNS and network failure.
+- Invalid provider response.
+- Thread interruption.
+- Generic provider failure.
+- Health-check status mapping.
+- Provider-check persistence.
+- HTTP status propagation.
+- Provider-check entity validation.
+- Provider-check query ordering.
+- Telegram `getMe` request construction.
+- Telegram `sendMessage` request construction.
+- Form encoding.
+- Request timeout behavior.
+- Interrupt status restoration.
+- Structured JSON response parsing.
+- Delivery result classification.
+- Secret-safe diagnostics.
+- Telegram message length boundaries.
+- Unicode-safe truncation.
+
+Final verification result:
+
+- Tests run: 74
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Maven test: BUILD SUCCESS
+- Maven compile: BUILD SUCCESS
+
+## Manual QA Architecture Verification
+
+The following operational states were manually verified:
+
+- DISABLED
+- CONFIGURATION_MISSING
+- HEALTHY
+- AUTHENTICATION_FAILED
+- TIMEOUT
+- UNREACHABLE
+- INVALID_RESPONSE
+
+Manual QA confirmed:
+
+- Health checks do not send Telegram messages.
+- Health checks do not create notification delivery attempts.
+- Health checks do not create notification events.
+- HTTP status is recorded only when an HTTP response exists.
+- Raw provider responses are not persisted.
+- Provider secrets are not displayed.
+- Provider secrets are not included in diagnostic messages.
+- Telegram remains disabled by default.
+- Telegram delivery remains manual only.
+
+## Preserved Architecture Boundaries
+
+Sprint 11 did not change:
+
+- Website monitoring execution.
+- Scheduled monitoring execution.
+- Evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment generation.
+- Assessment comparison.
+- Monitoring run reporting.
+- Notification event generation.
+- Notification read/unread management.
+- Notification delivery attempt ownership.
+
+Sprint 11 did not add:
+
+- Automatic notification dispatch.
+- Automatic delivery after monitoring completion.
+- Recipient management.
+- Notification subscriptions.
+- User-specific routing.
+- Retry scheduling.
+- Delivery queue.
+- Escalation rules.
+- Additional external delivery providers.
+- UI-based secret management.
+- AI-generated notification messages.
+
+## Resolved Sprint 10 Limitation
+
+Sprint 10 accepted boolean Telegram connectivity verification as a baseline limitation.
+
+Sprint 11 resolves that limitation through:
+
+- Typed connectivity statuses.
+- Typed connectivity results.
+- Safe diagnostic messages.
+- Optional HTTP status metadata.
+- Automated classification tests.
+- Operational UI visibility.
+
+The historical Sprint 10 limitation remains documented as the state accepted at Sprint 10 closure.
+
+## Deferred Architecture Items
+
+The following remain deferred:
+
+- Recipient domain model.
+- Delivery destination ownership.
+- Automatic dispatch rules.
+- Delivery idempotency.
+- Duplicate automatic delivery prevention.
+- Retry and exponential backoff.
+- Dead-letter handling.
+- Delivery queue.
+- Provider rate limiting.
+- Provider latency metrics.
+- Provider success-rate analytics.
+- Circuit breaker.
+- Provider failover.
+- Multi-provider routing.
+- Additional delivery providers.
+- External secret manager integration.
+- Authentication.
+- Role-based access control.
+
+## Architecture Result
+
+Sprint 11 is approved and closed.
+
+SiteSentinel now has a typed, testable, auditable, and secret-safe Telegram provider diagnostic architecture.
+
+The provider remains disabled by default and manual only.
+
+Automatic notification dispatch remains outside the approved architecture boundary.

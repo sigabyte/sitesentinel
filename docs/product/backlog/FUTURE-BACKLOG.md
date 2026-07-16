@@ -94,15 +94,13 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 
 ---
 
-## Provider Connectivity Improvements
+## Provider Diagnostics Follow-Up
 
-- Replace boolean Telegram connectivity verification with a typed result.
-- Distinguish authentication failure.
-- Distinguish connection timeout.
-- Distinguish DNS or network failure.
-- Distinguish Telegram API unavailability.
-- Distinguish unexpected provider responses.
-- Capture safe provider response metadata without exposing secrets.
+- Distinguish provider-side rate limiting from generic provider failure.
+- Distinguish Telegram or upstream provider unavailability from generic provider failure.
+- Evaluate whether additional safe provider error metadata should be stored beyond HTTP status code.
+- Define provider health-check freshness and stale-result rules.
+- Define provider health-check execution rate limits.
 
 ---
 
@@ -175,9 +173,7 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 - Add risk evaluation tests.
 - Add trust evaluation tests.
 - Add notification event generation tests.
-- Add notification delivery provider tests.
-- Add Telegram readiness and health-check tests.
-- Add notification delivery operations integration tests.
+- Add notification delivery settings controller and template integration tests.
 
 ---
 

@@ -4,33 +4,28 @@ import com.cigabyte.sitesentinel.notification.NotificationDeliveryChannel;
 import com.cigabyte.sitesentinel.notification.NotificationEvent;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.UnknownHostException;
+import java.net.http.HttpTimeoutException;
 
 @Component
 public class TelegramNotificationDeliveryProvider implements NotificationDeliveryProvider {
 
     private static final int TELEGRAM_MESSAGE_MAX_LENGTH = 3900;
-
-    private static final int TECHNICAL_DETAIL_MAX_LENGTH = 2000;
+    private static final String TELEGRAM_MESSAGE_TRUNCATION_SUFFIX =
+            "...";
 
     private final TelegramDeliveryProperties telegramDeliveryProperties;
 
-    private final HttpClient httpClient;
+    private final TelegramBotApiClient telegramBotApiClient;
 
     public TelegramNotificationDeliveryProvider(
-            TelegramDeliveryProperties telegramDeliveryProperties
+            TelegramDeliveryProperties telegramDeliveryProperties,
+            TelegramBotApiClient telegramBotApiClient
     ) {
         this.telegramDeliveryProperties = telegramDeliveryProperties;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(telegramDeliveryProperties.getConnectTimeoutSeconds()))
-                .build();
+        this.telegramBotApiClient = telegramBotApiClient;
     }
 
     @Override
@@ -39,49 +34,129 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
         return NotificationDeliveryChannel.TELEGRAM;
     }
 
-    public boolean verifyConnection() {
+    public TelegramConnectivityResult checkConnectivity() {
         if (!telegramDeliveryProperties.isEnabled()) {
-            return false;
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.FAILED,
+                    "Connectivity check was not executed because the Telegram provider is disabled.",
+                    null
+            );
         }
 
         if (!telegramDeliveryProperties.hasRequiredConfiguration()) {
-            return false;
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.FAILED,
+                    "Connectivity check was not executed because the Telegram provider configuration is incomplete.",
+                    null
+            );
         }
-
-        String telegramApiUrl =
-                telegramDeliveryProperties.getNormalizedApiBaseUrl()
-                        + "/bot"
-                        + telegramDeliveryProperties.getBotToken()
-                        + "/getMe";
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(telegramApiUrl))
-                .timeout(Duration.ofSeconds(
-                        telegramDeliveryProperties.getRequestTimeoutSeconds()
-                ))
-                .GET()
-                .build();
 
         try {
-            HttpResponse<String> response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
+            TelegramBotApiResponse response =
+                    telegramBotApiClient.getMe();
+
+            return classifyConnectivityResponse(response);
+
+        } catch (TelegramBotApiClientException exception) {
+            return classifyConnectivityException(exception);
+        }
+    }
+
+    private TelegramConnectivityResult classifyConnectivityResponse(
+            TelegramBotApiResponse response
+    ) {
+        int statusCode = response.getStatusCode();
+
+        if (response.indicatesSuccessfulTelegramResponse()) {
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.HEALTHY,
+                    "Telegram Bot API connectivity was verified.",
+                    statusCode
             );
+        }
 
-            int statusCode = response.statusCode();
+        if (indicatesAuthenticationFailure(response)) {
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.AUTHENTICATION_FAILED,
+                    "Telegram Bot API rejected the configured bot credentials.",
+                    statusCode
+            );
+        }
 
-            return statusCode >= 200
-                    && statusCode < 300
-                    && response.body() != null
-                    && response.body().contains("\"ok\":true");
+        if (response.hasSuccessfulStatusCode()) {
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.INVALID_RESPONSE,
+                    "Telegram Bot API returned an unexpected successful response.",
+                    statusCode
+            );
+        }
 
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            return false;
+        return new TelegramConnectivityResult(
+                TelegramConnectivityStatus.FAILED,
+                "Telegram Bot API returned an unsuccessful HTTP status.",
+                statusCode
+        );
+    }
 
-        } catch (IOException | IllegalArgumentException exception) {
+    private boolean indicatesAuthenticationFailure(
+            TelegramBotApiResponse response
+    ) {
+        int statusCode = response.getStatusCode();
+
+        if (statusCode == 401 || statusCode == 403) {
+            return true;
+        }
+
+        String responseBody = response.getBody();
+
+        if (responseBody == null || responseBody.isBlank()) {
             return false;
         }
+
+        String normalizedResponseBody =
+                responseBody.toLowerCase();
+
+        return normalizedResponseBody.contains("\"error_code\":401")
+                || normalizedResponseBody.contains("unauthorized");
+    }
+
+    private TelegramConnectivityResult classifyConnectivityException(
+            TelegramBotApiClientException exception
+    ) {
+        Throwable cause = exception.getCause();
+
+        if (cause instanceof InterruptedException) {
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.INTERRUPTED,
+                    "Telegram Bot API connectivity check was interrupted.",
+                    null
+            );
+        }
+
+        if (cause instanceof HttpTimeoutException) {
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.TIMEOUT,
+                    "Telegram Bot API connectivity check timed out.",
+                    null
+            );
+        }
+
+        if (cause instanceof ConnectException
+                || cause instanceof UnknownHostException
+                || cause instanceof NoRouteToHostException) {
+
+            return new TelegramConnectivityResult(
+                    TelegramConnectivityStatus.UNREACHABLE,
+                    "Telegram Bot API could not be reached.",
+                    null
+            );
+        }
+
+        return new TelegramConnectivityResult(
+                TelegramConnectivityStatus.FAILED,
+                "Telegram Bot API connectivity check failed.",
+                null
+        );
     }
 
     @Override
@@ -105,33 +180,26 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
         return sendTelegramMessage(notificationEvent);
     }
 
-    private NotificationDeliveryProviderResult sendTelegramMessage(NotificationEvent notificationEvent) {
-        String telegramApiUrl = telegramDeliveryProperties.getNormalizedApiBaseUrl()
-                + "/bot"
-                + telegramDeliveryProperties.getBotToken()
-                + "/sendMessage";
-
-        String requestBody = buildRequestBody(notificationEvent);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(telegramApiUrl))
-                .timeout(Duration.ofSeconds(telegramDeliveryProperties.getRequestTimeoutSeconds()))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+    private NotificationDeliveryProviderResult sendTelegramMessage(
+            NotificationEvent notificationEvent
+    ) {
+        String message = buildTelegramMessage(notificationEvent);
 
         try {
-            HttpResponse<String> response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+            TelegramBotApiResponse response =
+                    telegramBotApiClient.sendMessage(
+                            telegramDeliveryProperties.getChatId(),
+                            message
+                    );
 
-            int statusCode = response.statusCode();
+            int statusCode = response.getStatusCode();
 
-            if (statusCode >= 200 && statusCode < 300) {
+            if (response.indicatesSuccessfulTelegramResponse()) {
                 return NotificationDeliveryProviderResult.success(
                         "Telegram message was sent successfully.",
-                        "Telegram Bot API accepted the sendMessage request. HTTP status=" + statusCode + "."
+                        "Telegram Bot API accepted the sendMessage request. HTTP status="
+                                + statusCode
+                                + "."
                 );
             }
 
@@ -139,28 +207,15 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
                     "Telegram message delivery failed.",
                     "Telegram Bot API returned HTTP status="
                             + statusCode
-                            + ". Response body="
-                            + truncateTechnicalDetail(response.body())
+                            + "."
             );
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
 
-            return NotificationDeliveryProviderResult.failure(
-                    "Telegram message delivery was interrupted.",
-                    exception.getClass().getSimpleName() + ": " + safeMessage(exception.getMessage())
-            );
-        } catch (IOException | IllegalArgumentException exception) {
+        } catch (TelegramBotApiClientException exception) {
             return NotificationDeliveryProviderResult.failure(
                     "Telegram message delivery failed while calling Telegram Bot API.",
-                    exception.getClass().getSimpleName() + ": " + safeMessage(exception.getMessage())
+                    "Telegram Bot API client call failed before a valid response was received."
             );
         }
-    }
-
-    private String buildRequestBody(NotificationEvent notificationEvent) {
-        return "chat_id=" + encode(telegramDeliveryProperties.getChatId())
-                + "&text=" + encode(buildTelegramMessage(notificationEvent))
-                + "&disable_web_page_preview=true";
     }
 
     private String buildTelegramMessage(NotificationEvent notificationEvent) {
@@ -187,15 +242,37 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
                 notificationEvent.getId()
         ).trim();
 
+        return truncateTelegramMessage(message);
+    }
+
+    private String truncateTelegramMessage(String message) {
         if (message.length() <= TELEGRAM_MESSAGE_MAX_LENGTH) {
             return message;
         }
 
-        return message.substring(0, TELEGRAM_MESSAGE_MAX_LENGTH) + "...";
-    }
+        int maximumContentLength =
+                TELEGRAM_MESSAGE_MAX_LENGTH
+                        - TELEGRAM_MESSAGE_TRUNCATION_SUFFIX.length();
 
-    private String encode(String value) {
-        return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
+        int endIndex =
+                maximumContentLength;
+
+        if (endIndex > 0
+                && endIndex < message.length()
+                && Character.isHighSurrogate(
+                message.charAt(endIndex - 1)
+        )
+                && Character.isLowSurrogate(
+                message.charAt(endIndex)
+        )) {
+
+            endIndex--;
+        }
+
+        return message.substring(
+                0,
+                endIndex
+        ) + TELEGRAM_MESSAGE_TRUNCATION_SUFFIX;
     }
 
     private void validateNotificationEvent(NotificationEvent notificationEvent) {
@@ -206,25 +283,5 @@ public class TelegramNotificationDeliveryProvider implements NotificationDeliver
         if (notificationEvent.getId() == null) {
             throw new IllegalArgumentException("Notification event id is required for delivery.");
         }
-    }
-
-    private String safeMessage(String value) {
-        if (value == null || value.isBlank()) {
-            return "No technical message was provided.";
-        }
-
-        return truncateTechnicalDetail(value);
-    }
-
-    private String truncateTechnicalDetail(String value) {
-        if (value == null) {
-            return "";
-        }
-
-        if (value.length() <= TECHNICAL_DETAIL_MAX_LENGTH) {
-            return value;
-        }
-
-        return value.substring(0, TECHNICAL_DETAIL_MAX_LENGTH) + "...";
     }
 }

@@ -40,6 +40,13 @@
         <p th:text="${healthCheckMessage}">
             Telegram provider connection verified.
         </p>
+        <p th:if="${healthCheckHttpStatusCode != null}">
+            <strong>HTTP Status:</strong>
+
+            <span th:text="${healthCheckHttpStatusCode}">
+                   200
+            </span>
+        </p>
     </div>
 </section>
 
@@ -94,6 +101,27 @@
                 NO
             </span>
         </div>
+    </div>
+</section>
+
+<section>
+    <h2>Readiness and connectivity</h2>
+
+    <div class="traceability-card">
+        <p>
+            Readiness confirms that the provider is enabled and its required
+            configuration is present.
+        </p>
+
+        <p>
+            Connectivity confirms that SiteSentinel reached Telegram Bot API
+            and classified the external provider response.
+        </p>
+
+        <p class="output-note">
+            A READY provider is not automatically HEALTHY.
+            HEALTHY requires a successful provider health check.
+        </p>
     </div>
 </section>
 
@@ -189,6 +217,16 @@
         </tr>
 
         <tr>
+            <th>HTTP Status</th>
+
+            <td th:text="${settingsView.latestCheck.httpStatusCode != null
+            ? settingsView.latestCheck.httpStatusCode
+            : 'NOT_AVAILABLE'}">
+                200
+            </td>
+        </tr>
+
+        <tr>
             <th>Checked At</th>
             <td th:text="${settingsView.latestCheck.checkedAt}">
                 2026-07-11T15:00:00
@@ -219,6 +257,7 @@
         <tr>
             <th>Channel</th>
             <th>Status</th>
+            <th>HTTP Status</th>
             <th>Checked At</th>
             <th>Result Message</th>
         </tr>
@@ -232,6 +271,12 @@
 
             <td th:text="${providerCheck.status}">
                 HEALTHY
+            </td>
+
+            <td th:text="${providerCheck.httpStatusCode != null
+                 ? providerCheck.httpStatusCode
+                 : 'NOT_AVAILABLE'}">
+                200
             </td>
 
             <td th:text="${providerCheck.checkedAt}">

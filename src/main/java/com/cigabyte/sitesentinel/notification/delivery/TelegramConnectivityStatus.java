@@ -1,12 +1,8 @@
 package com.cigabyte.sitesentinel.notification.delivery;
 
-public enum NotificationDeliveryProviderCheckStatus {
+public enum TelegramConnectivityStatus {
 
     HEALTHY,
-
-    DISABLED,
-
-    CONFIGURATION_MISSING,
 
     AUTHENTICATION_FAILED,
 

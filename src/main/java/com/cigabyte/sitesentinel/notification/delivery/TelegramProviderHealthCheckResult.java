@@ -6,12 +6,27 @@ public class TelegramProviderHealthCheckResult {
 
     private final String message;
 
+    private final Integer httpStatusCode;
+
     public TelegramProviderHealthCheckResult(
             NotificationDeliveryProviderCheckStatus status,
             String message
     ) {
+        this(
+                status,
+                message,
+                null
+        );
+    }
+
+    public TelegramProviderHealthCheckResult(
+            NotificationDeliveryProviderCheckStatus status,
+            String message,
+            Integer httpStatusCode
+    ) {
         this.status = status;
         this.message = message;
+        this.httpStatusCode = httpStatusCode;
     }
 
     public NotificationDeliveryProviderCheckStatus getStatus() {
@@ -20,5 +35,9 @@ public class TelegramProviderHealthCheckResult {
 
     public String getMessage() {
         return message;
+    }
+
+    public Integer getHttpStatusCode() {
+        return httpStatusCode;
     }
 }
