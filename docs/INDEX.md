@@ -2,17 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-No sprint is currently open.
+Sprint 13 is complete.
 
 ## Current Implementation Status
 
-Sprint 12 is complete.
-
-The latest completed implementation scope is:
-
-Sprint 12 — AI Remediation Recommendation Baseline
-
-No new sprint has been approved.
+Current implementation status: SPRINT 13
+Implemented baseline: UPDATED THROUGH SPRINT 13
+Latest completed sprint: SPRINT 13
+Latest migration: V17
+Final test baseline: 143
 
 The authoritative website assessment lifecycle remains:
 
@@ -98,11 +96,16 @@ PDF Is Automatically Dispatched Through Telegram
 ↓  
 Dispatch Is Persisted and Auditable
 
-Sprint 12 completed only the AI remediation recommendation foundation.
+Sprint 12 completed the AI remediation recommendation foundation.
 
-PDF generation, Telegram document dispatch, automatic dispatch, and dispatch persistence remain deferred.
+Sprint 13 completed manual full monitoring run PDF rendering, immutable
+artifact persistence, SHA-256 integrity verification, and ownership-safe
+PDF download.
 
-## Implemented Baseline Through Sprint 12
+Automatic post-completion PDF generation, Telegram document dispatch,
+dispatch persistence, and delivery audit remain deferred.
+
+## Implemented Baseline Through Sprint 13
 
 - Website registration
 - Website detail view
@@ -355,7 +358,7 @@ authentication failure, timeout, unreachable, and invalid-response states
 - Latest recommendation mapping per persisted risk
 - Risk-to-recommendation report traceability
 - Advisory remediation recommendation report section
-- Monitoring run report read-model readiness for future PDF rendering
+- Monitoring run report read-model support for PDF rendering
 - Recommendation context sanitizer unit tests
 - Structured recommendation validator unit tests
 - Rule-based fallback unit tests
@@ -368,6 +371,26 @@ authentication failure, timeout, unreachable, and invalid-response states
 - Recommendation history and latest-query integration tests
 - Recommendation audit persistence integration tests
 - Risk-to-monitoring-run persistence boundary integration tests
+- Provider-neutral monitoring run PDF renderer contract
+- Apache PDFBox full monitoring report renderer
+- A4 PDF layout and automatic page breaks
+- PDF page-number footer
+- Safe PDF text wrapping and character normalization
+- Findings, risks, trust and comparison PDF sections
+- Advisory recommendation and audit metadata PDF sections
+- Immutable monitoring run PDF artifact persistence
+- Versioned PDF report contract
+- Deterministic PDF filename generation
+- SHA-256 PDF artifact fingerprinting
+- PDF byte-size integrity validation
+- Completed-run-only PDF artifact persistence
+- Monitoring-run/report-version duplicate prevention
+- Manual PDF artifact generation
+- Ownership-safe PDF artifact download
+- Secure PDF response headers
+- PDF renderer and artifact integration tests
+- Browser PDF generation and download verification
+- Visual PDF quality assurance
 
 ## Previous Completed Sprint
 
@@ -641,7 +664,14 @@ Implemented platform capabilities:
 - Monitoring lifecycle-safe recommendation generation.
 - Risk detail recommendation visibility.
 - Monitoring run recommendation report visibility.
-- Future PDF report read-model readiness.
+- Full monitoring run PDF rendering.
+- Immutable and versioned PDF artifact persistence.
+- Deterministic PDF filename policy.
+- SHA-256 and binary-size artifact integrity.
+- Completed-run-only PDF artifact generation.
+- Duplicate run/version prevention.
+- Ownership-safe manual PDF generation and download.
+- PDF visual and integration verification.
 - Automated recommendation safety and persistence verification.
 
 The recommendation baseline remains:
@@ -686,27 +716,28 @@ Telegram delivery remains:
 The current implementation does not include:
 
 - Concrete production AI provider communication.
-- PDF report generation.
-- PDF artifact persistence.
+- Automatic PDF generation after monitoring completion.
 - Telegram document upload.
 - Automatic Telegram PDF dispatch.
 - Report dispatch persistence.
 - Report dispatch idempotency.
 - Report delivery retry and recovery.
+- PDF artifact retention and cleanup automation.
 
 ## Current Repository State
 
 Latest completed sprint:
 
-Sprint 12 — AI Remediation Recommendation Baseline
+Sprint 13 — Full Monitoring Run PDF Artifact Baseline
 
 Repository baseline:
 
-Stable after Sprint 12 implementation, automated verification, final regression, and documentation closure.
+Stable after Sprint 13 implementation, automated verification,
+full integration testing, visual PDF QA, and documentation closure.
 
 Final verified test baseline:
 
-- Tests run: 110
+- Tests run: 143
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -715,7 +746,7 @@ Final verified test baseline:
 
 Latest Flyway migration:
 
-`V16__create_risk_remediation_recommendations_table.sql`
+`V17__create_monitoring_run_pdf_artifacts_table.sql`
 
 ## Next Approved Work
 
@@ -730,9 +761,6 @@ Future sprint planning may evaluate:
 - Provider timeout and failure classification.
 - Recommendation generation idempotency.
 - Recommendation supersession policy.
-- PDF generation from the existing monitoring run report read model.
-- PDF artifact persistence and versioning.
-- PDF artifact integrity fingerprinting.
 - Telegram document-upload client boundary.
 - Automatic Telegram PDF report dispatch.
 - Report dispatch persistence and audit.
@@ -753,7 +781,10 @@ Telegram Document Delivery
 ↓  
 Persisted Dispatch Audit
 
-A future PDF renderer must consume existing persisted report data.
+Any future automatic PDF generation flow must reuse the existing Sprint 13
+renderer, generation service, and persisted artifact model.
+
+It must not introduce a parallel PDF renderer or artifact model.
 
 It must not:
 
@@ -769,28 +800,59 @@ security boundaries are explicitly documented and approved.
 
 ## Next Phase
 
-Sprint 12 is complete.
+Sprint 13 is complete.
 
-The next sprint scope has not yet been approved.
+No Sprint 14 scope has yet been approved.
 
-The AI remediation recommendation foundation is complete.
+The manual Full Monitoring Run PDF Artifact Baseline is complete.
 
-The next major V1 chain remains:
+The remaining major V1 chain is:
 
-Persisted Recommendations  
+Completed Monitoring Run  
 ↓  
-Full Monitoring Run PDF  
+Automatic PDF Artifact Generation Using the Sprint 13 Baseline  
 ↓  
-Automatic Telegram Document Dispatch  
+Telegram Document Dispatch  
 ↓  
 Persisted and Auditable Dispatch
 
-Concrete AI provider integration, PDF generation, Telegram document delivery, and automatic
-report dispatch remain outside the approved implementation boundary.
+Concrete production AI provider integration, automatic PDF generation,
+Telegram document upload, automatic dispatch, dispatch persistence,
+idempotency, and retry remain outside the completed Sprint 13 boundary.
 
 ---
 
 ## Latest Completed Sprint
+
+### Sprint 13 — Full Monitoring Run PDF Artifact Baseline
+
+Sprint 13 established manual generation, persistence and download of a
+versioned full monitoring run PDF artifact.
+
+Implemented capabilities include:
+
+- PDFBox-based full monitoring report rendering;
+- findings, risks, trust and comparison output;
+- advisory AI remediation recommendation content and audit metadata;
+- immutable PDF artifact persistence;
+- deterministic versioned filenames;
+- SHA-256 and binary-size integrity validation;
+- completed-run-only generation;
+- duplicate run/version prevention;
+- ownership-safe manual PDF download;
+- browser generation and download controls;
+- end-to-end integration and visual PDF verification.
+
+Verification baseline:
+
+- Compile: SUCCESS
+- Tests: 143 PASSED
+- Latest migration: V17
+- Visual PDF QA: PASSED
+- Downloaded SHA-256: MATCHED
+- Duplicate artifact check: PASSED
+
+Automatic PDF generation and Telegram PDF dispatch are not yet implemented.
 
 ### Sprint 12 — AI Remediation Recommendation Baseline
 

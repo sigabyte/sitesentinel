@@ -59,6 +59,207 @@
   </p>
 </section>
 
+<section class="output-section">
+  <h2>Full monitoring run PDF</h2>
+
+  <p class="output-note">
+    The PDF artifact is generated manually from the existing persisted
+    monitoring run report. PDF generation does not rerun monitoring,
+    regenerate recommendations or dispatch the report.
+  </p>
+
+  <div class="assessment-summary"
+       th:if="${pdfArtifactStatus == 'SUCCESS'}">
+
+    <p>
+      <strong th:text="${pdfArtifactMessage}">
+        PDF artifact generated successfully.
+      </strong>
+    </p>
+
+    <p th:if="${generatedPdfArtifactId != null}">
+      Generated artifact ID:
+      <strong th:text="${generatedPdfArtifactId}">
+        Artifact ID
+      </strong>
+    </p>
+  </div>
+
+  <div class="failure-box"
+       th:if="${pdfArtifactStatus == 'FAILURE'}">
+
+    <p>
+      <strong th:text="${pdfArtifactMessage}">
+        PDF artifact generation was not completed.
+      </strong>
+    </p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">
+        PDF Artifact
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${pdfArtifactAvailable
+                    ? 'AVAILABLE'
+                    : 'NOT GENERATED'}">
+        NOT GENERATED
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        PDF Report Version
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${pdfReportVersion}">
+        monitoring-run-pdf-v1
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Persisted Artifacts
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${pdfArtifactCount}">
+        0
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Manual Generation
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${pdfArtifactGenerationAvailable
+                    ? 'AVAILABLE'
+                    : 'UNAVAILABLE'}">
+        AVAILABLE
+      </span>
+    </div>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${pdfArtifactAvailable}">
+
+    <h3>Persisted PDF artifact</h3>
+
+    <p>
+      Artifact ID:
+      <strong th:text="${pdfArtifact.id}">
+        Artifact ID
+      </strong>
+    </p>
+
+    <p>
+      File name:
+      <strong th:text="${pdfArtifact.fileName}">
+        monitoring-run-report.pdf
+      </strong>
+    </p>
+
+    <p>
+      Content type:
+      <strong th:text="${pdfArtifact.contentType}">
+        application/pdf
+      </strong>
+    </p>
+
+    <p>
+      Report version:
+      <strong th:text="${pdfArtifact.reportVersion}">
+        monitoring-run-pdf-v1
+      </strong>
+    </p>
+
+    <p>
+      Size:
+      <strong th:text="${pdfArtifact.sizeBytes}">
+        0
+      </strong>
+      bytes
+    </p>
+
+    <p>
+      Generated at:
+      <strong th:text="${pdfArtifact.generatedAt}">
+        Generated at
+      </strong>
+    </p>
+
+    <p>
+      Persisted at:
+      <strong th:text="${pdfArtifact.createdAt}">
+        Persisted at
+      </strong>
+    </p>
+
+    <div class="output-subsection">
+      <h3>SHA-256 fingerprint</h3>
+
+      <div class="traceability-description"
+           th:text="${pdfArtifact.sha256Fingerprint}">
+        SHA-256 fingerprint
+      </div>
+    </div>
+
+    <p class="traceability-actions">
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts/{artifactId}/download(websiteId=${website.id}, runId=${monitoringRun.id}, artifactId=${pdfArtifact.id})}">
+        Download PDF artifact
+      </a>
+    </p>
+
+    <p class="output-note">
+      The artifact is immutable. This report version cannot be generated
+      again for the same monitoring run.
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${pdfArtifactGenerationAvailable}">
+
+    <h3>Generate PDF artifact</h3>
+
+    <p>
+      Generate and persist the full monitoring run PDF artifact for this
+      completed monitoring run.
+    </p>
+
+    <form method="post"
+          th:action="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts(websiteId=${website.id}, runId=${monitoringRun.id})}">
+
+      <button type="submit">
+        Generate PDF artifact
+      </button>
+    </form>
+
+    <p class="output-note">
+      Generation is manual and may be performed only once for the current
+      PDF report version.
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${!pdfArtifactAvailable
+               && !pdfArtifactGenerationAvailable}">
+
+    <p>
+      PDF artifact generation is unavailable for this monitoring run.
+    </p>
+
+    <p class="output-note">
+      A full PDF artifact may only be generated for a completed monitoring
+      run.
+    </p>
+  </div>
+</section>
+
 <section>
   <h2>Website</h2>
 

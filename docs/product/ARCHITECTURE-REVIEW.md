@@ -3232,3 +3232,160 @@ The existing report read model is ready to support a future PDF renderer.
 
 PDF generation, Telegram PDF dispatch, dispatch persistence, and dispatch audit remain outside the Sprint 12 
 architecture boundary.
+
+# SiteSentinel Architecture Review-13 Opening
+
+- Sprint: Sprint 13 Opening
+- Result: APPROVED TO START
+- Planned Scope: Full Monitoring Run PDF Artifact Baseline
+- PDF generation is limited to completed monitoring runs.
+- The renderer will consume the existing `MonitoringRunReportView`.
+- The artifact will be immutable and versioned.
+- The artifact will carry a SHA-256 fingerprint.
+- Duplicate artifacts for the same monitoring run and report version will be prevented.
+- Manual generation and manual download will be supported.
+- PDF generation failure will not change the monitoring run status.
+- Automatic generation, Telegram document upload, and dispatch remain explicitly deferred.
+- The V17 migration will be introduced in a subsequent implementation block.
+
+Completed MonitoringRun
+↓
+MonitoringRunReportService
+↓
+MonitoringRunReportView
+↓
+MonitoringRunPdfRenderer
+↓
+MonitoringRunPdfArtifactService
+↓
+MonitoringRunPdfArtifact
+↓
+Manual PDF Download
+
+---
+
+# SiteSentinel Architecture Review-13 Closure
+
+### Decision
+
+APPROVED
+
+### Architectural outcome
+
+Sprint 13 introduced a versioned PDF artifact boundary without coupling
+monitoring execution, recommendation generation, PDF rendering, persistence
+or Telegram delivery.
+
+The approved flow is:
+
+`MonitoringRunReportService`
+→ `MonitoringRunReportView`
+→ `MonitoringRunPdfRenderer`
+→ `MonitoringRunPdfArtifactGenerationService`
+→ `MonitoringRunPdfArtifactService`
+→ `MonitoringRunPdfArtifactRepository`
+
+### Renderer boundary
+
+`MonitoringRunPdfRenderer` consumes an already-built
+`MonitoringRunReportView` and returns PDF binary content.
+
+The renderer does not:
+
+- query repositories;
+- rerun monitoring;
+- generate findings or risks;
+- calculate trust;
+- generate remediation recommendations;
+- invoke an AI provider;
+- persist artifacts;
+- calculate filenames or fingerprints;
+- dispatch through Telegram.
+
+### Artifact model
+
+`MonitoringRunPdfArtifact` is an immutable persisted artifact containing:
+
+- artifact ID;
+- monitoring run ID;
+- report version;
+- deterministic filename;
+- PDF content type;
+- binary content;
+- byte size;
+- SHA-256 fingerprint;
+- generation timestamp;
+- persistence timestamp.
+
+### Persistence invariants
+
+V17 and the application persistence boundary enforce:
+
+- completed-run-only persistence;
+- valid monitoring run ownership;
+- one artifact per run and report version;
+- supported report version;
+- `application/pdf` content type;
+- `%PDF-` binary header;
+- positive binary size;
+- exact binary-size metadata;
+- lowercase 64-character SHA-256 format;
+- deterministic path-safe `.pdf` filename.
+
+The application service independently recalculates SHA-256 before persistence.
+The database unique constraint remains authoritative under concurrent requests.
+
+### Transaction decision
+
+PDF rendering is intentionally performed outside the artifact write
+transaction.
+
+- Report construction uses its existing read-only transaction.
+- Rendering does not retain an open database transaction.
+- Artifact persistence uses its own controlled write transaction.
+- Rendering failure cannot leave a partial database artifact.
+- Persistence failure cannot alter monitoring lifecycle output.
+
+### Web boundary
+
+Manual generation and download are separated:
+
+- POST generates and persists the artifact, then redirects.
+- GET validates website-to-run and run-to-artifact ownership before download.
+- Download responses use `application/pdf`, attachment disposition,
+  `no-store` caching and `nosniff`.
+
+### Security and trust assessment
+
+APPROVED
+
+- User-controlled website names are excluded from filenames.
+- Raw renderer and persistence errors are not exposed to the browser.
+- Artifact download requires two-stage ownership validation.
+- Persisted artifact integrity is independently verifiable through SHA-256.
+- PDF rendering is read-only and cannot alter the assessment baseline.
+- Duplicate artifacts are blocked at both application and database levels.
+
+### Verification baseline
+
+- Compile: SUCCESS
+- Tests: 143 PASSED
+- Latest migration: V17
+- Full integration chain: PASSED
+- Visual PDF review: PASSED
+- Downloaded SHA-256 comparison: MATCHED
+- Duplicate artifact check: PASSED
+
+### Deferred architecture
+
+The following remain outside the approved Sprint 13 baseline:
+
+- automatic post-completion PDF generation;
+- Telegram document dispatch;
+- dispatch persistence and audit;
+- delivery idempotency;
+- retry and queue architecture;
+- asynchronous processing;
+- recipient preferences;
+- authorization;
+- artifact retention automation.

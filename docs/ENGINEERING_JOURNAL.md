@@ -3469,3 +3469,128 @@ The monitoring run report model is ready for future PDF rendering.
 
 PDF generation, automatic Telegram PDF dispatch, dispatch persistence, and delivery audit remain outside
 the completed Sprint 12 implementation boundary.
+
+# Sprint 13 Opening — Full Monitoring Run PDF Artifact Baseline
+
+## Status
+
+OPENED
+
+## Approved Scope
+
+- Full monitoring run PDF artifact baseline.
+- Existing `MonitoringRunReportView` reuse.
+- Completed-run-only PDF generation.
+- Immutable and versioned PDF artifact persistence.
+- SHA-256 integrity fingerprint.
+- Deterministic filename.
+- Manual generation and download.
+- Rendering and persistence failure isolation.
+- Controlled Block 13A–13G implementation plan.
+
+## Explicit Exclusions
+
+- Automatic post-completion PDF generation.
+- Telegram document upload.
+- Automatic Telegram PDF dispatch.
+- Dispatch persistence and audit.
+- Retry, backoff and queue processing.
+
+# Sprint 13 Closure — Full Monitoring Run PDF Artifact Baseline
+
+### Status
+
+COMPLETED
+
+### Objective
+
+Establish a versioned, immutable and auditable full monitoring run PDF
+artifact baseline using existing persisted monitoring lifecycle output.
+
+### Implemented baseline
+
+- Provider-neutral PDF renderer contract.
+- Apache PDFBox concrete renderer.
+- A4 document layout foundation.
+- Automatic page creation and page-number footer.
+- Safe text wrapping and unsupported-character normalization.
+- Full monitoring report rendering from `MonitoringRunReportView`.
+- Website, monitoring run and lifecycle count sections.
+- Trust assessment and traceability sections.
+- Assessment comparison section.
+- Finding and risk sections.
+- Advisory remediation recommendation content.
+- Recommendation source and audit metadata.
+- Versioned immutable `MonitoringRunPdfArtifact`.
+- V17 PDF artifact persistence schema.
+- Deterministic PDF filename policy.
+- SHA-256 fingerprint and binary-size integrity validation.
+- Completed-run-only artifact persistence.
+- Run/version duplicate prevention.
+- Maximum PDF artifact size boundary of 10 MiB.
+- Manual PDF artifact generation endpoint.
+- Ownership-safe PDF download endpoint.
+- Monitoring report page generation and download controls.
+- Secure PDF download response headers.
+- Renderer, persistence, generation, endpoint and full integration tests.
+- Manual visual PDF quality assurance.
+
+### Architecture flow
+
+`MonitoringRunReportService`
+→ `MonitoringRunReportView`
+→ `MonitoringRunPdfRenderer`
+→ deterministic filename and SHA-256 generation
+→ `MonitoringRunPdfArtifact`
+→ `MonitoringRunPdfArtifactService`
+→ persisted PDF download
+
+### Integrity guarantees
+
+- Only completed monitoring runs can produce persisted PDF artifacts.
+- One artifact per monitoring run and PDF report version.
+- PDF binary content must begin with `%PDF-`.
+- Persisted byte size must equal the actual binary length.
+- Persisted SHA-256 fingerprint must match the generated PDF bytes.
+- Artifact filename is deterministic and path-safe.
+- Artifact records are immutable and cannot be overwritten.
+- Website-to-run and run-to-artifact ownership are verified on download.
+- PDF generation does not mutate monitoring, assessment or recommendation output.
+
+### Verification
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 143
+- PDF artifact persistence tests: 8 PASSED
+- PDF renderer tests: 6 PASSED
+- Filename policy tests: 2 PASSED
+- PDF generation tests: 8 PASSED
+- PDF web endpoint tests: 6 PASSED
+- Full PDF integration tests: 3 PASSED
+- Browser generation: SUCCESS
+- Browser download: SUCCESS
+- Visual PDF layout: PASSED
+- Downloaded SHA-256: MATCHED
+- Duplicate artifact verification: PASSED
+- Latest migration: V17
+
+### Explicitly deferred
+
+- Automatic PDF generation after monitoring completion.
+- Telegram document upload and automatic dispatch.
+- Persisted Telegram PDF dispatch audit.
+- Dispatch retry, backoff and queue processing.
+- Recipient and delivery preference management.
+- Asynchronous artifact generation.
+- Artifact regeneration or overwrite.
+- PDF approval workflow.
+- Artifact retention and cleanup automation.
+- Authentication and role-based authorization.
+
+### Closure decision
+
+Sprint 13 is closed as the Full Monitoring Run PDF Artifact Baseline.
+The system can manually generate, persist, review and download an immutable
+full monitoring run PDF. Automatic post-completion PDF generation and Telegram
+document dispatch remain explicitly deferred.

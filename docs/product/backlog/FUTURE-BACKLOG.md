@@ -42,7 +42,8 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 
 ### FB-009 — Asynchronous Post-Monitoring Processing
 
-Evaluate whether recommendation generation, PDF rendering, and report dispatch should move from the synchronous monitoring completion path to a durable post-monitoring work queue.
+Evaluate whether automatic recommendation generation, automatic PDF artifact
+generation, and report dispatch should use a durable post-monitoring work queue.
 
 ---
 
@@ -215,8 +216,6 @@ Evaluate whether recommendation generation, PDF rendering, and report dispatch s
 - Define recommendation generation idempotency.
 - Define duplicate recommendation prevention rules.
 - Define recommendation supersession integrity rules.
-- Define PDF report artifact uniqueness per monitoring run and report version.
-- Define PDF artifact integrity fingerprint requirements.
 - Define notification dispatch idempotency.
 - Define report dispatch idempotency.
 - Define delivery attempt uniqueness rules.
@@ -239,8 +238,6 @@ Evaluate whether recommendation generation, PDF rendering, and report dispatch s
 - Add provider timeout, rate-limit, and failure-classification tests.
 - Add recommendation generation idempotency tests.
 - Add recommendation supersession tests.
-- Add PDF renderer integration tests.
-- Add PDF artifact integrity tests.
 - Add Telegram document-upload safety tests.
 - Add automatic report dispatch ordering tests.
 - Add report dispatch idempotency tests.
@@ -252,19 +249,7 @@ Evaluate whether recommendation generation, PDF rendering, and report dispatch s
 
 ## Reporting, PDF Artifacts and Export
 
-- Add PDF generation from the existing `MonitoringRunReportView`.
-- Ensure PDF rendering reads persisted report data without triggering recommendation generation.
-- Include persisted advisory recommendations in the full monitoring run PDF.
-- Include recommendation source, fallback classification, prompt version, model metadata, and context fingerprint in the PDF audit section.
-- Add PDF artifact persistence.
-- Add PDF report versioning.
-- Add PDF artifact integrity fingerprinting.
-- Define PDF filename conventions.
-- Define PDF size limits.
-- Define PDF storage location and ownership.
 - Define PDF retention and deletion policy.
-- Define behavior when PDF rendering fails after the monitoring run completes.
-- Add controlled manual PDF download.
 - Add CSV export.
 - Define business-user report format.
 - Add report approval workflow.
@@ -307,3 +292,58 @@ remediation recommendation boundary.
 - Decide whether report dispatch should include all completed runs or only runs meeting configured risk and severity 
 rules.
 - Decide whether the full PDF report or a short notification should be sent when a completed run contains no risks.
+
+## Automatic Monitoring Report Dispatch Chain
+
+### Automatic PDF generation
+
+Generate the existing versioned full monitoring run PDF artifact
+automatically after a monitoring run completes.
+
+The future implementation must reuse the Sprint 13 renderer, generation and
+artifact persistence boundaries. It must not introduce a parallel PDF model.
+
+### Telegram PDF document dispatch
+
+Upload and dispatch the persisted full monitoring run PDF through the
+controlled Telegram delivery provider.
+
+The Telegram message may include a concise summary, but the persisted PDF
+artifact remains the authoritative full monitoring report.
+
+### Dispatch persistence and audit
+
+Persist the relationship between:
+
+- monitoring run;
+- PDF artifact;
+- notification event;
+- Telegram delivery attempt;
+- provider response;
+- delivery status;
+- failure category;
+- timestamps.
+
+### Recommendation and dispatch idempotency
+
+Prevent duplicate recommendation generation, duplicate PDF generation and
+duplicate Telegram document dispatch for the same monitoring lifecycle event.
+
+Sprint 12 recommendation persistence and lifecycle-isolation boundaries,
+together with Sprint 13 PDF run/version uniqueness, must be reused rather
+than bypassed.
+
+Recommendation generation idempotency remains future work and must be
+defined before automatic report dispatch is approved.
+
+### Retry and failure isolation
+
+Telegram upload or dispatch failure must not:
+
+- roll back a completed monitoring run;
+- delete or corrupt the PDF artifact;
+- regenerate recommendations;
+- create duplicate PDF artifacts;
+- create uncontrolled repeated dispatch attempts.
+
+Retry, backoff and queue behavior require a separate approved scope.
