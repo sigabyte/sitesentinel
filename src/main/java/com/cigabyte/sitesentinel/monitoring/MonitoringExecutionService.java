@@ -5,6 +5,8 @@ import com.cigabyte.sitesentinel.engine.collection.EvidenceCollectionEngine;
 import com.cigabyte.sitesentinel.engine.risk.RiskEvaluationEngine;
 import com.cigabyte.sitesentinel.engine.trust.TrustEvaluationEngine;
 import org.springframework.stereotype.Service;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationResult;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationService;
 
 import java.util.UUID;
 import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService;
@@ -21,7 +23,11 @@ public class MonitoringExecutionService {
     private final EvidenceAnalysisEngine evidenceAnalysisEngine;
     private final RiskEvaluationEngine riskEvaluationEngine;
     private final TrustEvaluationEngine trustEvaluationEngine;
-    private final NotificationEventGenerationService notificationEventGenerationService;
+    private final RiskRemediationRecommendationRunGenerationService
+            recommendationRunGenerationService;
+    private final NotificationEventGenerationService
+            notificationEventGenerationService;
+
 
 
     public MonitoringExecutionService(
@@ -30,14 +36,18 @@ public class MonitoringExecutionService {
             EvidenceAnalysisEngine evidenceAnalysisEngine,
             RiskEvaluationEngine riskEvaluationEngine,
             TrustEvaluationEngine trustEvaluationEngine,
-            NotificationEventGenerationService notificationEventGenerationService
+            NotificationEventGenerationService notificationEventGenerationService,
+            RiskRemediationRecommendationRunGenerationService recommendationRunGenerationService
     ) {
         this.monitoringRunService = monitoringRunService;
         this.evidenceCollectionEngine = evidenceCollectionEngine;
         this.evidenceAnalysisEngine = evidenceAnalysisEngine;
         this.riskEvaluationEngine = riskEvaluationEngine;
         this.trustEvaluationEngine = trustEvaluationEngine;
-        this.notificationEventGenerationService = notificationEventGenerationService;
+        this.notificationEventGenerationService =
+                notificationEventGenerationService;
+        this.recommendationRunGenerationService =
+                recommendationRunGenerationService;
     }
 
     public MonitoringRun execute(UUID websiteId) {
@@ -64,8 +74,14 @@ public class MonitoringExecutionService {
             riskEvaluationEngine.evaluate(monitoringRun.getId());
             trustEvaluationEngine.assess(monitoringRun.getId());
 
-            MonitoringRun completedRun = monitoringRunService.markCompleted(monitoringRun.getId());
+            MonitoringRun completedRun =
+                    monitoringRunService.markCompleted(
+                            monitoringRun.getId()
+                    );
+
+            generateRecommendationsSafely(completedRun);
             generateNotificationsSafely(completedRun);
+
             return completedRun;
         } catch (RuntimeException exception) {
             MonitoringRun failedRun = monitoringRunService.markFailed(
@@ -90,6 +106,38 @@ public class MonitoringExecutionService {
         }
 
         return message;
+    }
+
+    private void generateRecommendationsSafely(
+            MonitoringRun monitoringRun
+    ) {
+        try {
+            RiskRemediationRecommendationRunGenerationResult
+                    result =
+                    recommendationRunGenerationService
+                            .generateForCompletedRun(
+                                    monitoringRun
+                            );
+
+            log.info(
+                    "Risk remediation recommendation generation "
+                            + "completed for monitoringRunId={}, "
+                            + "riskCount={}, generatedCount={}, "
+                            + "failedCount={}",
+                    result.monitoringRunId(),
+                    result.riskCount(),
+                    result.generatedCount(),
+                    result.failedCount()
+            );
+        } catch (RuntimeException exception) {
+            log.warn(
+                    "Risk remediation recommendation run generation "
+                            + "failed for monitoringRunId={}, "
+                            + "failureType={}",
+                    monitoringRun.getId(),
+                    exception.getClass().getSimpleName()
+            );
+        }
     }
 
     private void generateNotificationsSafely(MonitoringRun monitoringRun) {

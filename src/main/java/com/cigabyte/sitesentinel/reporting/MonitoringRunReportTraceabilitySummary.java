@@ -6,6 +6,7 @@ public class MonitoringRunReportTraceabilitySummary {
     private final boolean normalizedEvidenceAvailable;
     private final boolean findingsAvailable;
     private final boolean risksAvailable;
+    private final boolean recommendationsAvailable;
     private final boolean trustAssessmentsAvailable;
 
     private MonitoringRunReportTraceabilitySummary(
@@ -13,13 +14,26 @@ public class MonitoringRunReportTraceabilitySummary {
             boolean normalizedEvidenceAvailable,
             boolean findingsAvailable,
             boolean risksAvailable,
+            boolean recommendationsAvailable,
             boolean trustAssessmentsAvailable
     ) {
-        this.collectedEvidenceAvailable = collectedEvidenceAvailable;
-        this.normalizedEvidenceAvailable = normalizedEvidenceAvailable;
-        this.findingsAvailable = findingsAvailable;
-        this.risksAvailable = risksAvailable;
-        this.trustAssessmentsAvailable = trustAssessmentsAvailable;
+        this.collectedEvidenceAvailable =
+                collectedEvidenceAvailable;
+
+        this.normalizedEvidenceAvailable =
+                normalizedEvidenceAvailable;
+
+        this.findingsAvailable =
+                findingsAvailable;
+
+        this.risksAvailable =
+                risksAvailable;
+
+        this.recommendationsAvailable =
+                recommendationsAvailable;
+
+        this.trustAssessmentsAvailable =
+                trustAssessmentsAvailable;
     }
 
     public static MonitoringRunReportTraceabilitySummary fromCounts(
@@ -27,6 +41,7 @@ public class MonitoringRunReportTraceabilitySummary {
     ) {
         if (counts == null) {
             return new MonitoringRunReportTraceabilitySummary(
+                    false,
                     false,
                     false,
                     false,
@@ -40,6 +55,7 @@ public class MonitoringRunReportTraceabilitySummary {
                 counts.hasNormalizedEvidence(),
                 counts.hasFindings(),
                 counts.hasRisks(),
+                counts.hasRecommendations(),
                 counts.hasTrustAssessments()
         );
     }
@@ -60,6 +76,10 @@ public class MonitoringRunReportTraceabilitySummary {
         return risksAvailable;
     }
 
+    public boolean isRecommendationsAvailable() {
+        return recommendationsAvailable;
+    }
+
     public boolean isTrustAssessmentsAvailable() {
         return trustAssessmentsAvailable;
     }
@@ -72,6 +92,11 @@ public class MonitoringRunReportTraceabilitySummary {
         return findingsAvailable && risksAvailable;
     }
 
+    public boolean isRiskToRecommendationReviewable() {
+        return risksAvailable
+                && recommendationsAvailable;
+    }
+
     public boolean isRiskToTrustReviewable() {
         return risksAvailable && trustAssessmentsAvailable;
     }
@@ -81,6 +106,7 @@ public class MonitoringRunReportTraceabilitySummary {
                 && normalizedEvidenceAvailable
                 && findingsAvailable
                 && risksAvailable
+                && recommendationsAvailable
                 && trustAssessmentsAvailable;
     }
 }

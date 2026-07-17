@@ -15,6 +15,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationService;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,19 +33,23 @@ public class RiskController {
     private final RiskService riskService;
     private final FindingService findingService;
     private final EvidenceService evidenceService;
+    private final RiskRemediationRecommendationService
+            recommendationService;
 
     public RiskController(
             WebsiteService websiteService,
             MonitoringRunService monitoringRunService,
             RiskService riskService,
             FindingService findingService,
-            EvidenceService evidenceService
+            EvidenceService evidenceService,
+            RiskRemediationRecommendationService recommendationService
     ) {
         this.websiteService = websiteService;
         this.monitoringRunService = monitoringRunService;
         this.riskService = riskService;
         this.findingService = findingService;
         this.evidenceService = evidenceService;
+        this.recommendationService = recommendationService;
     }
 
     @GetMapping("/{riskId}")
@@ -61,6 +67,18 @@ public class RiskController {
                 runId,
                 websiteId
         );
+
+        List<RiskRemediationRecommendation> recommendations =
+                recommendationService
+                        .findByRiskIdAndMonitoringRunId(
+                                riskId,
+                                runId
+                        );
+
+        RiskRemediationRecommendation latestRecommendation =
+                recommendations.isEmpty()
+                        ? null
+                        : recommendations.get(0);
 
         List<RiskFinding> riskFindingLinks = riskService.findFindingLinks(riskId);
 
@@ -121,6 +139,21 @@ public class RiskController {
         model.addAttribute("findingEvidenceLinksByFindingId", findingEvidenceLinksByFindingId);
         model.addAttribute("sourceEvidenceByFindingId", sourceEvidenceByFindingId);
         model.addAttribute("normalizedEvidenceByCollectedEvidenceId", normalizedEvidenceByCollectedEvidenceId);
+
+        model.addAttribute(
+                "recommendations",
+                recommendations
+        );
+
+        model.addAttribute(
+                "latestRecommendation",
+                latestRecommendation
+        );
+
+        model.addAttribute(
+                "recommendationCount",
+                recommendations.size()
+        );
 
         return "risks/detail";
     }

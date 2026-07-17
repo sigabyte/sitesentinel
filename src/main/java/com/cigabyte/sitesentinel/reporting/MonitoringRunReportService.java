@@ -15,9 +15,13 @@ import com.cigabyte.sitesentinel.website.Website;
 import com.cigabyte.sitesentinel.website.WebsiteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationService;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class MonitoringRunReportService {
@@ -27,6 +31,8 @@ public class MonitoringRunReportService {
     private final EvidenceService evidenceService;
     private final FindingService findingService;
     private final RiskService riskService;
+    private final RiskRemediationRecommendationService
+            recommendationService;
     private final TrustAssessmentService trustAssessmentService;
     private final AssessmentComparisonService assessmentComparisonService;
 
@@ -36,6 +42,8 @@ public class MonitoringRunReportService {
             EvidenceService evidenceService,
             FindingService findingService,
             RiskService riskService,
+            RiskRemediationRecommendationService
+                    recommendationService,
             TrustAssessmentService trustAssessmentService,
             AssessmentComparisonService assessmentComparisonService
     ) {
@@ -44,6 +52,8 @@ public class MonitoringRunReportService {
         this.evidenceService = evidenceService;
         this.findingService = findingService;
         this.riskService = riskService;
+        this.recommendationService =
+                recommendationService;
         this.trustAssessmentService = trustAssessmentService;
         this.assessmentComparisonService = assessmentComparisonService;
     }
@@ -68,6 +78,18 @@ public class MonitoringRunReportService {
 
         List<Risk> risks = riskService.findByMonitoringRunId(monitoringRun.getId());
 
+        List<RiskRemediationRecommendation> recommendations =
+                recommendationService.findByMonitoringRunId(
+                        monitoringRun.getId()
+                );
+
+        List<MonitoringRunReportRiskRecommendationView>
+                riskRecommendationViews =
+                buildRiskRecommendationViews(
+                        risks,
+                        recommendations
+                );
+
         AssessmentComparisonSummary comparison = assessmentComparisonService.compare(
                 website.getId(),
                 monitoringRun.getId()
@@ -81,17 +103,72 @@ public class MonitoringRunReportService {
                 latestTrustAssessment,
                 findings,
                 risks,
+                recommendations,
+                riskRecommendationViews,
                 comparison
         );
     }
 
-    private MonitoringRunReportCounts buildCounts(UUID monitoringRunId) {
+    private List<MonitoringRunReportRiskRecommendationView>
+    buildRiskRecommendationViews(
+            List<Risk> risks,
+            List<RiskRemediationRecommendation>
+                    recommendations
+    ) {
+        if (risks == null || risks.isEmpty()) {
+            return List.of();
+        }
+
+        Map<UUID, RiskRemediationRecommendation>
+                latestRecommendationByRiskId =
+                new HashMap<>();
+
+        if (recommendations != null) {
+            for (RiskRemediationRecommendation recommendation
+                    : recommendations) {
+
+                latestRecommendationByRiskId.put(
+                        recommendation.getRiskId(),
+                        recommendation
+                );
+            }
+        }
+
+        return risks.stream()
+                .map(
+                        risk ->
+                                new MonitoringRunReportRiskRecommendationView(
+                                        risk,
+                                        latestRecommendationByRiskId
+                                                .get(risk.getId())
+                                )
+                )
+                .toList();
+    }
+
+    private MonitoringRunReportCounts buildCounts(
+            UUID monitoringRunId
+    ) {
         return new MonitoringRunReportCounts(
-                evidenceService.countCollectedEvidence(monitoringRunId),
-                evidenceService.countNormalizedEvidence(monitoringRunId),
-                findingService.countByMonitoringRunId(monitoringRunId),
-                riskService.countByMonitoringRunId(monitoringRunId),
-                trustAssessmentService.countByMonitoringRunId(monitoringRunId)
+                evidenceService.countCollectedEvidence(
+                        monitoringRunId
+                ),
+                evidenceService.countNormalizedEvidence(
+                        monitoringRunId
+                ),
+                findingService.countByMonitoringRunId(
+                        monitoringRunId
+                ),
+                riskService.countByMonitoringRunId(
+                        monitoringRunId
+                ),
+                recommendationService.countByMonitoringRunId(
+                        monitoringRunId
+                ),
+                trustAssessmentService
+                        .countByMonitoringRunId(
+                                monitoringRunId
+                        )
         );
     }
 

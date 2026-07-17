@@ -6,50 +6,103 @@ No sprint is currently open.
 
 ## Current Implementation Status
 
-Sprint 11 is complete.
+Sprint 12 is complete.
 
 The latest completed implementation scope is:
 
-Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
+Sprint 12 — AI Remediation Recommendation Baseline
 
 No new sprint has been approved.
 
-The current implementation provides a working core assessment lifecycle with an explainable 
-traceability review layer, a historical comparison baseline, and a controlled scheduled monitoring baseline:
+The authoritative website assessment lifecycle remains:
 
-Website
-↓
-MonitoringRun
-↓
-HTTP Evidence Collection
-↓
-CollectedEvidence
-↓
-NormalizedEvidence
-↓
-Finding
-↓
-Risk
-↓
-TrustAssessment
-↓
+Website  
+↓  
+MonitoringRun  
+↓  
+HTTP Evidence Collection  
+↓  
+CollectedEvidence  
+↓  
+NormalizedEvidence  
+↓  
+Finding  
+↓  
+Risk  
+↓  
+TrustAssessment  
+↓  
 Assessment Comparison
 
-The scheduled monitoring baseline follows this execution path:
+The scheduled monitoring baseline follows:
 
-Website
-↓
-MonitoringSchedule
-↓
-ScheduledMonitoringWorker
-↓
-MonitoringExecutionService
-↓
-MonitoringRun
-↓
+Website  
+↓  
+MonitoringSchedule  
+↓  
+ScheduledMonitoringWorker  
+↓  
+MonitoringExecutionService  
+↓  
+MonitoringRun  
+↓  
 Existing Assessment Lifecycle
 
-## Implemented Baseline Through Sprint 11
+Sprint 12 added the following post-assessment advisory path:
+
+Monitoring Run Marked COMPLETED  
+↓  
+Persisted Risks Loaded  
+↓  
+Linked Findings Loaded  
+↓  
+Linked Normalized Evidence Loaded  
+↓  
+Evidence-Safe Recommendation Context Built  
+↓  
+Versioned AI Provider Request Created  
+↓  
+Structured Output Validated  
+↓  
+AI Recommendation or Rule-Based Fallback Produced  
+↓  
+Validated Advisory Recommendation Persisted  
+↓  
+Risk Detail and Monitoring Run Report Read Models Updated
+
+The recommendation layer is downstream from the authoritative assessment lifecycle.
+
+It does not:
+
+- Create risks.
+- Create findings.
+- Create evidence.
+- Change risk severity.
+- Change risk score.
+- Change confidence score.
+- Change trust score.
+
+The V1 target chain remains:
+
+Monitoring Run Completes  
+↓  
+Risks Are Identified  
+↓  
+AI Remediation Recommendations Are Generated  
+↓  
+Recommendations Are Validated  
+↓  
+Full Monitoring Run PDF Is Generated  
+↓  
+PDF Is Automatically Dispatched Through Telegram  
+↓  
+Dispatch Is Persisted and Auditable
+
+Sprint 12 completed only the AI remediation recommendation foundation.
+
+PDF generation, Telegram document dispatch, automatic dispatch, and dispatch persistence remain deferred.
+
+## Implemented Baseline Through Sprint 12
 
 - Website registration
 - Website detail view
@@ -230,6 +283,91 @@ and monitoring run report
 - Disabled-by-default readiness tests
 - Manual provider diagnostic QA for disabled, missing configuration, healthy, 
 authentication failure, timeout, unreachable, and invalid-response states
+- Risk remediation recommendation domain vocabulary
+- Persisted risk remediation recommendation entity
+- Recommendation content contract
+- Recommendation source classification
+- Recommendation fallback reason classification
+- Validated-only recommendation persistence
+- Advisory-only recommendation persistence
+- Risk-to-monitoring-run recommendation ownership validation
+- Recommendation repository
+- Monitoring run recommendation history
+- Risk recommendation history
+- Latest recommendation lookup
+- Recommendation count by monitoring run
+- Evidence-safe recommendation context
+- Persisted risk context loading
+- Persisted finding context loading
+- Persisted normalized evidence context loading
+- Raw collected evidence exclusion from recommendation context
+- Evidence source URL exclusion from recommendation context
+- Secret-safe context sanitization
+- Private key redaction
+- Authorization credential redaction
+- Telegram bot token redaction
+- JWT redaction
+- Embedded URL credential redaction
+- Sensitive assignment redaction
+- UTF-16-safe recommendation context truncation
+- Deterministic recommendation context ordering
+- SHA-256 recommendation context fingerprinting
+- Provider-neutral AI recommendation abstraction
+- Typed AI provider status classification
+- Structured AI output contract
+- Prompt versioning
+- Output schema versioning
+- Rule-based fallback versioning
+- Evidence-safe prompt construction
+- Database identifier exclusion from AI prompt payload
+- Raw provider response persistence prevention
+- Full prompt persistence prevention
+- Structured recommendation validation
+- Typed recommendation validation issues
+- Schema-version validation
+- Advisory-output validation
+- Recommendation content length validation
+- Remediation step validation
+- Verification step validation
+- Sensitive AI output rejection
+- Persistence-ready recommendation content conversion
+- Deterministic rule-based remediation fallback
+- Severity-aware fallback guidance
+- Free-text echo prevention in fallback recommendations
+- Single-risk recommendation generation orchestration
+- Safe AI provider selection
+- Provider metadata safety validation
+- AI success recommendation persistence
+- Provider-unavailable fallback persistence
+- Provider-failure fallback persistence
+- Validation-failure fallback persistence
+- Recommendation audit metadata persistence
+- Completed-run recommendation generation
+- Failed-run recommendation generation exclusion
+- Per-risk recommendation failure isolation
+- Monitoring lifecycle-safe recommendation integration
+- Recommendation-before-notification execution ordering
+- Latest recommendation visibility on risk detail
+- Recommendation audit metadata visibility on risk detail
+- Recommendation history visibility on risk detail
+- Escaped recommendation content rendering
+- Recommendation count in monitoring run reports
+- Latest recommendation mapping per persisted risk
+- Risk-to-recommendation report traceability
+- Advisory remediation recommendation report section
+- Monitoring run report read-model readiness for future PDF rendering
+- Recommendation context sanitizer unit tests
+- Structured recommendation validator unit tests
+- Rule-based fallback unit tests
+- Prompt and context fingerprint unit tests
+- AI recommendation orchestration tests
+- Provider failure isolation tests
+- Per-risk recommendation generation isolation tests
+- Monitoring lifecycle recommendation safety tests
+- Recommendation repository ordering integration tests
+- Recommendation history and latest-query integration tests
+- Recommendation audit persistence integration tests
+- Risk-to-monitoring-run persistence boundary integration tests
 
 ## Previous Completed Sprint
 
@@ -485,21 +623,59 @@ Implemented platform capabilities:
 - Evidence traceability.
 - Historical assessment comparison.
 - Scheduled monitoring.
-- Monitoring reports.
+- Browser-based monitoring reports.
 - Notification event generation and management.
 - Notification delivery attempt audit baseline.
-- Controlled Telegram delivery provider.
+- Controlled Telegram text-message delivery provider.
 - Notification delivery operations.
 - Typed Telegram provider diagnostics.
 - Provider health-check persistence.
 - Secret-safe provider operational visibility.
 - Automated Telegram provider safety verification.
+- Persisted advisory remediation recommendations.
+- Evidence-safe recommendation context.
+- Provider-neutral AI recommendation abstraction.
+- Structured AI recommendation validation.
+- Deterministic rule-based fallback.
+- Recommendation audit metadata.
+- Monitoring lifecycle-safe recommendation generation.
+- Risk detail recommendation visibility.
+- Monitoring run recommendation report visibility.
+- Future PDF report read-model readiness.
+- Automated recommendation safety and persistence verification.
+
+The recommendation baseline remains:
+
+- Advisory only.
+- Downstream from risk and trust assessment.
+- Based on persisted risks, findings, and normalized evidence.
+- Isolated from raw collected evidence.
+- Isolated from evidence source URLs.
+- Isolated from provider credentials.
+- Protected by secret-safe context sanitization.
+- Protected by structured output validation.
+- Protected by deterministic rule-based fallback.
+- Operational without a concrete production AI provider.
+- Unable to create or modify risks, findings, evidence, or trust output.
+- Isolated from monitoring run failure classification.
+- Auditable through persisted generation metadata.
+- Read-only when displayed through risk detail and monitoring run reports.
+
+Current production recommendation behavior:
+
+- No concrete AI provider adapter is configured.
+- Completed monitoring runs generate rule-based fallback recommendations for persisted risks.
+- Fallback reason is `PROVIDER_UNAVAILABLE` when no AI provider exists.
+- Current prompt version is `risk-remediation-v1`.
+- Current output schema version is `risk-remediation-output-v1`.
+- Current fallback rule version is `risk-remediation-fallback-v1`.
 
 Telegram delivery remains:
 
 - Disabled by default.
 - Configuration-protected.
 - Manual only.
+- Limited to the existing Telegram text-message delivery path.
 - Isolated from monitoring execution.
 - Isolated from notification event generation.
 - Auditable through notification delivery attempts.
@@ -507,15 +683,39 @@ Telegram delivery remains:
 - Independent from provider health-check records.
 - Protected by typed and secret-safe provider diagnostics.
 
+The current implementation does not include:
+
+- Concrete production AI provider communication.
+- PDF report generation.
+- PDF artifact persistence.
+- Telegram document upload.
+- Automatic Telegram PDF dispatch.
+- Report dispatch persistence.
+- Report dispatch idempotency.
+- Report delivery retry and recovery.
+
 ## Current Repository State
 
 Latest completed sprint:
 
-Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
+Sprint 12 — AI Remediation Recommendation Baseline
 
 Repository baseline:
 
-Stable after Sprint 11 final regression and documentation closure.
+Stable after Sprint 12 implementation, automated verification, final regression, and documentation closure.
+
+Final verified test baseline:
+
+- Tests run: 110
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Maven test: BUILD SUCCESS
+- Maven compile: BUILD SUCCESS
+
+Latest Flyway migration:
+
+`V16__create_risk_remediation_recommendations_table.sql`
 
 ## Next Approved Work
 
@@ -523,50 +723,186 @@ No additional sprint has been approved.
 
 Future sprint planning may evaluate:
 
-- Notification recipient domain modeling.
-- Delivery destination ownership.
-- Recipient activation and deactivation.
-- Per-website notification routing.
-- Notification subscription rules.
-- Automatic dispatch governance.
-- Delivery idempotency.
-- Duplicate automatic delivery prevention.
-- Retry and backoff policies.
-- Delivery queue boundaries.
-- Dead-letter handling.
-- Provider rate limiting.
-- Provider analytics.
-- Additional delivery providers.
-- External secret manager integration.
+- Concrete production AI provider adapter.
+- AI provider HTTP client boundary.
+- AI provider environment configuration.
+- AI credential secret management.
+- Provider timeout and failure classification.
+- Recommendation generation idempotency.
+- Recommendation supersession policy.
+- PDF generation from the existing monitoring run report read model.
+- PDF artifact persistence and versioning.
+- PDF artifact integrity fingerprinting.
+- Telegram document-upload client boundary.
+- Automatic Telegram PDF report dispatch.
+- Report dispatch persistence and audit.
+- Report dispatch idempotency.
+- Duplicate report dispatch prevention.
+- Report delivery retry and recovery.
+- Report destination and recipient ownership.
 
-Automatic notification dispatch must not be implemented until recipient ownership, routing,
-idempotency, retry, duplicate prevention, and security boundaries are documented and explicitly approved.
+The approved future report-delivery direction is:
 
-The implemented notification delivery path is:
+Persisted Monitoring Run Report View  
+↓  
+PDF Renderer  
+↓  
+Versioned PDF Artifact  
+↓  
+Telegram Document Delivery  
+↓  
+Persisted Dispatch Audit
 
-NotificationEvent  
-↓  
-NotificationDeliveryAttemptService  
-↓  
-NotificationDeliveryProvider  
-↓  
-TelegramNotificationDeliveryProvider  
-↓  
-Telegram Bot API  
-↓  
-NotificationDeliveryAttempt
+A future PDF renderer must consume existing persisted report data.
+
+It must not:
+
+- Re-run monitoring.
+- Recalculate risks.
+- Recalculate trust.
+- Regenerate recommendations during report rendering.
+- Call an AI provider while rendering an already completed report.
+
+Automatic Telegram report dispatch must not be implemented until PDF artifact ownership,
+dispatch persistence, idempotency, duplicate prevention, retry, destination ownership, and
+security boundaries are explicitly documented and approved.
 
 ## Next Phase
 
-Sprint 11 is complete.
+Sprint 12 is complete.
 
 The next sprint scope has not yet been approved.
 
-Automatic notification dispatch remains outside the approved implementation boundary.
+The AI remediation recommendation foundation is complete.
+
+The next major V1 chain remains:
+
+Persisted Recommendations  
+↓  
+Full Monitoring Run PDF  
+↓  
+Automatic Telegram Document Dispatch  
+↓  
+Persisted and Auditable Dispatch
+
+Concrete AI provider integration, PDF generation, Telegram document delivery, and automatic
+report dispatch remain outside the approved implementation boundary.
 
 ---
 
 ## Latest Completed Sprint
+
+### Sprint 12 — AI Remediation Recommendation Baseline
+
+Sprint 12 is complete.
+
+Sprint 12 introduced a persisted, evidence-grounded, validated, advisory remediation recommendation layer.
+
+The completed recommendation path is:
+
+Monitoring Run Marked COMPLETED  
+↓  
+Persisted Risks Loaded  
+↓  
+Linked Findings Loaded  
+↓  
+Linked Normalized Evidence Loaded  
+↓  
+Evidence-Safe Recommendation Context Built  
+↓  
+Versioned AI Request Created  
+↓  
+Provider Result Classified  
+↓  
+Structured AI Output Validated  
+↓  
+AI Recommendation or Rule-Based Fallback Produced  
+↓  
+Validated Recommendation Persisted  
+↓  
+Risk Detail and Monitoring Run Report Read Models Updated
+
+Sprint 12 introduced:
+
+- Risk remediation recommendation domain model.
+- Recommendation persistence.
+- Recommendation repository and service.
+- Risk-to-monitoring-run persistence validation.
+- Evidence-safe recommendation context.
+- Raw collected evidence exclusion.
+- Source URL exclusion.
+- Secret-safe text sanitization.
+- Deterministic context ordering.
+- SHA-256 context fingerprinting.
+- Provider-neutral AI abstraction.
+- Typed provider result classification.
+- Structured AI output contract.
+- Prompt and output schema versioning.
+- Structured recommendation validation.
+- Sensitive AI output rejection.
+- Deterministic rule-based fallback.
+- Severity-aware advisory guidance.
+- Recommendation generation orchestration.
+- Provider failure isolation.
+- Recommendation audit metadata.
+- Completed-run lifecycle integration.
+- Per-risk generation failure isolation.
+- Risk detail recommendation visibility.
+- Recommendation history visibility.
+- Monitoring run recommendation report visibility.
+- Future PDF report read-model readiness.
+- Automated recommendation safety tests.
+- Recommendation persistence integration tests.
+
+Current version identifiers:
+
+- Prompt version: `risk-remediation-v1`
+- Output schema version: `risk-remediation-output-v1`
+- Fallback rule version: `risk-remediation-fallback-v1`
+
+Sprint 12 added the following Flyway migration:
+
+- `V16__create_risk_remediation_recommendations_table.sql`
+
+Final verification:
+
+- Tests run: 110
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Maven test: BUILD SUCCESS
+- Maven compile: BUILD SUCCESS
+
+Sprint 12 preserved:
+
+- Persisted risk authority.
+- Persisted finding authority.
+- Persisted evidence authority.
+- Persisted trust-assessment authority.
+- Raw collected evidence isolation.
+- Secret-safe provider boundaries.
+- Monitoring lifecycle safety.
+- Notification event isolation.
+- Notification delivery isolation.
+- Manual-only Telegram text-message delivery.
+- Disabled-by-default Telegram delivery configuration.
+
+Sprint 12 did not add:
+
+- A concrete production AI provider adapter.
+- AI provider HTTP communication.
+- AI credential management.
+- Recommendation approval workflow.
+- Recommendation regeneration controls.
+- Recommendation idempotency.
+- PDF generation.
+- PDF artifact persistence.
+- Telegram document delivery.
+- Automatic Telegram PDF dispatch.
+- Report dispatch persistence.
+- Dispatch retry or recovery.
+
+## Previous Completed Sprint
 
 ### Sprint 11 — Notification Provider Diagnostics and Safety Verification Baseline
 

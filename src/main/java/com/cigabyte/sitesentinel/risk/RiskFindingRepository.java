@@ -11,6 +11,9 @@ public interface RiskFindingRepository extends JpaRepository<RiskFinding, UUID> 
 
     List<RiskFinding> findByRiskIdOrderByCreatedAtAsc(UUID riskId);
 
+    List<RiskFinding>
+    findByRiskIdOrderByCreatedAtAscIdAsc(UUID riskId);
+
     boolean existsByRiskIdAndFindingId(UUID riskId, UUID findingId);
 
     long countByRiskId(UUID riskId);

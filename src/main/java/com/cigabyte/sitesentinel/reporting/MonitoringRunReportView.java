@@ -7,6 +7,7 @@ import com.cigabyte.sitesentinel.monitoring.MonitoringRunStatus;
 import com.cigabyte.sitesentinel.risk.Risk;
 import com.cigabyte.sitesentinel.trust.TrustAssessment;
 import com.cigabyte.sitesentinel.website.Website;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
 
 import java.util.List;
 
@@ -20,6 +21,11 @@ public class MonitoringRunReportView {
     private final TrustAssessment latestTrustAssessment;
     private final List<Finding> findings;
     private final List<Risk> risks;
+    private final List<RiskRemediationRecommendation>
+            recommendations;
+
+    private final List<MonitoringRunReportRiskRecommendationView>
+            riskRecommendationViews;
     private final AssessmentComparisonSummary comparison;
 
     public MonitoringRunReportView(
@@ -30,6 +36,9 @@ public class MonitoringRunReportView {
             TrustAssessment latestTrustAssessment,
             List<Finding> findings,
             List<Risk> risks,
+            List<RiskRemediationRecommendation> recommendations,
+            List<MonitoringRunReportRiskRecommendationView>
+                    riskRecommendationViews,
             AssessmentComparisonSummary comparison
     ) {
         this.website = website;
@@ -38,14 +47,31 @@ public class MonitoringRunReportView {
                 monitoringRun == null ? null : monitoringRun.getStatus()
         );
         this.counts = counts == null
-                ? new MonitoringRunReportCounts(0, 0, 0, 0, 0)
+                ? new MonitoringRunReportCounts(0, 0, 0, 0, 0,0)
                 : counts;
         this.traceabilitySummary = traceabilitySummary == null
                 ? MonitoringRunReportTraceabilitySummary.fromCounts(this.counts)
                 : traceabilitySummary;
         this.latestTrustAssessment = latestTrustAssessment;
-        this.findings = findings == null ? List.of() : List.copyOf(findings);
-        this.risks = risks == null ? List.of() : List.copyOf(risks);
+        this.findings = findings == null
+                ? List.of()
+                : List.copyOf(findings);
+
+        this.risks = risks == null
+                ? List.of()
+                : List.copyOf(risks);
+
+        this.recommendations = recommendations == null
+                ? List.of()
+                : List.copyOf(recommendations);
+
+        this.riskRecommendationViews =
+                riskRecommendationViews == null
+                        ? List.of()
+                        : List.copyOf(
+                        riskRecommendationViews
+                );
+
         this.comparison = comparison;
     }
 
@@ -79,6 +105,16 @@ public class MonitoringRunReportView {
 
     public List<Risk> getRisks() {
         return risks;
+    }
+
+    public List<RiskRemediationRecommendation>
+    getRecommendations() {
+        return recommendations;
+    }
+
+    public List<MonitoringRunReportRiskRecommendationView>
+    getRiskRecommendationViews() {
+        return riskRecommendationViews;
     }
 
     public AssessmentComparisonSummary getComparison() {
@@ -129,6 +165,10 @@ public class MonitoringRunReportView {
 
     public boolean hasRisks() {
         return !risks.isEmpty();
+    }
+
+    public boolean hasRecommendations() {
+        return !recommendations.isEmpty();
     }
 
     public boolean hasComparison() {

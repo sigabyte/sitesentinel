@@ -185,6 +185,17 @@
     </div>
 
     <div class="summary-card">
+      <span class="summary-card-label">
+          Remediation Recommendations
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${report.counts.recommendationCount}">
+          0
+      </span>
+    </div>
+
+    <div class="summary-card">
       <span class="summary-card-label">Trust Assessments</span>
       <span class="summary-card-value" th:text="${report.counts.trustAssessmentCount}">0</span>
     </div>
@@ -271,10 +282,23 @@
 
     <div class="summary-card">
       <span class="summary-card-label">Risks Available</span>
-      <span class="summary-card-value"
-            th:text="${report.traceabilitySummary.risksAvailable ? 'YES' : 'NO'}">
+            <span class="summary-card-value"
+                  th:text="${report.traceabilitySummary.risksAvailable ? 'YES' : 'NO'}">
                 YES
             </span>
+    </div>
+
+    <div class="summary-card">
+       <span class="summary-card-label">
+           Recommendations Available
+       </span>
+
+      <span class="summary-card-value"
+            th:text="${report.traceabilitySummary.recommendationsAvailable
+                ? 'YES'
+                : 'NO'}">
+           YES
+      </span>
     </div>
 
     <div class="summary-card">
@@ -315,6 +339,25 @@
       <td>
         <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${website.id}, runId=${monitoringRun.id})}">
           Open monitoring run traceability
+        </a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Risk → Advisory Recommendation</td>
+
+      <td th:text="${report.traceabilitySummary.riskToRecommendationReviewable
+          ? 'REVIEWABLE'
+          : 'LIMITED'}">
+        REVIEWABLE
+      </td>
+
+      <td>
+        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report(
+            websiteId=${website.id},
+            runId=${monitoringRun.id}
+            )}">
+            Review recommendations in report
         </a>
       </td>
     </tr>
@@ -510,6 +553,221 @@
 </section>
 
 <section class="output-section">
+  <h2>Advisory remediation recommendations</h2>
+
+  <p class="output-note">
+    Recommendations are advisory only. They are read from persisted
+    recommendation records and do not modify risk severity, risk score,
+    confidence score or trust score.
+  </p>
+
+  <div th:if="${#lists.isEmpty(report.riskRecommendationViews)}">
+    <p>
+      No risks or remediation recommendations are available for this
+      monitoring run.
+    </p>
+  </div>
+
+  <div th:each="item : ${report.riskRecommendationViews}"
+       class="traceability-card">
+
+    <h3>
+      <span th:text="${item.risk.riskType}">
+        RISK_TYPE
+      </span>
+
+      <span th:if="${item.recommendationAvailable}">
+        —
+        <span th:text="${item.latestRecommendation.title}">
+          Recommendation title
+        </span>
+      </span>
+    </h3>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-card-label">Risk Severity</span>
+        <span class="summary-card-value"
+              th:text="${item.risk.severity}">
+          LOW
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Risk Score</span>
+        <span class="summary-card-value"
+              th:text="${item.risk.riskScore}">
+          0
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">
+          Recommendation Available
+        </span>
+
+        <span class="summary-card-value"
+              th:text="${item.recommendationAvailable
+                      ? 'YES'
+                      : 'NO'}">
+          YES
+        </span>
+      </div>
+    </div>
+
+    <div th:if="${!item.recommendationAvailable}"
+         class="assessment-summary">
+
+      <p>
+        No persisted remediation recommendation is available for this risk.
+      </p>
+
+      <p class="output-note">
+        This can occur for monitoring runs completed before the recommendation
+        baseline was introduced or when isolated recommendation generation
+        failed.
+      </p>
+    </div>
+
+    <div th:if="${item.recommendationAvailable}">
+      <div class="output-subsection">
+        <h3>Summary</h3>
+
+        <div class="traceability-description"
+             th:text="${item.latestRecommendation.summary}">
+          Recommendation summary
+        </div>
+      </div>
+
+      <div class="output-subsection">
+        <h3>Remediation steps</h3>
+
+        <div class="traceability-description"
+             th:text="${item.latestRecommendation.remediationSteps}">
+          Remediation steps
+        </div>
+      </div>
+
+      <div class="output-subsection">
+        <h3>Verification steps</h3>
+
+        <div class="traceability-description"
+             th:text="${item.latestRecommendation.verificationSteps}">
+          Verification steps
+        </div>
+      </div>
+
+      <div class="output-subsection">
+        <h3>Recommendation audit metadata</h3>
+
+        <p>
+          Source:
+          <strong th:text="${item.latestRecommendation.source}">
+            SOURCE
+          </strong>
+        </p>
+
+        <p>
+          Fallback Reason:
+          <strong th:text="${item.latestRecommendation.fallbackReason}">
+            NONE
+          </strong>
+        </p>
+
+        <p>
+          Validation Status:
+          <strong th:text="${item.latestRecommendation.validationStatus}">
+            VALID
+          </strong>
+        </p>
+
+        <p>
+          Advisory:
+          <strong th:text="${item.latestRecommendation.advisory
+                  ? 'YES'
+                  : 'NO'}">
+            YES
+          </strong>
+        </p>
+
+        <p>
+          Provider:
+          <strong th:text="${item.latestRecommendation.providerName != null
+                  ? item.latestRecommendation.providerName
+                  : 'Not used'}">
+            Provider
+          </strong>
+        </p>
+
+        <p>
+          Model:
+          <strong th:text="${item.latestRecommendation.modelName != null
+                  ? item.latestRecommendation.modelName
+                  : 'Not used'}">
+            Model
+          </strong>
+        </p>
+
+        <p>
+          Prompt Version:
+          <strong th:text="${item.latestRecommendation.promptVersion}">
+            Prompt version
+          </strong>
+        </p>
+
+        <p>
+          Fallback Rule Version:
+          <strong th:text="${item.latestRecommendation.fallbackRuleVersion
+                  != null
+                  ? item.latestRecommendation.fallbackRuleVersion
+                  : 'Not applicable'}">
+            Fallback rule
+          </strong>
+        </p>
+
+        <p>
+          Context Fingerprint:
+          <strong th:text="${item.latestRecommendation.contextFingerprint}">
+            Context fingerprint
+          </strong>
+        </p>
+
+        <p>
+          Linked Findings:
+          <strong th:text="${item.latestRecommendation.contextFindingCount}">
+            0
+          </strong>
+        </p>
+
+        <p>
+          Normalized Evidence Items:
+          <strong th:text="${item.latestRecommendation.contextEvidenceCount}">
+            0
+          </strong>
+        </p>
+
+        <p>
+          Generated At:
+          <strong th:text="${item.latestRecommendation.generatedAt}">
+            Generated at
+          </strong>
+        </p>
+      </div>
+    </div>
+
+    <p class="traceability-actions">
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/risks/{riskId}(
+              websiteId=${website.id},
+              runId=${monitoringRun.id},
+              riskId=${item.risk.id}
+          )}">
+        Open risk and recommendation detail
+      </a>
+    </p>
+  </div>
+</section>
+
+<section class="output-section">
   <h2>Report boundary</h2>
 
   <div class="traceability-card">
@@ -518,7 +776,14 @@
     </p>
 
     <p>
-      It does not collect evidence, normalize evidence, generate findings, evaluate risks, generate trust assessments, or modify comparison output.
+      It does not collect evidence, normalize evidence, generate findings,
+      evaluate risks, generate remediation recommendations, generate trust
+      assessments, or modify comparison output.
+    </p>
+    <p>
+      Persisted advisory remediation recommendations are included as read-only
+      report output. The same report view model is intended to support a future
+      PDF renderer without triggering recommendation generation.
     </p>
   </div>
 </section>

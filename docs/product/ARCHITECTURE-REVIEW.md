@@ -2169,3 +2169,1066 @@ SiteSentinel now has a typed, testable, auditable, and secret-safe Telegram prov
 The provider remains disabled by default and manual only.
 
 Automatic notification dispatch remains outside the approved architecture boundary.
+
+# SiteSentinel Architecture Review-12
+
+## Sprint
+
+Sprint 12 Closure
+
+## Result
+
+APPROVED
+
+## Product Owner
+
+Approved
+
+## Architecture Status
+
+AI Remediation Recommendation Baseline Implemented
+
+## Implementation Status
+
+Sprint 12 introduced a persisted, evidence-grounded, validated, advisory remediation recommendation layer.
+
+The approved core assessment lifecycle remains:
+
+Website  
+↓  
+MonitoringRun  
+↓  
+HTTP Evidence Collection  
+↓  
+CollectedEvidence  
+↓  
+NormalizedEvidence  
+↓  
+Finding  
+↓  
+Risk  
+↓  
+TrustAssessment
+
+Sprint 12 extends the completed assessment lifecycle with a post-assessment advisory path:
+
+Monitoring Run Marked COMPLETED  
+↓  
+Persisted Risks Loaded  
+↓  
+Linked Findings Loaded  
+↓  
+Linked Normalized Evidence Loaded  
+↓  
+Evidence-Safe Recommendation Context Built  
+↓  
+Versioned AI Request Created  
+↓  
+AI Provider Abstraction Evaluated  
+↓  
+Structured Output Validated  
+↓  
+AI Recommendation or Rule-Based Fallback Produced  
+↓  
+Validated Advisory Recommendation Persisted  
+↓  
+Risk Detail and Monitoring Run Report Read Models Updated
+
+The recommendation layer does not participate in risk or trust calculation.
+
+Risk and trust remain authoritative persisted assessment outputs.
+
+Recommendations are downstream advisory artifacts.
+
+## Architectural Objective
+
+Sprint 12 established the minimum architecture required to generate remediation guidance without weakening the 
+existing assessment, traceability, security, or monitoring lifecycle boundaries.
+
+The architecture must ensure that recommendation generation:
+
+- Uses existing persisted risks.
+- Uses existing persisted findings.
+- Uses existing persisted normalized evidence.
+- Does not create new risks.
+- Does not create new findings.
+- Does not create new evidence.
+- Does not change risk severity.
+- Does not change risk score.
+- Does not change confidence score.
+- Does not change trust score.
+- Does not expose secrets to AI providers.
+- Does not persist invalid AI output.
+- Does not cause a completed monitoring run to become failed.
+- Falls back to deterministic advisory guidance when AI is unavailable or invalid.
+
+## Recommendation Domain Boundary
+
+Sprint 12 introduced the recommendation domain under:
+
+`com.cigabyte.sitesentinel.recommendation`
+
+The primary persisted entity is:
+
+`RiskRemediationRecommendation`
+
+A recommendation is associated with:
+
+- One persisted monitoring run.
+- One persisted risk.
+
+The recommendation is not part of the `Risk` aggregate.
+
+The recommendation does not own or mutate:
+
+- Risk.
+- Finding.
+- Evidence.
+- Trust assessment.
+- Monitoring run assessment data.
+
+The association is maintained through persisted identifiers:
+
+- `monitoringRunId`
+- `riskId`
+
+Database foreign keys preserve referential integrity.
+
+Application-level persistence validation additionally confirms that the selected risk belongs to the selected 
+monitoring run.
+
+## Recommendation Source Model
+
+The architecture supports two recommendation sources:
+
+- `AI`
+- `RULE_BASED_FALLBACK`
+
+Supported fallback classifications are:
+
+- `NONE`
+- `PROVIDER_UNAVAILABLE`
+- `PROVIDER_FAILURE`
+- `VALIDATION_FAILURE`
+
+The approved state combinations are:
+
+AI recommendation:
+
+- Source is `AI`.
+- Fallback reason is `NONE`.
+- Provider name is required.
+- Model name is required.
+- Prompt version is required.
+- Fallback rule version is absent.
+
+Rule-based fallback recommendation:
+
+- Source is `RULE_BASED_FALLBACK`.
+- Fallback reason is not `NONE`.
+- Prompt version is required.
+- Fallback rule version is required.
+- Attempted provider and model metadata are optional.
+
+Only recommendations with:
+
+- `validationStatus = VALID`
+- `advisory = true`
+
+may cross the persistence boundary.
+
+## Database Architecture
+
+Sprint 12 added:
+
+`V16__create_risk_remediation_recommendations_table.sql`
+
+The migration introduced:
+
+- Recommendation primary key.
+- Monitoring run foreign key.
+- Risk foreign key.
+- Source classification.
+- Fallback classification.
+- Validation status.
+- Advisory flag.
+- Recommendation content.
+- Provider metadata.
+- Prompt version metadata.
+- Fallback rule version metadata.
+- Context fingerprint.
+- Context finding count.
+- Context evidence count.
+- Generation timestamp.
+- Persistence timestamp.
+
+Database constraints enforce:
+
+- Approved source values.
+- Approved fallback values.
+- Validated-only persistence.
+- Advisory-only persistence.
+- Non-negative context counts.
+- Exact 64-character context fingerprint length.
+- Consistent AI metadata.
+- Consistent fallback metadata.
+
+Indexes support:
+
+- Monitoring run recommendation retrieval.
+- Risk recommendation retrieval.
+- Source classification queries.
+- Generation-time ordering.
+
+No existing risk, finding, evidence, trust, monitoring, notification, provider-check, or delivery-attempt table 
+was modified.
+
+## Persistence Architecture
+
+Recommendation persistence is owned by:
+
+`RiskRemediationRecommendationService`
+
+The service validates:
+
+- Recommendation presence.
+- Monitoring run identifier presence.
+- Risk identifier presence.
+- Validation status.
+- Advisory status.
+- Monitoring run existence.
+- Risk existence.
+- Risk-to-monitoring-run ownership.
+
+The service is the approved application persistence boundary for generated recommendations.
+
+The repository provides:
+
+- Monitoring run recommendation history.
+- Risk recommendation history.
+- Latest recommendation lookup.
+- Monitoring run recommendation count.
+
+Repository ordering supports:
+
+Monitoring run report use:
+
+- `generatedAt ASC`
+- `createdAt ASC`
+
+Risk detail history use:
+
+- `generatedAt DESC`
+- `createdAt DESC`
+
+Latest recommendation use:
+
+- Newest `generatedAt`.
+- Newest `createdAt` as the secondary ordering field.
+
+## Evidence-Safe Context Architecture
+
+Recommendation context construction is owned by:
+
+`RiskRemediationRecommendationContextBuilder`
+
+The approved persisted traceability path is:
+
+Risk  
+↓  
+RiskFinding  
+↓  
+Finding  
+↓  
+FindingEvidence  
+↓  
+NormalizedEvidence
+
+The context builder may read:
+
+- Risk type.
+- Risk severity.
+- Risk score.
+- Risk confidence score.
+- Risk rationale.
+- Finding type.
+- Finding title.
+- Finding description.
+- Finding confidence score.
+- Normalized evidence type.
+- Normalized evidence value.
+
+The context builder must not read:
+
+- Raw collected evidence value.
+- Evidence source URL.
+- Provider credential.
+- Telegram bot token.
+- Telegram chat ID.
+- Database password.
+- Raw AI response.
+- Provider exception message.
+
+The recommendation context builder has no dependency on:
+
+- `CollectedEvidence`
+- `CollectedEvidenceRepository`
+
+This dependency exclusion is an explicit architecture boundary.
+
+## Deterministic Context Ordering
+
+Context fingerprint reliability requires deterministic repository ordering.
+
+Sprint 12 added ordered retrieval paths for:
+
+- Risk-to-finding links.
+- Findings.
+- Finding-to-evidence links.
+- Normalized evidence.
+
+The canonical context order is stable for the same persisted dataset.
+
+This prevents nondeterministic database row ordering from changing the context fingerprint.
+
+## Secret-Safe Text Boundary
+
+Recommendation context text passes through:
+
+`RiskRemediationRecommendationContextSanitizer`
+
+The sanitizer provides defense-in-depth detection and redaction for patterns representing:
+
+- Private keys.
+- Bearer credentials.
+- Basic credentials.
+- Telegram bot tokens.
+- JWT values.
+- Credentials embedded in HTTP URLs.
+- API keys.
+- Access tokens.
+- Refresh tokens.
+- Secrets.
+- Passwords.
+- Cookies.
+- Session identifiers.
+- Chat identifiers.
+
+Text fields also use controlled length limits.
+
+UTF-16 truncation:
+
+- Includes the suffix within the maximum length.
+- Avoids splitting Unicode surrogate pairs.
+
+The primary secret-safety boundary remains exclusion of raw collected evidence and provider credentials.
+
+Pattern-based sanitization is a secondary control and is not treated as a complete secret-detection system.
+
+## Context Fingerprint Architecture
+
+Each context receives a deterministic SHA-256 fingerprint.
+
+The canonical fingerprint input includes:
+
+- Monitoring run ID.
+- Risk ID.
+- Risk properties.
+- Ordered finding properties.
+- Ordered normalized evidence properties.
+- Finding count.
+- Evidence count.
+
+The resulting fingerprint:
+
+- Contains 64 lowercase hexadecimal characters.
+- Is stable for the same ordered context.
+- Changes when canonical context content changes.
+- Is persisted as recommendation audit metadata.
+
+Database identifiers participate in the fingerprint for traceability integrity.
+
+Those identifiers are not included in the AI prompt payload.
+
+The fingerprint is not used in:
+
+- Risk scoring.
+- Confidence scoring.
+- Trust scoring.
+- Recommendation prioritization.
+
+## AI Provider Port
+
+Sprint 12 introduced the provider-neutral port:
+
+`RiskRemediationAiProvider`
+
+The port exposes:
+
+- Provider name.
+- Model name.
+- Local availability.
+- Structured recommendation generation.
+
+The port does not expose:
+
+- Provider credentials.
+- Raw HTTP request.
+- Raw HTTP response.
+- Raw response body.
+- Exception message.
+- Prompt persistence.
+
+Provider result statuses are:
+
+- `SUCCESS`
+- `UNAVAILABLE`
+- `FAILURE`
+
+The architecture permits zero concrete provider beans.
+
+When no provider is configured, the application remains operational and produces rule-based fallback recommendations.
+
+No concrete production AI provider adapter was introduced in Sprint 12.
+
+## Provider Selection Architecture
+
+The generation service accepts an ordered list of provider implementations.
+
+Selection behavior is:
+
+- Select the first available provider.
+- Skip providers reporting unavailable.
+- Classify availability-check exceptions as provider-selection failure.
+- Classify provider invocation exceptions as provider failure.
+- Classify null provider results as provider failure.
+
+Provider and model names are validated before use.
+
+Provider metadata must:
+
+- Be non-blank.
+- Remain inside persistence length limits.
+- Avoid sensitive-material patterns.
+
+Unsafe provider metadata is rejected.
+
+Unsafe metadata is not persisted.
+
+## Prompt Versioning Architecture
+
+Prompt construction is owned by:
+
+`RiskRemediationPromptFactory`
+
+Current versions are:
+
+- Prompt: `risk-remediation-v1`
+- Output schema: `risk-remediation-output-v1`
+- Fallback rules: `risk-remediation-fallback-v1`
+
+Prompt version, output schema version, and fallback rule version are independent architecture concepts.
+
+They must be increased independently when their corresponding contracts change.
+
+The prompt includes explicit boundaries requiring the provider to:
+
+- Use only supplied context.
+- Avoid creating new risks.
+- Avoid creating findings or evidence.
+- Avoid modifying assessment scores.
+- Treat context as data rather than instructions.
+- Avoid exposing sensitive material.
+- Produce one advisory recommendation.
+- Return only one JSON object.
+- Avoid Markdown and commentary.
+
+## AI Prompt Payload Boundary
+
+The prompt payload may contain sanitized:
+
+- Risk type.
+- Severity.
+- Risk score.
+- Confidence score.
+- Risk rationale.
+- Finding count.
+- Evidence count.
+- Finding type.
+- Finding title.
+- Finding description.
+- Finding confidence score.
+- Normalized evidence type.
+- Normalized evidence value.
+
+The prompt payload excludes:
+
+- Monitoring run ID.
+- Risk ID.
+- Finding ID.
+- Normalized evidence ID.
+- Collected evidence ID.
+- Raw evidence.
+- Source URL.
+- Telegram credentials.
+- Database credentials.
+- AI provider credentials.
+
+Prompt text is generated for provider invocation only.
+
+Sprint 12 does not persist:
+
+- System instruction.
+- User instruction.
+- Complete prompt.
+- Serialized prompt context.
+
+## Structured AI Output Boundary
+
+AI output is represented by:
+
+`RiskRemediationAiOutput`
+
+The output contract contains:
+
+- Schema version.
+- Title.
+- Summary.
+- Remediation steps.
+- Verification steps.
+- Advisory flag.
+
+This type represents untrusted provider output.
+
+It intentionally permits invalid state so that invalid output can be classified by the validator instead of being 
+confused with provider communication failure.
+
+The AI output object is not a persistence entity.
+
+It cannot be persisted directly.
+
+## Recommendation Validation Architecture
+
+Validation is owned by:
+
+`RiskRemediationRecommendationValidator`
+
+The validator checks:
+
+- Output presence.
+- Schema version presence.
+- Exact schema version.
+- Title presence.
+- Title length.
+- Summary presence.
+- Summary length.
+- Remediation step presence.
+- Remediation step item presence.
+- Remediation step length.
+- Remediation step count.
+- Verification step presence.
+- Verification step item presence.
+- Verification step length.
+- Verification step count.
+- Advisory flag presence.
+- Advisory flag value.
+- Sensitive-material patterns.
+- Persistence content contract compatibility.
+
+Validation returns:
+
+- `VALID` with persistence-ready content.
+- `INVALID` with typed issue codes.
+
+Invalid validation results do not contain recommendation content.
+
+Valid validation results do not contain validation issues.
+
+Invalid AI output:
+
+- Is not persisted.
+- Is not partially persisted.
+- Is not silently corrected.
+- Is not stored for later display.
+- Leads to deterministic fallback generation.
+
+Sensitive AI output is rejected rather than redacted and accepted.
+
+## Rule-Based Fallback Architecture
+
+Rule-based fallback generation is owned by:
+
+`RiskRemediationRuleBasedFallbackGenerator`
+
+The fallback is:
+
+- Deterministic.
+- Versioned.
+- Advisory.
+- Provider-independent.
+- Network-independent.
+- Database-independent after context creation.
+
+Fallback content uses:
+
+- Risk type.
+- Persisted severity.
+- Finding count.
+- Normalized evidence count.
+
+Fallback content does not echo:
+
+- Risk rationale.
+- Finding description.
+- Normalized evidence value.
+- Raw evidence.
+- Source URL.
+- Provider response.
+- Exception message.
+
+Severity affects guidance language only.
+
+Severity is not recalculated or modified.
+
+The current fallback rule version is:
+
+`risk-remediation-fallback-v1`
+
+## Recommendation Generation Orchestration
+
+Single-risk orchestration is owned by:
+
+`RiskRemediationRecommendationGenerationService`
+
+The service coordinates:
+
+1. Context construction.
+2. Prompt construction.
+3. Provider selection.
+4. Provider metadata validation.
+5. Provider invocation.
+6. Provider result classification.
+7. Structured output validation.
+8. AI or fallback recommendation creation.
+9. Validated persistence.
+
+The approved mapping is:
+
+No provider:
+
+- Source: `RULE_BASED_FALLBACK`
+- Reason: `PROVIDER_UNAVAILABLE`
+
+Provider unavailable:
+
+- Source: `RULE_BASED_FALLBACK`
+- Reason: `PROVIDER_UNAVAILABLE`
+
+Provider failure or exception:
+
+- Source: `RULE_BASED_FALLBACK`
+- Reason: `PROVIDER_FAILURE`
+
+Provider success with invalid output:
+
+- Source: `RULE_BASED_FALLBACK`
+- Reason: `VALIDATION_FAILURE`
+
+Provider success with valid output:
+
+- Source: `AI`
+- Reason: `NONE`
+
+Provider exception messages and invalid AI output are not persisted.
+
+## Transaction Architecture
+
+The recommendation generation orchestration service is not transaction-scoped.
+
+AI provider invocation must not occur inside a long-running database transaction.
+
+Persistence transactions remain short and are owned by:
+
+`RiskRemediationRecommendationService.saveValidated(...)`
+
+Run-level generation also does not create a transaction around all risks.
+
+This design ensures:
+
+- Network latency does not hold database transactions open.
+- One failed risk does not roll back previously persisted recommendations.
+- Remaining risks continue processing.
+- Persistence remains isolated per recommendation.
+
+## Monitoring Lifecycle Integration
+
+Run-level generation is owned by:
+
+`RiskRemediationRecommendationRunGenerationService`
+
+Recommendation generation runs only for a persisted monitoring run with status:
+
+`COMPLETED`
+
+The approved execution order is:
+
+Monitoring collection and assessment  
+↓  
+Trust assessment generation  
+↓  
+Monitoring run marked COMPLETED  
+↓  
+Recommendation generation  
+↓  
+Notification event generation
+
+Recommendation generation does not run for failed monitoring runs.
+
+A run-level recommendation exception is caught by the monitoring execution boundary.
+
+The completed monitoring run remains completed.
+
+Notification event generation is still attempted.
+
+The recommendation subsystem cannot overwrite the main monitoring failure reason.
+
+## Per-Risk Failure Isolation
+
+Run-level generation processes persisted risks independently.
+
+For each risk:
+
+- Generation is attempted.
+- Success increments the generated count.
+- Runtime failure increments the failed count.
+- Processing continues with the next risk.
+
+The run-level result contains:
+
+- Monitoring run ID.
+- Risk count.
+- Generated count.
+- Failed count.
+
+The result does not contain:
+
+- Recommendation content.
+- Prompt content.
+- Evidence content.
+- Exception message.
+- Provider response.
+
+## Risk Detail Presentation Boundary
+
+Risk detail now includes:
+
+- Latest persisted recommendation.
+- Recommendation content.
+- Recommendation audit metadata.
+- Recommendation history.
+
+Recommendation history is read-only and ordered newest first.
+
+The view does not:
+
+- Trigger recommendation generation.
+- Call an AI provider.
+- Modify a recommendation.
+- Modify a risk.
+- Modify trust output.
+
+Recommendation content is rendered through escaped Thymeleaf text:
+
+`th:text`
+
+Unescaped rendering through:
+
+`th:utext`
+
+is not approved for recommendation content.
+
+## Monitoring Run Report Architecture
+
+The monitoring run report read model now includes:
+
+- Recommendation count.
+- Persisted recommendation collection.
+- Latest recommendation per risk.
+- Risk-to-recommendation view mapping.
+- Recommendation availability.
+- Risk-to-recommendation traceability.
+
+The report includes one read-model item for each persisted risk.
+
+A report item may contain:
+
+- Risk with recommendation.
+- Risk without recommendation.
+
+This preserves compatibility with:
+
+- Monitoring runs completed before Sprint 12.
+- Isolated recommendation generation failures.
+
+Opening a report is a read-only operation.
+
+The report does not:
+
+- Generate recommendations.
+- Call an AI provider.
+- Re-run monitoring.
+- Mutate persisted assessment data.
+
+## PDF Integration Readiness
+
+The monitoring run report view now carries sufficient persisted recommendation information for a future PDF renderer.
+
+The future PDF layer should consume the existing report read model instead of rebuilding recommendation context 
+or invoking AI.
+
+The approved future direction is:
+
+Persisted Monitoring Run Report View  
+↓  
+PDF Renderer  
+↓  
+Versioned PDF Artifact  
+↓  
+Telegram Document Dispatch  
+↓  
+Persisted Dispatch Audit
+
+Sprint 12 stops before PDF rendering.
+
+No PDF renderer or document-delivery adapter was added.
+
+## Audit Architecture
+
+Persisted recommendation audit metadata includes:
+
+- Monitoring run ID.
+- Risk ID.
+- Source.
+- Fallback reason.
+- Validation status.
+- Advisory status.
+- Provider name when safely available.
+- Model name when safely available.
+- Prompt version.
+- Fallback rule version when applicable.
+- Context fingerprint.
+- Context finding count.
+- Context evidence count.
+- Generated timestamp.
+- Created timestamp.
+
+The recommendation audit model intentionally excludes:
+
+- Full prompts.
+- Raw AI responses.
+- Invalid AI output.
+- Provider response bodies.
+- Exception messages.
+- Credentials.
+- Raw evidence.
+- Source URLs.
+
+This provides operational traceability without retaining high-risk provider or secret-bearing payloads.
+
+## Automated Verification Architecture
+
+Sprint 12 added 36 automated tests.
+
+Unit-level coverage includes:
+
+- Secret redaction.
+- Private key redaction.
+- UTF-16-safe truncation.
+- Blank context rejection.
+- Structured output acceptance.
+- Schema mismatch rejection.
+- Non-advisory output rejection.
+- Sensitive output rejection.
+- Null step rejection.
+- Step-count enforcement.
+- Deterministic fallback generation.
+- Severity-aware fallback guidance.
+- Free-text echo prevention.
+- Deterministic fingerprint generation.
+- Fingerprint change detection.
+- Prompt versioning.
+- Prompt identifier exclusion.
+
+Orchestration coverage includes:
+
+- No-provider fallback.
+- Provider unavailable fallback.
+- Provider failure fallback.
+- Provider exception isolation.
+- Valid AI persistence.
+- Validation failure fallback.
+- Unsafe provider metadata rejection.
+- Per-risk failure isolation.
+- Empty completed-run handling.
+- Non-completed-run rejection.
+- Monitoring lifecycle preservation.
+- Failed-run recommendation exclusion.
+- Recommendation-before-notification ordering.
+
+Persistence integration coverage includes:
+
+- Monitoring run ordering.
+- Monitoring run filtering.
+- Risk history ordering.
+- Latest recommendation selection.
+- Recommendation count isolation.
+- AI audit metadata persistence.
+- Fallback audit metadata persistence.
+- Valid risk-to-run persistence.
+- Mismatched risk-to-run rejection.
+
+Final verification result:
+
+- Tests run: 110
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Maven test: BUILD SUCCESS
+- Maven compile: BUILD SUCCESS
+
+## Preserved Architecture Boundaries
+
+Sprint 12 preserves the following ownership:
+
+- Evidence Collection Engine collects evidence.
+- Evidence Analysis Engine normalizes evidence and produces findings.
+- Risk Evaluation Engine produces risks.
+- Trust Evaluation Engine produces trust assessments.
+- Recommendation Context Builder produces evidence-safe advisory context.
+- Prompt Factory produces versioned provider requests.
+- AI Provider port owns provider communication abstraction.
+- Recommendation Validator validates untrusted provider output.
+- Rule-Based Fallback Generator produces deterministic fallback content.
+- Recommendation Generation Service coordinates single-risk generation.
+- Recommendation Run Generation Service coordinates completed-run processing.
+- Recommendation Service owns validated persistence.
+- Risk detail and report layers own read-only presentation.
+- Notification Event Generation remains separate from recommendation generation.
+- Notification Delivery remains separate from recommendation generation.
+
+## Explicit Non-Responsibilities
+
+The recommendation layer does not own:
+
+- Website registration.
+- Monitoring scheduling.
+- HTTP evidence collection.
+- Evidence normalization.
+- Finding generation.
+- Risk evaluation.
+- Trust assessment.
+- Notification event ownership.
+- Notification delivery attempts.
+- Telegram provider health checks.
+- Telegram message delivery.
+- PDF creation.
+- Report dispatch.
+
+## Accepted Sprint 12 Limitations
+
+The following limitations are accepted at Sprint 12 closure:
+
+- No concrete production AI provider is configured.
+- Production recommendation output currently uses rule-based fallback when no provider exists.
+- Provider selection uses the first available implementation.
+- Provider-specific network timeout policy is not yet implemented.
+- Provider-specific retry policy is not yet implemented.
+- Provider rate-limit classification is not implemented.
+- Recommendation generation is synchronous after monitoring completion.
+- Recommendation generation may delay notification generation for runs containing many risks.
+- Recommendation regeneration idempotency is not implemented.
+- Repeated explicit generation could create additional history records.
+- Recommendation supersession is not modeled.
+- Recommendation approval is not modeled.
+- Recommendation quality feedback is not modeled.
+- Prompt injection controls rely on instruction boundaries, context sanitization, structured validation, 
+and raw-evidence exclusion; they do not provide a formal guarantee against all adversarial content.
+- Pattern-based sensitive-material detection cannot identify every possible secret format.
+- Recommendation history retention limits are not implemented.
+- Context construction may perform multiple repository reads per risk.
+- Provider latency and token-usage metrics are not persisted.
+- Raw AI output is intentionally unavailable for forensic replay.
+- PDF report generation is not implemented.
+- Telegram PDF dispatch is not implemented.
+
+These limitations do not invalidate the Sprint 12 baseline.
+
+They define future architecture work.
+
+## Deferred Architecture Items
+
+The following remain deferred:
+
+- Concrete AI provider adapter.
+- AI HTTP client boundary.
+- Provider-specific request and response parser.
+- AI credential configuration.
+- External secret-manager integration.
+- Provider timeout configuration.
+- Provider retry and backoff.
+- Provider rate-limit handling.
+- Provider circuit breaker.
+- Provider failover.
+- Multi-provider routing.
+- Provider usage metrics.
+- Provider cost metrics.
+- Prompt template administration.
+- Prompt experiment management.
+- Recommendation regeneration controls.
+- Recommendation idempotency.
+- Recommendation supersession.
+- Recommendation approval workflow.
+- Recommendation user feedback.
+- Recommendation quality scoring.
+- Recommendation retention policy.
+- Asynchronous recommendation generation.
+- Recommendation work queue.
+- PDF report renderer.
+- PDF artifact persistence.
+- PDF versioning.
+- PDF integrity fingerprint.
+- PDF retention policy.
+- Telegram document-upload client boundary.
+- Automatic Telegram report dispatch.
+- Dispatch persistence.
+- Dispatch idempotency.
+- Duplicate dispatch prevention.
+- Dispatch retry and backoff.
+- Dispatch failure recovery.
+- Report destination ownership.
+- Recipient management.
+- Notification subscriptions.
+- Authentication.
+- Role-based access control.
+
+## Architecture Decision
+
+Sprint 12 is architecturally approved.
+
+SiteSentinel now has a provider-neutral, evidence-grounded, secret-safe, validated, persisted, advisory remediation
+recommendation foundation.
+
+The recommendation layer remains downstream from risk and trust assessment.
+
+It does not change assessment calculations.
+
+The application remains operational without a concrete AI provider through deterministic rule-based fallback.
+
+Provider and validation failures remain isolated from the completed monitoring run lifecycle.
+
+Recommendation data is available through risk detail and monitoring run report read models.
+
+The existing report read model is ready to support a future PDF renderer.
+
+PDF generation, Telegram PDF dispatch, dispatch persistence, and dispatch audit remain outside the Sprint 12 
+architecture boundary.

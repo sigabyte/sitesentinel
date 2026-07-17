@@ -60,10 +60,245 @@
 </section>
 
 <section class="output-section">
+  <h2>Remediation recommendation</h2>
+
+  <p class="output-note">
+    Recommendations are advisory only. They do not create a new risk or
+    modify the persisted risk severity, risk score, confidence score or
+    trust assessment.
+  </p>
+
+  <div th:if="${latestRecommendation == null}"
+       class="assessment-summary">
+    <p>
+      No remediation recommendation is stored for this risk and monitoring
+      run.
+    </p>
+  </div>
+
+  <div th:if="${latestRecommendation != null}">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-card-label">Recommendation Source</span>
+        <span class="summary-card-value"
+              th:text="${latestRecommendation.source}">
+          Source
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Advisory</span>
+        <span class="summary-card-value"
+              th:text="${latestRecommendation.advisory ? 'YES' : 'NO'}">
+          YES
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Linked Findings</span>
+        <span class="summary-card-value"
+              th:text="${latestRecommendation.contextFindingCount}">
+          0
+        </span>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-card-label">Normalized Evidence Items</span>
+        <span class="summary-card-value"
+              th:text="${latestRecommendation.contextEvidenceCount}">
+          0
+        </span>
+      </div>
+    </div>
+
+    <div class="traceability-card">
+      <h3 th:text="${latestRecommendation.title}">
+        Recommendation title
+      </h3>
+
+      <p>Summary:</p>
+      <div class="traceability-description"
+           th:text="${latestRecommendation.summary}">
+        Recommendation summary
+      </div>
+
+      <div class="output-subsection">
+        <h3>Remediation steps</h3>
+
+        <div class="traceability-description"
+             th:text="${latestRecommendation.remediationSteps}">
+          Remediation steps
+        </div>
+      </div>
+
+      <div class="output-subsection">
+        <h3>Verification steps</h3>
+
+        <div class="traceability-description"
+             th:text="${latestRecommendation.verificationSteps}">
+          Verification steps
+        </div>
+      </div>
+    </div>
+
+    <div class="traceability-card">
+      <h3>Recommendation audit metadata</h3>
+
+      <p>
+        Validation Status:
+        <strong th:text="${latestRecommendation.validationStatus}">
+          VALID
+        </strong>
+      </p>
+
+      <p>
+        Source:
+        <strong th:text="${latestRecommendation.source}">
+          Source
+        </strong>
+      </p>
+
+      <p>
+        Fallback Reason:
+        <strong th:text="${latestRecommendation.fallbackReason}">
+          NONE
+        </strong>
+      </p>
+
+      <p>
+        Provider:
+        <strong th:text="${latestRecommendation.providerName != null
+                ? latestRecommendation.providerName
+                : 'Not used'}">
+          Provider
+        </strong>
+      </p>
+
+      <p>
+        Model:
+        <strong th:text="${latestRecommendation.modelName != null
+                ? latestRecommendation.modelName
+                : 'Not used'}">
+          Model
+        </strong>
+      </p>
+
+      <p>
+        Prompt Version:
+        <strong th:text="${latestRecommendation.promptVersion}">
+          Prompt version
+        </strong>
+      </p>
+
+      <p>
+        Fallback Rule Version:
+        <strong th:text="${latestRecommendation.fallbackRuleVersion != null
+                ? latestRecommendation.fallbackRuleVersion
+                : 'Not applicable'}">
+          Fallback rule version
+        </strong>
+      </p>
+
+      <p>
+        Context Fingerprint:
+        <strong th:text="${latestRecommendation.contextFingerprint}">
+          Context fingerprint
+        </strong>
+      </p>
+
+      <p>
+        Generated At:
+        <strong th:text="${latestRecommendation.generatedAt}">
+          Generated at
+        </strong>
+      </p>
+
+      <p>
+        Persisted At:
+        <strong th:text="${latestRecommendation.createdAt}">
+          Persisted at
+        </strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="output-section">
+  <h2>Recommendation history</h2>
+
+  <p class="output-note">
+    Generation history is ordered from the newest recommendation to the
+    oldest recommendation.
+  </p>
+
+  <div th:if="${#lists.isEmpty(recommendations)}"
+       class="assessment-summary">
+    <p>No recommendation history is available.</p>
+  </div>
+
+  <table th:if="${!#lists.isEmpty(recommendations)}">
+    <thead>
+    <tr>
+      <th>Generated At</th>
+      <th>Source</th>
+      <th>Fallback Reason</th>
+      <th>Provider</th>
+      <th>Model</th>
+      <th>Prompt Version</th>
+      <th>Fallback Rule</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="recommendation : ${recommendations}">
+      <td th:text="${recommendation.generatedAt}">
+        Generated at
+      </td>
+
+      <td th:text="${recommendation.source}">
+        Source
+      </td>
+
+      <td th:text="${recommendation.fallbackReason}">
+        Fallback reason
+      </td>
+
+      <td th:text="${recommendation.providerName != null
+              ? recommendation.providerName
+              : 'Not used'}">
+        Provider
+      </td>
+
+      <td th:text="${recommendation.modelName != null
+              ? recommendation.modelName
+              : 'Not used'}">
+        Model
+      </td>
+
+      <td th:text="${recommendation.promptVersion}">
+        Prompt version
+      </td>
+
+      <td th:text="${recommendation.fallbackRuleVersion != null
+              ? recommendation.fallbackRuleVersion
+              : 'Not applicable'}">
+        Fallback rule
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="output-section">
   <h2>Source findings</h2>
   <p class="output-note">
     These findings are linked to this risk through the risk_finding table.
   </p>
+
+  <div class="traceability-chain-step">
+    Advisory Recommendations:
+    <strong th:text="${recommendationCount}">0</strong>
+  </div>
 
   <div class="summary-grid">
     <div class="summary-card">

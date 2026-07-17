@@ -40,18 +40,67 @@ Evaluate a workspace-oriented user interface after the MVP UI structure is stabl
 
 Define measurable targets for response time, uptime, monitoring throughput, and failure rates.
 
+### FB-009 — Asynchronous Post-Monitoring Processing
+
+Evaluate whether recommendation generation, PDF rendering, and report dispatch should move from the synchronous monitoring completion path to a durable post-monitoring work queue.
+
 ---
 
-## Notification Dispatch
+## AI Remediation Recommendation Follow-Up
 
-- Design automatic notification dispatch rules.
+- Add a concrete production AI provider adapter.
+- Add an AI provider HTTP client boundary.
+- Add provider-specific structured response parsing.
+- Add environment-based AI provider configuration.
+- Add external secret-manager integration for AI credentials.
+- Add provider request timeout configuration.
+- Add provider retry and backoff policy.
+- Add provider rate-limit classification.
+- Add provider circuit breaker.
+- Add provider failover.
+- Add multi-provider routing.
+- Add provider latency metrics.
+- Add provider token-usage metrics.
+- Add provider cost metrics.
+- Add recommendation generation duration metrics.
+- Add recommendation regeneration controls.
+- Define recommendation generation idempotency.
+- Prevent accidental duplicate recommendation generation.
+- Define recommendation supersession rules.
+- Add recommendation approval workflow.
+- Add recommendation quality feedback.
+- Evaluate recommendation quality scoring.
+- Define recommendation history retention.
+- Add prompt template administration.
+- Add prompt experiment management.
+- Define prompt-version retirement rules.
+- Evaluate asynchronous recommendation generation.
+- Evaluate a durable recommendation work queue.
+- Optimize recommendation context loading for monitoring runs containing many risks.
+- Define safe operational visibility for validation issue classifications.
+- Preserve the rule-based fallback path when a production AI provider is unavailable.
+
+---
+
+## Notification and Report Dispatch
+
+- Design automatic notification and report dispatch rules.
 - Define eligible notification event types.
 - Define severity-based dispatch rules.
 - Define manual and automatic dispatch boundaries.
 - Define scheduled monitoring dispatch behavior.
-- Prevent duplicate automatic dispatch.
-- Define delivery idempotency requirements.
-- Add automatic Telegram delivery after monitoring completion.
+- Add a Telegram document-upload client boundary.
+- Keep Telegram document delivery separate from Telegram text-message delivery.
+- Automatically dispatch the persisted full monitoring run PDF after successful report generation.
+- Require the monitoring run to be completed before automatic report dispatch.
+- Require recommendation generation processing to finish before PDF report rendering.
+- Do not dispatch when no valid PDF artifact is available.
+- Persist report dispatch lifecycle and audit metadata.
+- Define report destination ownership.
+- Prevent duplicate automatic report dispatch.
+- Define report dispatch idempotency requirements.
+- Add manual report re-dispatch controls.
+- Preserve notification generation when recommendation or report dispatch fails safely.
 
 ---
 
@@ -91,6 +140,11 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 - Add manual retry action.
 - Add retry audit visibility.
 - Add delivery queue support.
+- Add PDF report dispatch retry classification.
+- Add Telegram document-upload retry handling.
+- Prevent retry from creating duplicate dispatch records.
+- Preserve the original PDF artifact across delivery retries.
+- Define recovery for report generation success followed by dispatch failure.
 
 ---
 
@@ -158,8 +212,15 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 ## Data Integrity and Idempotency
 
 - Add database-level uniqueness constraints for idempotent assessment outputs.
+- Define recommendation generation idempotency.
+- Define duplicate recommendation prevention rules.
+- Define recommendation supersession integrity rules.
+- Define PDF report artifact uniqueness per monitoring run and report version.
+- Define PDF artifact integrity fingerprint requirements.
 - Define notification dispatch idempotency.
+- Define report dispatch idempotency.
 - Define delivery attempt uniqueness rules.
+- Define duplicate Telegram document dispatch prevention.
 - Define duplicate provider check handling.
 
 ---
@@ -168,23 +229,46 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 
 - Add service tests for website registration.
 - Add scanner safety validation tests.
-- Add monitoring lifecycle integration tests.
 - Add evidence analysis tests.
 - Add risk evaluation tests.
 - Add trust evaluation tests.
 - Add notification event generation tests.
 - Add notification delivery settings controller and template integration tests.
+- Add concrete AI provider contract tests.
+- Add AI provider HTTP integration tests using controlled stub responses.
+- Add provider timeout, rate-limit, and failure-classification tests.
+- Add recommendation generation idempotency tests.
+- Add recommendation supersession tests.
+- Add PDF renderer integration tests.
+- Add PDF artifact integrity tests.
+- Add Telegram document-upload safety tests.
+- Add automatic report dispatch ordering tests.
+- Add report dispatch idempotency tests.
+- Add duplicate document-dispatch prevention tests.
+- Add report delivery retry and recovery tests.
+- Add end-to-end completed-run-to-Telegram-report tests.
 
 ---
 
-## Reporting and Export
+## Reporting, PDF Artifacts and Export
 
-- Add PDF report export.
+- Add PDF generation from the existing `MonitoringRunReportView`.
+- Ensure PDF rendering reads persisted report data without triggering recommendation generation.
+- Include persisted advisory recommendations in the full monitoring run PDF.
+- Include recommendation source, fallback classification, prompt version, model metadata, and context fingerprint in the PDF audit section.
+- Add PDF artifact persistence.
+- Add PDF report versioning.
+- Add PDF artifact integrity fingerprinting.
+- Define PDF filename conventions.
+- Define PDF size limits.
+- Define PDF storage location and ownership.
+- Define PDF retention and deletion policy.
+- Define behavior when PDF rendering fails after the monitoring run completes.
+- Add controlled manual PDF download.
 - Add CSV export.
 - Define business-user report format.
-- Add report versioning.
 - Add report approval workflow.
-- Evaluate AI-assisted report summaries.
+- Evaluate AI-assisted report summaries as a separate validated output contract.
 
 ---
 
@@ -216,4 +300,10 @@ Define measurable targets for response time, uptime, monitoring throughput, and 
 - Decide whether optional resource failures should affect trust score.
 - Decide how historical trend changes should be displayed.
 - Decide which scanner signals should be visible by default.
-- Define future AI-assisted analysis boundaries.
+- Decide whether AI may ever participate in risk, finding, or evidence analysis beyond the approved advisory 
+remediation recommendation boundary.
+- Decide whether AI-generated recommendations require human approval before external report dispatch.
+- Decide whether repeated recommendations replace, supersede, or remain alongside previous recommendation history.
+- Decide whether report dispatch should include all completed runs or only runs meeting configured risk and severity 
+rules.
+- Decide whether the full PDF report or a short notification should be sent when a completed run contains no risks.

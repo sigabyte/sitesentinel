@@ -6,6 +6,7 @@ public class MonitoringRunReportCounts {
     private final long normalizedEvidenceCount;
     private final long findingCount;
     private final long riskCount;
+    private final long recommendationCount;
     private final long trustAssessmentCount;
 
     public MonitoringRunReportCounts(
@@ -13,13 +14,22 @@ public class MonitoringRunReportCounts {
             long normalizedEvidenceCount,
             long findingCount,
             long riskCount,
+            long recommendationCount,
             long trustAssessmentCount
     ) {
-        this.collectedEvidenceCount = collectedEvidenceCount;
-        this.normalizedEvidenceCount = normalizedEvidenceCount;
+        this.collectedEvidenceCount =
+                collectedEvidenceCount;
+
+        this.normalizedEvidenceCount =
+                normalizedEvidenceCount;
+
         this.findingCount = findingCount;
         this.riskCount = riskCount;
-        this.trustAssessmentCount = trustAssessmentCount;
+        this.recommendationCount =
+                recommendationCount;
+
+        this.trustAssessmentCount =
+                trustAssessmentCount;
     }
 
     public long getCollectedEvidenceCount() {
@@ -36,6 +46,10 @@ public class MonitoringRunReportCounts {
 
     public long getRiskCount() {
         return riskCount;
+    }
+
+    public long getRecommendationCount() {
+        return recommendationCount;
     }
 
     public long getTrustAssessmentCount() {
@@ -58,6 +72,10 @@ public class MonitoringRunReportCounts {
         return riskCount > 0;
     }
 
+    public boolean hasRecommendations() {
+        return recommendationCount > 0;
+    }
+
     public boolean hasTrustAssessments() {
         return trustAssessmentCount > 0;
     }
@@ -69,6 +87,7 @@ public class MonitoringRunReportCounts {
     public boolean hasLifecycleOutput() {
         return hasCollectedEvidence()
                 || hasNormalizedEvidence()
-                || hasAssessmentOutput();
+                || hasAssessmentOutput()
+                || hasRecommendations();
     }
 }
