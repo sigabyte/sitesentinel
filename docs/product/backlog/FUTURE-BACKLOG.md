@@ -47,69 +47,134 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ---
 
-## AI Remediation Recommendation Follow-Up
+## AI Remediation Recommendation Production Hardening
 
-- Add a concrete production AI provider adapter.
-- Add an AI provider HTTP client boundary.
-- Add provider-specific structured response parsing.
-- Add environment-based AI provider configuration.
+Sprint 15 completed the first concrete production AI provider baseline.
+
+The completed foundation includes:
+
+- provider-neutral recommendation orchestration;
+- concrete OpenAI provider adapter;
+- environment-based OpenAI configuration;
+- default-disabled provider behavior;
+- OpenAI Responses API HTTP client boundary;
+- strict structured-output request generation;
+- typed provider response parsing;
+- timeout and HTTP failure classification;
+- existing recommendation validation;
+- provider-disabled rule-based fallback;
+- provider-failure rule-based fallback;
+- real OpenAI recommendation verification;
+- AI recommendation persistence;
+- AI-enriched PDF generation;
+- automatic Telegram delivery of the AI-enriched PDF;
+- secret-safe request, response, and error handling.
+
+Future work must build on the existing provider-neutral boundary and must not
+replace the rule-based fallback path.
+
+Remaining production-hardening work:
+
 - Add external secret-manager integration for AI credentials.
-- Add provider request timeout configuration.
-- Add provider retry and backoff policy.
-- Add provider rate-limit classification.
-- Add provider circuit breaker.
+- Define production API-key rotation and revocation procedures.
+- Add explicit AI provider priority configuration.
+- Add a second concrete AI provider only after a documented provider-expansion
+  decision.
 - Add provider failover.
 - Add multi-provider routing.
+- Add automatic provider retry policy.
+- Classify retryable and non-retryable AI provider failures.
+- Add `Retry-After` handling for provider rate limits when available.
+- Add exponential backoff.
+- Add maximum retry count.
+- Add provider circuit breaker.
+- Add provider health monitoring.
+- Add provider-health freshness rules.
+- Add provider request-ID audit when it can be stored without exposing
+  sensitive response data.
+- Decide whether authentication, rate-limit, timeout, invalid-response and
+  provider-unavailable classifications should be persisted separately from the
+  current broad `PROVIDER_FAILURE` fallback reason.
+- Define safe operational visibility for provider failure classifications.
 - Add provider latency metrics.
 - Add provider token-usage metrics.
 - Add provider cost metrics.
-- Add recommendation generation duration metrics.
+- Add recommendation-generation duration metrics.
+- Define model evaluation and promotion criteria.
+- Add a repeatable recommendation-quality evaluation dataset.
+- Compare configured models using:
+
+  - structured-output success rate;
+  - validator acceptance rate;
+  - unsupported-claim rate;
+  - remediation-step usefulness;
+  - verification-step usefulness;
+  - latency;
+  - token usage;
+  - cost.
+- Define model-version upgrade and rollback procedures.
+- Define behavior when a configured model is retired or unavailable.
 - Add recommendation regeneration controls.
 - Define recommendation generation idempotency.
 - Prevent accidental duplicate recommendation generation.
 - Define recommendation supersession rules.
+- Define recommendation history retention.
 - Add recommendation approval workflow.
 - Add recommendation quality feedback.
 - Evaluate recommendation quality scoring.
-- Define recommendation history retention.
 - Add prompt template administration.
 - Add prompt experiment management.
 - Define prompt-version retirement rules.
 - Evaluate asynchronous recommendation generation.
 - Evaluate a durable recommendation work queue.
-- Optimize recommendation context loading for monitoring runs containing many risks.
-- Define safe operational visibility for validation issue classifications.
-- Preserve the rule-based fallback path when a production AI provider is unavailable.
+- Optimize recommendation context loading for monitoring runs containing many
+  risks.
+- Preserve the existing rule-based fallback whenever every configured AI
+  provider is disabled, unavailable, invalid, or unsuccessful.
+
+Future implementations must not:
+
+- allow an AI provider to collect evidence;
+- allow an AI provider to create findings or risks;
+- allow AI output to alter severity or trust assessments;
+- bypass `RiskRemediationRecommendationValidator.java`;
+- persist raw provider responses;
+- persist authorization headers or API keys;
+- expose provider exception messages without an approved sanitization
+  boundary;
+- make recommendation-provider failure fail a completed monitoring run;
+- couple provider communication directly to PDF rendering or Telegram
+  delivery.
 
 ---
 
 ## AI Unresolved-Risk Impact Analysis
 
-* Generate potential impact analysis for validated monitoring risks when they remain unresolved.
-* Explain what technical, operational, security, availability, customer, financial, compliance, or reputational 
+- Generate potential impact analysis for validated monitoring risks when they remain unresolved.
+- Explain what technical, operational, security, availability, customer, financial, compliance, or reputational 
 consequences may occur if a risk is not remediated.
-* Generate only impact categories that are relevant to the finding and supported by available evidence.
-* Link every generated impact statement to the originating risk, finding, evidence, monitoring run, prompt version, 
+- Generate only impact categories that are relevant to the finding and supported by available evidence.
+- Link every generated impact statement to the originating risk, finding, evidence, monitoring run, prompt version, 
 and recommendation generation record.
-* Include an impact category for every generated consequence.
-* Include likelihood or urgency when it can be supported safely.
-* Include confidence for every generated impact statement.
-* Use non-deterministic language such as `may`, `could`, or `is likely to` unless the consequence follows directly 
+- Include an impact category for every generated consequence.
+- Include likelihood or urgency when it can be supported safely.
+- Include confidence for every generated impact statement.
+- Use non-deterministic language such as `may`, `could`, or `is likely to` unless the consequence follows directly 
 from verified technical evidence.
-* Prevent unsupported claims, exaggerated business consequences, and speculative legal, regulatory, or financial 
+- Prevent unsupported claims, exaggerated business consequences, and speculative legal, regulatory, or financial 
 conclusions.
-* Preserve the rule-based fallback path when AI-generated impact analysis is unavailable or invalid.
-* Validate AI-generated impact analysis before persistence or external presentation.
-* Store validated impact analysis as structured data rather than generating it inside the PDF renderer.
-* Make validated impact analysis reusable by PDF reports, web views, APIs, notification summaries, and future 
+- Preserve the rule-based fallback path when AI-generated impact analysis is unavailable or invalid.
+- Validate AI-generated impact analysis before persistence or external presentation.
+- Store validated impact analysis as structured data rather than generating it inside the PDF renderer.
+- Make validated impact analysis reusable by PDF reports, web views, APIs, notification summaries, and future 
 executive dashboards.
-* Keep unresolved-risk impact analysis separate from risk detection, severity calculation, trust assessment, 
+- Keep unresolved-risk impact analysis separate from risk detection, severity calculation, trust assessment, 
 and evidence analysis.
-* Do not allow AI-generated impact analysis to modify the authoritative risk severity or monitoring result.
-* Define impact-analysis generation idempotency.
-* Prevent duplicate impact-analysis generation for the same risk and recommendation lifecycle.
-* Define regeneration, supersession, history retention, and approval rules.
-* Optimize impact generation for monitoring runs containing many risks.
+- Do not allow AI-generated impact analysis to modify the authoritative risk severity or monitoring result.
+- Define impact-analysis generation idempotency.
+- Prevent duplicate impact-analysis generation for the same risk and recommendation lifecycle.
+- Define regeneration, supersession, history retention, and approval rules.
+- Optimize impact generation for monitoring runs containing many risks.
 
 
 ## Notification and Report Dispatch Follow-Up
@@ -269,8 +334,6 @@ and evidence analysis.
 - Add trust evaluation tests.
 - Add notification event generation tests.
 - Add notification delivery settings controller and template integration tests.
-- Add concrete AI provider contract tests.
-- Add AI provider HTTP integration tests using controlled stub responses.
 - Add unresolved-risk impact generation service tests.
 - Add impact-analysis structured output validation tests.
 - Add risk, finding, evidence, and impact traceability tests.
@@ -281,9 +344,21 @@ and evidence analysis.
 - Add impact-analysis regeneration and supersession tests.
 - Add PDF rendering tests for validated unresolved-risk impacts.
 - Verify that the PDF renderer does not independently generate impact statements.
-- Add provider timeout, rate-limit, and failure-classification tests.
 - Add recommendation generation idempotency tests.
 - Add recommendation supersession tests.
+- Add repeatable AI recommendation quality-evaluation tests across approved
+  monitoring-risk fixtures.
+- Add model-comparison tests for validator acceptance, unsupported claims,
+  latency, token usage, and estimated cost.
+- Add provider model-retirement and configuration-rollback tests.
+- Add automatic AI provider retry-policy tests when retry behavior is
+  implemented.
+- Add AI provider `Retry-After` and exponential-backoff tests when implemented.
+- Add provider circuit-breaker tests when implemented.
+- Add multi-provider priority and failover tests when a second provider is
+  approved.
+- Add provider-specific persisted failure-classification tests if detailed
+  provider failure audit is approved.
 - Add automatic report-dispatch retry-policy tests.
 - Add provider rate-limit and `retry_after` handling tests.
 - Add exponential-backoff scheduling tests.

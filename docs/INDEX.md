@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 14 is complete.
+Sprint 15 is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 14
-Implemented baseline: UPDATED THROUGH SPRINT 14
-Latest completed sprint: SPRINT 14
+Current implementation status: SPRINT 15
+Implemented baseline: UPDATED THROUGH SPRINT 15
+Latest completed sprint: SPRINT 15
 Latest migration: V18
-Final test baseline: 228
+Final test baseline: 277
 
 The authoritative website assessment lifecycle remains:
 
@@ -107,6 +107,50 @@ pre-dispatch integrity revalidation, Telegram multipart document upload,
 dedicated dispatch persistence, automatic dispatch idempotency, append-only
 delivery audit, manual retry, and controlled real Telegram verification.
 
+Sprint 15 completed the first concrete production AI recommendation provider
+baseline.
+
+The existing provider-neutral recommendation architecture now includes:
+
+- default-disabled OpenAI configuration;
+- environment-based API credentials and model selection;
+- OpenAI Responses API communication;
+- strict structured-output request generation;
+- typed response parsing;
+- transport failure classification;
+- validated AI recommendation persistence;
+- rule-based fallback when OpenAI is disabled or fails;
+- controlled real OpenAI recommendation verification;
+- AI recommendation inclusion in the full monitoring run PDF;
+- automatic Telegram delivery of the AI-enriched PDF.
+
+The completed production recommendation and delivery chain is:
+
+Monitoring Run Completes  
+↓  
+Evidence-Based Risks Are Persisted  
+↓  
+Evidence-Safe Recommendation Context Is Built  
+↓  
+OpenAI Responses API Is Called  
+↓  
+Strict Structured Output Is Parsed  
+↓  
+Recommendation Output Is Validated  
+↓  
+AI Recommendation or Rule-Based Fallback Is Persisted  
+↓  
+Full Monitoring Run PDF Is Generated  
+↓  
+PDF Is Automatically Dispatched Through Telegram  
+↓  
+Dispatch Is Persisted and Auditable
+
+OpenAI remains downstream from authoritative monitoring, evidence, finding,
+risk and trust-assessment lifecycles.
+
+OpenAI failure does not fail a completed monitoring run.
+
 Automatic and manual Telegram PDF delivery remain downstream from the
 authoritative monitoring, risk, trust, evidence and recommendation
 lifecycles.
@@ -114,7 +158,7 @@ lifecycles.
 Telegram delivery failure does not change a completed monitoring run to
 FAILED.
 
-## Implemented Baseline Through Sprint 14
+## Implemented Baseline Through Sprint 15
 
 - Website registration
 - Website detail view
@@ -448,6 +492,62 @@ authentication failure, timeout, unreachable, and invalid-response states
 - Scheduler environment-variable control
 - Controlled local Telegram stub end-to-end integration testing
 - Controlled real Telegram PDF delivery verification
+* Telegram delivery safe-default property binding
+* Automatic Telegram PDF dispatch safe-default property binding
+* OpenAI recommendation configuration boundary
+* Default-disabled OpenAI provider behavior
+* Environment-based OpenAI API-key configuration
+* Environment-based OpenAI model configuration
+* Configurable OpenAI API base URL
+* Configurable OpenAI connection timeout
+* Configurable OpenAI request timeout
+* Configurable OpenAI maximum output-token limit
+* OpenAI configuration readiness evaluation
+* OpenAI configuration sanitization and minimum bounds
+* Provider-neutral OpenAI API client interface
+* Typed OpenAI API status classification
+* Typed OpenAI API result invariants
+* OpenAI Responses API request-body generation
+* Strict JSON Schema recommendation output
+* Required recommendation output fields
+* Recommendation output length and list-size bounds
+* OpenAI response-storage disablement
+* OpenAI API-key request-body serialization prevention
+* Recommendation context-fingerprint serialization prevention
+* Internal prompt-version serialization prevention
+* Completed OpenAI response parsing
+* OpenAI refusal classification
+* Incomplete response rejection
+* Malformed provider response rejection
+* Missing provider output rejection
+* Ambiguous multiple-output rejection
+* JDK HTTP OpenAI Responses API transport
+* Bearer authorization header construction
+* UTF-8 JSON request and response transport
+* Redirect-following prevention
+* OpenAI authentication-failure classification
+* OpenAI rate-limit classification
+* OpenAI provider-unavailable classification
+* OpenAI timeout classification
+* OpenAI interruption classification
+* Thread interrupt-flag restoration
+* OpenAI network-failure containment
+* Concrete OpenAI recommendation provider adapter
+* Disabled-provider HTTP-call prevention
+* Missing-configuration HTTP-call prevention
+* OpenAI success mapping into the provider-neutral contract
+* OpenAI failure mapping into the provider-neutral contract
+* Unexpected OpenAI client-exception containment
+* Existing recommendation validator preservation
+* Existing rule-based fallback preservation
+* Provider-disabled fallback verification
+* Provider-failure fallback verification
+* Controlled real OpenAI recommendation verification
+* OpenAI provider and model audit persistence
+* Validated AI recommendation persistence
+* Real AI recommendation PDF-content verification
+* Real AI PDF automatic Telegram-delivery verification
+* OpenAI secret-exposure regression verification
 
 ## Previous Completed Sprint
 
@@ -858,90 +958,287 @@ No additional sprint has been approved.
 
 Future sprint planning may evaluate:
 
-- Concrete production AI provider adapter.
-- AI provider HTTP communication.
-- AI credential and secret management.
-- Recommendation generation idempotency.
-- Recommendation approval and supersession.
-- AI-generated unresolved-risk impact analysis.
-- Asynchronous report dispatch.
-- Durable dispatch queue.
-- Automatic retry scheduling.
-- Exponential retry backoff.
-- Telegram rate-limit and `retry_after` handling.
-- Dead-letter processing.
-- Recovery and reconciliation of PENDING dispatch attempts.
-- Dispatch operational metrics and alerting.
-- Recipient ownership.
-- Multi-recipient routing.
-- Notification subscriptions and destination preferences.
-- Additional document-delivery providers.
-- Authentication and role-based authorization.
-- PDF artifact retention and cleanup automation.
+* AI provider production hardening;
+* external secret-manager integration;
+* explicit AI provider priority;
+* second-provider evaluation;
+* provider failover and multi-provider routing;
+* retryable and non-retryable provider failure policy;
+* OpenAI rate-limit and `Retry-After` handling;
+* automatic retry and exponential backoff;
+* provider circuit breaker;
+* provider health monitoring;
+* token-usage, latency and cost metrics;
+* repeatable recommendation-quality evaluation;
+* model upgrade and rollback procedures;
+* recommendation generation idempotency;
+* duplicate recommendation prevention;
+* recommendation regeneration and supersession;
+* recommendation approval and feedback;
+* prompt administration and experimentation;
+* asynchronous recommendation generation;
+* durable recommendation work queue;
+* AI-generated unresolved-risk impact analysis;
+* asynchronous report dispatch;
+* report-delivery retry and reconciliation;
+* recipient management and multi-recipient routing;
+* authentication and role-based authorization;
+* artifact retention and cleanup.
 
-Future report-dispatch work must build on the completed Sprint 14 baseline:
+Future AI-provider work must build on the completed Sprint 15 baseline:
 
-Completed Monitoring Run  
-↓  
-Recommendation Generation  
-↓  
-Immutable Versioned PDF Artifact  
-↓  
-SHA-256 Integrity Validation  
-↓  
-Dedicated Report Dispatch Attempt  
-↓  
-Telegram Document Delivery  
-↓  
-Persisted SENT or FAILED Audit
+Completed Monitoring Run
+↓
+Persisted Evidence-Based Risk
+↓
+Evidence-Safe Recommendation Context
+↓
+Provider-Neutral AI Boundary
+↓
+OpenAI or Future Approved Provider
+↓
+Strict Structured Output
+↓
+Existing Recommendation Validation
+↓
+AI Recommendation or Rule-Based Fallback
+↓
+Existing Recommendation Persistence
 
 Future implementations must not:
 
-- Introduce a parallel PDF renderer or artifact model.
-- Regenerate the PDF during delivery retry.
-- Overwrite historical dispatch attempts.
-- Merge report-dispatch attempts into notification-event delivery attempts.
-- Reopen or modify a completed monitoring run.
-- Recalculate risks or trust during report delivery.
-- Call an AI provider while rendering an already completed report.
-- Persist Telegram credentials or raw secret-bearing provider responses.
+* allow an AI provider to collect evidence;
+* allow an AI provider to create findings or risks;
+* allow AI output to modify severity, confidence, trust or monitoring status;
+* bypass `RiskRemediationRecommendationValidator.java`;
+* remove the rule-based fallback path;
+* persist API credentials or authorization headers;
+* persist raw provider responses;
+* expose unsanitized provider exception messages;
+* make provider failure fail a completed monitoring run;
+* couple AI provider communication directly to PDF rendering;
+* couple AI provider communication directly to Telegram delivery;
+* introduce a parallel recommendation persistence model.
+
+Future report-delivery work must continue to build on the completed Sprint 14
+dispatch baseline and reuse immutable persisted PDF artifacts.
 
 ## Next Phase
 
-Sprint 14 is complete.
+Sprint 15 is complete.
 
-No Sprint 15 scope has yet been approved.
+No Sprint 16 scope has yet been approved.
 
-The V1 monitoring-to-report-to-Telegram chain is complete:
+The V1 monitoring-to-AI-recommendation-to-report-to-Telegram chain is complete:
 
-Completed Monitoring Run  
-↓  
-Evidence-Grounded Remediation Recommendations  
-↓  
-Immutable and Versioned Full Monitoring Run PDF  
-↓  
-PDF Integrity Revalidation  
-↓  
-Automatic Telegram Document Dispatch  
-↓  
+Scheduled or Manual Monitoring
+↓
+Evidence Collection and Normalization
+↓
+Finding, Risk and Trust Assessment
+↓
+Evidence-Safe Recommendation Context
+↓
+Validated OpenAI Remediation Recommendations
+↓
+Rule-Based Fallback When Required
+↓
+Immutable and Versioned Full Monitoring Run PDF
+↓
+Automatic Telegram Document Dispatch
+↓
 Persisted and Auditable Delivery Outcome
 
-The implementation also supports explicit manual retry of the latest failed
-dispatch attempt using the same immutable PDF artifact.
+Controlled production verification confirmed:
 
-The next phase should focus on an explicitly approved product or
-production-hardening objective rather than extending Sprint 14 implicitly.
+* four persisted risks;
+* four validated OpenAI recommendations;
+* provider name `OpenAI`;
+* model name `gpt-5.6-terra`;
+* AI recommendation content in the generated PDF;
+* successful automatic Telegram PDF delivery;
+* persisted Telegram message ID;
+* one automatic dispatch attempt;
+* no detected secret exposure.
+
+Controlled resilience verification confirmed:
+
+* provider disabled → `PROVIDER_UNAVAILABLE` fallback;
+* invalid provider credentials → `PROVIDER_FAILURE` fallback;
+* four risks → four fallback recommendations;
+* monitoring run remained `COMPLETED`;
+* provider failure did not alter authoritative monitoring results.
+
+The next phase should focus on an explicitly approved product objective,
+recommendation-lifecycle capability or production-hardening requirement rather
+than extending Sprint 15 implicitly.
 
 Potential future directions include:
 
-- production AI provider integration;
-- unresolved-risk impact analysis;
-- asynchronous dispatch;
-- automatic retry and reconciliation;
-- recipient management;
-- authentication and authorization;
-- operational metrics and alerting;
-- artifact retention and cleanup.
+* provider production hardening;
+* recommendation quality evaluation;
+* recommendation idempotency and lifecycle;
+* unresolved-risk impact analysis;
+* asynchronous recommendation or report processing;
+* automatic retry and reconciliation;
+* recipient management;
+* authentication and authorization;
+* operational metrics and alerting;
+* artifact retention and cleanup.
+
+---
+
+## Latest Completed Sprint
+
+### Sprint 15 — Production OpenAI Recommendation Provider Baseline
+
+Sprint 15 completed the first concrete production AI recommendation provider
+and closed the V1 real-AI recommendation chain.
+
+Implemented capabilities include:
+
+* Telegram and automatic PDF dispatch safe-default correction;
+* OpenAI configuration boundary;
+* default-disabled provider operation;
+* environment-based API-key configuration;
+* environment-based model selection;
+* configurable API base URL;
+* configurable connection and request timeouts;
+* configurable maximum output-token limit;
+* provider readiness evaluation;
+* provider-neutral OpenAI API client contract;
+* typed provider result classification;
+* strict Responses API request generation;
+* strict JSON Schema recommendation output;
+* bounded structured recommendation content;
+* provider response-storage disablement;
+* typed completed-response parsing;
+* refusal handling;
+* incomplete and malformed response rejection;
+* Java `HttpClient` OpenAI transport;
+* Bearer authentication;
+* redirect-following prevention;
+* authentication, rate-limit, timeout and provider-unavailable classification;
+* interruption handling and interrupt-flag restoration;
+* network-failure containment;
+* concrete OpenAI provider adapter;
+* disabled-provider HTTP-call prevention;
+* provider failure containment;
+* existing output-validator preservation;
+* existing rule-based fallback preservation;
+* real OpenAI recommendation persistence;
+* OpenAI provider and model audit metadata;
+* controlled provider-disabled fallback verification;
+* controlled provider-failure fallback verification;
+* AI recommendation PDF-content verification;
+* automatic Telegram delivery of the AI-enriched PDF;
+* secret-exposure regression verification.
+
+The completed production AI path is:
+
+Completed Monitoring Run
+↓
+Persisted Risks Loaded
+↓
+Evidence-Safe Recommendation Context Built
+↓
+Versioned Prompt Created
+↓
+OpenAI Provider Selected
+↓
+OpenAI Responses API Called
+↓
+Strict Structured Output Parsed
+↓
+Existing Recommendation Validator Applied
+↓
+Validated AI Recommendation Persisted
+↓
+Full Monitoring Run PDF Generated
+↓
+PDF Automatically Dispatched Through Telegram
+↓
+Dispatch Audit Persisted
+
+The preserved provider-disabled path is:
+
+OpenAI Disabled or Incompletely Configured
+↓
+Provider Marked Unavailable
+↓
+OpenAI HTTP Client Not Called
+↓
+Rule-Based Fallback Generated
+↓
+Fallback Reason `PROVIDER_UNAVAILABLE`
+↓
+Recommendation Persisted
+
+The preserved provider-failure path is:
+
+OpenAI Request Fails
+↓
+Typed Provider Failure Returned
+↓
+Rule-Based Fallback Generated
+↓
+Fallback Reason `PROVIDER_FAILURE`
+↓
+Recommendation Persisted
+↓
+Monitoring Run Remains `COMPLETED`
+
+Verification baseline:
+
+* Compile: SUCCESS
+* Tests: 277 PASSED
+* Failures: 0
+* Errors: 0
+* Latest migration: V18
+* Database migration added: NO
+* Real OpenAI recommendation: VERIFIED
+* Provider-disabled fallback: VERIFIED
+* Provider-failure fallback: VERIFIED
+* Real AI recommendation count: 4
+* AI recommendation PDF content: VERIFIED
+* Automatic Telegram PDF dispatch: SENT
+* Telegram message ID persistence: VERIFIED
+* Automatic dispatch count: 1
+* Secret exposure: NOT DETECTED
+
+Sprint 15 preserved:
+
+* provider-neutral recommendation orchestration;
+* authoritative monitoring results;
+* evidence, finding, risk and trust authority;
+* evidence-safe AI context;
+* structured recommendation validation;
+* mandatory rule-based fallback;
+* immutable PDF artifact history;
+* Telegram delivery isolation;
+* append-only dispatch audit;
+* external secret configuration;
+* monitoring lifecycle isolation from provider failure.
+
+Sprint 15 did not add:
+
+* a second concrete AI provider;
+* provider failover;
+* automatic AI retry;
+* exponential backoff;
+* circuit breaker;
+* token, cost or latency metrics;
+* provider-health persistence;
+* recommendation idempotency;
+* recommendation regeneration;
+* recommendation supersession;
+* recommendation approval or feedback;
+* prompt administration;
+* asynchronous recommendation processing;
+* durable recommendation queue;
+* AI-generated unresolved-risk impact analysis;
+* authentication or role-based authorization;
+* external secret-manager integration.
 
 ---
 

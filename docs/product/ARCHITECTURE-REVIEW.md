@@ -3917,3 +3917,926 @@ Automatic duplicate delivery is blocked at application and database levels.
 
 Failed delivery can be manually retried using the same immutable PDF while
 preserving the complete dispatch history.
+
+# SiteSentinel Architecture Review-15 Opening
+
+- Sprint: Sprint 15 Opening
+- Result: APPROVED TO START
+- Planned Scope: Production OpenAI Recommendation Provider Baseline
+- The existing provider-neutral recommendation architecture will be preserved.
+- OpenAI will be implemented as the first concrete production AI provider.
+- OpenAI-specific HTTP, request and response details will remain isolated from
+  the recommendation domain.
+- Provider enablement will be disabled by default.
+- API credentials will remain external environment configuration.
+- The model name will remain configuration-controlled.
+- The OpenAI Responses API will be used.
+- Recommendation output will use strict structured JSON.
+- Existing recommendation validation will remain authoritative.
+- Existing rule-based fallback generation will remain mandatory.
+- Provider unavailability or failure will not fail a monitoring run.
+- Raw provider responses and exception messages will not be persisted.
+- Existing recommendation persistence will be reused.
+- Existing PDF generation and Telegram dispatch boundaries will remain
+  unchanged.
+- No database migration is expected.
+- Multi-provider routing, provider failover, automatic retry and recommendation
+  lifecycle expansion remain deferred.
+
+Approved planned flow:
+
+Completed Monitoring Run
+↓
+Persisted Risk
+↓
+Evidence-Safe Recommendation Context
+↓
+Versioned Prompt
+↓
+Provider Selection
+↓
+OpenAI Provider Adapter
+↓
+OpenAI Responses API
+↓
+Strict Structured Output
+↓
+Existing Recommendation Validator
+↓
+AI Recommendation or Rule-Based Fallback
+↓
+Existing Recommendation Persistence
+↓
+Existing PDF Generation
+↓
+Existing Telegram PDF Dispatch
+
+---
+
+# SiteSentinel Architecture Review-15 Closure
+
+## Decision
+
+APPROVED
+
+## Architectural Outcome
+
+Sprint 15 completed the first concrete production AI provider implementation
+without replacing or weakening the provider-neutral recommendation
+architecture introduced in Sprint 12.
+
+The approved real-AI flow is:
+
+`RiskRemediationRecommendationRunGenerationService`
+→ `RiskRemediationRecommendationGenerationService`
+→ `RiskRemediationRecommendationContextBuilder`
+→ `RiskRemediationPromptFactory`
+→ `RiskRemediationAiProvider`
+→ `OpenAiRiskRemediationAiProvider`
+→ `OpenAiRecommendationApiClient`
+→ `JdkOpenAiRecommendationApiClient`
+→ OpenAI Responses API
+→ `OpenAiRecommendationResponseParser`
+→ `RiskRemediationAiOutput`
+→ `RiskRemediationRecommendationValidator`
+→ `RiskRemediationRecommendationService`
+
+The approved fallback flow is:
+
+Provider disabled, unavailable or failed
+↓
+`RiskRemediationAiProviderResult`
+↓
+`RiskRemediationRecommendationGenerationService`
+↓
+`RiskRemediationRuleBasedFallbackGenerator`
+↓
+Validated fallback recommendation
+↓
+Existing recommendation persistence
+
+The existing downstream report flow remains:
+
+Persisted recommendations
+↓
+Monitoring run report
+↓
+Immutable PDF artifact
+↓
+Automatic Telegram document dispatch
+↓
+Persisted dispatch audit
+
+OpenAI transport remains downstream from authoritative monitoring, evidence,
+finding, assessment and risk persistence.
+
+## Provider-Neutral Architecture
+
+APPROVED
+
+The existing `RiskRemediationAiProvider.java` interface remains the
+recommendation domain boundary.
+
+`RiskRemediationRecommendationGenerationService.java` continues to depend on:
+
+`List<RiskRemediationAiProvider>`
+
+rather than a concrete OpenAI implementation.
+
+This preserves:
+
+- provider-neutral orchestration;
+- optional provider availability;
+- future provider extensibility;
+- existing provider selection behavior;
+- existing validation behavior;
+- existing fallback behavior;
+- isolation from external API details.
+
+The concrete OpenAI adapter is discovered as a Spring bean through the existing
+provider list.
+
+No OpenAI-specific type is introduced into:
+
+- monitoring execution;
+- risk persistence;
+- recommendation persistence;
+- PDF generation;
+- Telegram delivery;
+- controllers;
+- database entities.
+
+OpenAI is therefore an infrastructure adapter rather than an authoritative
+domain dependency.
+
+## OpenAI Package Boundary
+
+OpenAI-specific implementation is isolated under:
+
+`com.cigabyte.sitesentinel.recommendation.openai`
+
+The approved components are:
+
+- `OpenAiRecommendationProperties.java`
+- `OpenAiRecommendationApiClient.java`
+- `OpenAiRecommendationApiStatus.java`
+- `OpenAiRecommendationApiResult.java`
+- `OpenAiRecommendationRequestBodyFactory.java`
+- `OpenAiRecommendationResponseParser.java`
+- `JdkOpenAiRecommendationApiClient.java`
+- `OpenAiRiskRemediationAiProvider.java`
+
+The package owns:
+
+- provider configuration;
+- Responses API request construction;
+- HTTP transport;
+- OpenAI response parsing;
+- transport failure classification;
+- mapping into the existing provider-neutral result.
+
+The package does not own:
+
+- evidence collection;
+- finding generation;
+- risk classification;
+- severity determination;
+- recommendation persistence;
+- report rendering;
+- Telegram delivery;
+- retry orchestration;
+- monitoring-run state transitions.
+
+## Configuration Architecture
+
+APPROVED
+
+OpenAI configuration is represented by:
+
+`OpenAiRecommendationProperties.java`
+
+Configuration prefix:
+
+`sitesentinel.recommendation.ai.openai`
+
+Supported environment configuration:
+
+- `SITESENTINEL_OPENAI_ENABLED`
+- `SITESENTINEL_OPENAI_API_KEY`
+- `SITESENTINEL_OPENAI_API_BASE_URL`
+- `SITESENTINEL_OPENAI_MODEL`
+- `SITESENTINEL_OPENAI_CONNECT_TIMEOUT_SECONDS`
+- `SITESENTINEL_OPENAI_REQUEST_TIMEOUT_SECONDS`
+- `SITESENTINEL_OPENAI_MAX_OUTPUT_TOKENS`
+
+Approved safe defaults:
+
+- provider enabled: `false`;
+- API key: empty;
+- API base URL: `https://api.openai.com/v1`;
+- model: `gpt-5.6-terra`;
+- connection timeout: 10 seconds;
+- request timeout: 60 seconds;
+- maximum output tokens: 2000.
+
+Provider readiness requires:
+
+- explicit enablement;
+- non-blank API key;
+- non-blank API base URL;
+- non-blank model name.
+
+Configuration sanitization:
+
+- trims string values;
+- restores approved defaults for blank API URL or model values;
+- enforces positive timeout values;
+- enforces a minimum maximum-output-token value;
+- removes a trailing slash when constructing the operation endpoint.
+
+The model name remains configuration-controlled and is not embedded in the
+recommendation domain.
+
+## Default-Disabled Safety Decision
+
+APPROVED
+
+External OpenAI communication is disabled by default.
+
+The application does not call OpenAI unless:
+
+`SITESENTINEL_OPENAI_ENABLED=true`
+
+and all required provider configuration is available.
+
+When the provider is disabled or incomplete:
+
+- `OpenAiRiskRemediationAiProvider.isAvailable()` returns false;
+- the OpenAI API client is not invoked;
+- recommendation generation selects the existing rule-based fallback;
+- the persisted fallback reason is `PROVIDER_UNAVAILABLE`;
+- monitoring execution remains successful.
+
+This prevents accidental provider use during:
+
+- local development;
+- automated tests;
+- fresh deployments;
+- incomplete configuration;
+- environments without API billing;
+- environments without approved external-AI access.
+
+## Telegram Safe-Default Correction
+
+APPROVED
+
+Sprint 15 corrected a configuration inconsistency inherited from the Sprint 14
+runtime properties.
+
+The following properties now bind to disabled unless explicitly enabled:
+
+`sitesentinel.notification.delivery.telegram.enabled`
+
+`sitesentinel.notification.delivery.telegram.automatic-pdf-dispatch-enabled`
+
+Approved environment defaults:
+
+`SITESENTINEL_TELEGRAM_ENABLED=false`
+
+`SITESENTINEL_TELEGRAM_AUTOMATIC_PDF_DISPATCH_ENABLED=false`
+
+This aligns runtime property binding with the existing
+`TelegramDeliveryProperties.java` safety defaults and the Sprint 14
+architecture decision.
+
+`TelegramDeliveryConfigurationBindingTests.java` protects this configuration
+baseline.
+
+## Request Construction Architecture
+
+APPROVED
+
+`OpenAiRecommendationRequestBodyFactory.java` converts the existing
+provider-neutral `RiskRemediationAiRequest.java` into an OpenAI Responses API
+request.
+
+The approved request contains:
+
+- configured model;
+- system instruction;
+- user instruction;
+- bounded maximum output tokens;
+- `store=false`;
+- strict structured-output configuration.
+
+The request body does not include:
+
+- OpenAI API key;
+- authorization header;
+- recommendation context fingerprint;
+- internal prompt-version metadata;
+- database identifiers beyond text intentionally present in the sanitized
+  provider request;
+- raw database entities;
+- raw website content outside the existing evidence-safe prompt boundary.
+
+The existing prompt factory remains responsible for deciding what information
+is sent to the provider.
+
+The OpenAI request factory does not independently access repositories or
+monitoring data.
+
+## Structured Output Architecture
+
+APPROVED
+
+OpenAI output is constrained through a strict JSON Schema.
+
+The required output fields are:
+
+- `schemaVersion`
+- `title`
+- `summary`
+- `remediationSteps`
+- `verificationSteps`
+- `advisory`
+
+The schema enforces:
+
+- object output;
+- all expected fields required;
+- no additional properties;
+- expected schema version only;
+- non-empty title;
+- non-empty summary;
+- at least one remediation step;
+- at least one verification step;
+- bounded string lengths;
+- bounded list sizes;
+- advisory value fixed to `true`.
+
+Structured output reduces parsing ambiguity but does not replace application
+validation.
+
+`RiskRemediationRecommendationValidator.java` remains the authoritative
+acceptance boundary.
+
+A structurally parseable OpenAI response can still be rejected by the existing
+validator and replaced with a rule-based fallback.
+
+## Response Parsing Architecture
+
+APPROVED
+
+`OpenAiRecommendationResponseParser.java` accepts only a narrow successful
+response shape.
+
+A successful provider result requires:
+
+- a 2xx HTTP response;
+- OpenAI response status `completed`;
+- no response-level error;
+- an output message;
+- exactly one `output_text` content item;
+- non-blank structured output text;
+- JSON convertible to `RiskRemediationAiOutput.java`.
+
+The parser rejects:
+
+- null or blank response bodies;
+- malformed JSON;
+- incomplete responses;
+- failed responses;
+- response-level errors;
+- absent output;
+- absent output text;
+- multiple output-text items;
+- unsupported output shapes;
+- output that cannot be mapped to the typed AI output model.
+
+A refusal content item is classified as:
+
+`REQUEST_REJECTED`
+
+The refusal message itself is not exposed outside the parser.
+
+The parser does not return raw JSON.
+
+## HTTP Transport Architecture
+
+APPROVED
+
+`JdkOpenAiRecommendationApiClient.java` implements the external transport with
+Java `HttpClient`.
+
+Approved operation:
+
+`POST <normalized-api-base-url>/responses`
+
+Approved headers:
+
+- Bearer authorization;
+- `Content-Type: application/json`;
+- `Accept: application/json`.
+
+Approved transport controls:
+
+- configured connection timeout;
+- configured request timeout;
+- UTF-8 request and response handling;
+- redirect following disabled;
+- typed result returned instead of transport exception propagation.
+
+Redirect following remains disabled to reduce the risk of authorization data
+being forwarded to another destination.
+
+The Spring injection constructor is explicitly marked because the class also
+contains a package-private constructor used by isolated transport tests.
+
+## Transport Result Architecture
+
+APPROVED
+
+OpenAI transport results are represented by:
+
+- `OpenAiRecommendationApiStatus.java`
+- `OpenAiRecommendationApiResult.java`
+
+Supported transport statuses:
+
+- `SUCCESS`
+- `REQUEST_REJECTED`
+- `AUTHENTICATION_FAILED`
+- `RATE_LIMITED`
+- `TIMEOUT`
+- `PROVIDER_UNAVAILABLE`
+- `INVALID_RESPONSE`
+- `INTERRUPTED`
+- `FAILURE`
+
+HTTP classification:
+
+- 2xx → response parser;
+- 401 or 403 → `AUTHENTICATION_FAILED`;
+- 429 → `RATE_LIMITED`;
+- 500–599 → `PROVIDER_UNAVAILABLE`;
+- other non-2xx → `REQUEST_REJECTED`.
+
+Exception classification:
+
+- HTTP timeout → `TIMEOUT`;
+- thread interruption → `INTERRUPTED`;
+- network I/O failure → `FAILURE`;
+- invalid request construction → `FAILURE`;
+- security-related request failure → `FAILURE`.
+
+Thread interruption restores the thread interrupt flag.
+
+A successful result requires:
+
+- typed `RiskRemediationAiOutput`;
+- valid 2xx HTTP status.
+
+An unsuccessful result cannot carry AI output.
+
+Transport results do not contain:
+
+- API key;
+- authorization header;
+- raw response body;
+- OpenAI error message;
+- exception message;
+- prompt content.
+
+## Provider Adapter Decision
+
+APPROVED
+
+`OpenAiRiskRemediationAiProvider.java` maps the OpenAI transport layer into the
+existing provider-neutral contract.
+
+Approved mapping:
+
+OpenAI transport `SUCCESS`
+→ provider `SUCCESS`
+
+OpenAI provider disabled or incomplete configuration
+→ provider `UNAVAILABLE`
+
+Any unsuccessful OpenAI transport result
+→ provider `FAILURE`
+
+Unexpected runtime exception
+→ provider `FAILURE`
+
+Null client result
+→ provider `FAILURE`
+
+This intentionally prevents OpenAI transport-specific status values from
+leaking into the recommendation domain.
+
+The existing recommendation architecture persists the broad fallback reason:
+
+- `PROVIDER_UNAVAILABLE`;
+- `PROVIDER_FAILURE`;
+- `VALIDATION_FAILURE`.
+
+Detailed authentication, rate-limit and timeout diagnostics are not persisted
+in Sprint 15.
+
+## Validation and Fallback Decision
+
+APPROVED
+
+AI output is advisory and cannot bypass
+`RiskRemediationRecommendationValidator.java`.
+
+The accepted success sequence is:
+
+OpenAI transport success
+↓
+Typed AI output
+↓
+Existing recommendation validator
+↓
+Validated recommendation content
+↓
+AI recommendation persistence
+
+If validation fails:
+
+- AI output is rejected;
+- rule-based recommendation is generated;
+- fallback reason is `VALIDATION_FAILURE`;
+- provider metadata may remain available for audit according to the existing
+  recommendation-generation behavior;
+- the invalid provider output is not persisted as recommendation content.
+
+If the provider is unavailable:
+
+- rule-based recommendation is generated;
+- fallback reason is `PROVIDER_UNAVAILABLE`.
+
+If the provider fails:
+
+- rule-based recommendation is generated;
+- fallback reason is `PROVIDER_FAILURE`.
+
+Fallback generation remains mandatory rather than optional.
+
+## Monitoring Lifecycle Isolation
+
+APPROVED
+
+Provider communication remains subordinate to the authoritative monitoring
+lifecycle.
+
+OpenAI does not:
+
+- start monitoring runs;
+- complete monitoring runs;
+- fail monitoring runs;
+- collect evidence;
+- create findings;
+- create risks;
+- alter risk severity;
+- alter risk status;
+- alter trust evaluation;
+- modify website state;
+- modify comparison baselines.
+
+Controlled provider-failure verification confirmed:
+
+- monitoring run status remained `COMPLETED`;
+- four risks remained persisted;
+- four rule-based fallback recommendations were generated;
+- fallback reason was `PROVIDER_FAILURE`;
+- provider errors did not become monitoring failure reasons.
+
+Provider-disabled verification confirmed:
+
+- no OpenAI HTTP request was performed;
+- monitoring run status remained `COMPLETED`;
+- four risks produced four fallback recommendations;
+- fallback reason was `PROVIDER_UNAVAILABLE`.
+
+## Persistence Architecture
+
+APPROVED
+
+Sprint 15 reused the existing
+`risk_remediation_recommendations` persistence model.
+
+Existing audit fields already support:
+
+- recommendation source;
+- fallback reason;
+- validation status;
+- provider name;
+- model name;
+- prompt version;
+- context fingerprint;
+- finding count;
+- evidence count;
+- advisory flag;
+- generation timestamp.
+
+No new table or column was required.
+
+Latest migration remains:
+
+V18
+
+No V19 migration was introduced.
+
+Raw OpenAI requests and responses are not persisted.
+
+API credentials are not persisted.
+
+## Transaction Architecture
+
+APPROVED
+
+Sprint 15 does not introduce a provider-spanning database transaction.
+
+The external OpenAI HTTP call does not create a distributed transaction with:
+
+- monitoring-run persistence;
+- risk persistence;
+- recommendation persistence;
+- PDF artifact persistence;
+- Telegram dispatch persistence.
+
+Recommendation persistence continues through the existing application service
+after provider output has been parsed and validated.
+
+Provider failure produces fallback content rather than a partial AI
+recommendation record.
+
+The existing per-risk generation and failure-isolation behavior remains
+authoritative.
+
+## PDF and Telegram Boundary Preservation
+
+APPROVED
+
+Sprint 15 does not couple OpenAI transport to PDF rendering or Telegram
+delivery.
+
+OpenAI communication produces recommendation content only.
+
+The PDF layer reads persisted report data.
+
+The Telegram layer delivers an immutable persisted PDF artifact.
+
+The verified production chain is:
+
+Completed monitoring run
+↓
+Four persisted risks
+↓
+Four validated OpenAI recommendations
+↓
+Persisted recommendation audit metadata
+↓
+Generated PDF artifact
+↓
+Automatic Telegram document delivery
+↓
+Persisted SENT dispatch attempt
+↓
+Persisted Telegram message ID
+
+Controlled verification confirmed:
+
+- PDF AI recommendation content was present;
+- PDF was generated successfully;
+- PDF was delivered successfully;
+- automatic dispatch count remained one;
+- Telegram message ID was persisted;
+- no secret was detected in the PDF or observed output.
+
+## Security Review
+
+APPROVED
+
+Sprint 15 preserves the following security properties:
+
+- OpenAI access is disabled by default.
+- API key is supplied only through external environment configuration.
+- API key is not included in source-controlled properties.
+- API key is not included in request JSON.
+- API key is not returned in typed results.
+- Authorization headers are not logged or persisted.
+- Raw OpenAI responses are not persisted.
+- Raw OpenAI error bodies are not propagated.
+- Provider exception messages are not propagated.
+- Refusal text is not propagated.
+- Redirect following is disabled.
+- Request and output sizes are bounded.
+- Only evidence-safe prompt content is sent.
+- Strict structured output is required.
+- Existing output validation remains mandatory.
+- AI output remains advisory.
+- Provider failure cannot alter authoritative monitoring results.
+- Controlled real verification detected no secret exposure.
+- Controlled invalid-key verification detected no secret exposure.
+
+## Operational Review
+
+APPROVED
+
+Sprint 15 supports:
+
+- default-disabled provider operation;
+- environment-controlled provider enablement;
+- environment-controlled model selection;
+- environment-controlled timeouts;
+- environment-controlled output size;
+- controlled real provider verification;
+- provider-disabled fallback;
+- provider-failure fallback;
+- real AI recommendation persistence;
+- real AI content in PDF reports;
+- automatic Telegram delivery of AI-enriched reports.
+
+A real controlled monitoring run produced:
+
+- four persisted risks;
+- four AI recommendations;
+- provider name `OpenAI`;
+- model name `gpt-5.6-terra`;
+- validation status `VALID`;
+- fallback reason `NONE`.
+
+A controlled invalid-key run produced:
+
+- four persisted risks;
+- four rule-based fallback recommendations;
+- fallback reason `PROVIDER_FAILURE`;
+- successful monitoring completion.
+
+## Verification Baseline
+
+- Final compile: SUCCESS
+- Final tests: 277 PASSED
+- Failures: 0
+- Errors: 0
+- Latest migration: V18
+- Telegram safe property binding: PASSED
+- OpenAI safe defaults: PASSED
+- OpenAI property binding: PASSED
+- Provider readiness rules: PASSED
+- Configuration sanitization: PASSED
+- Timeout and output bounds: PASSED
+- Typed API-result invariants: PASSED
+- Strict request-schema generation: PASSED
+- Sensitive configuration serialization prevention: PASSED
+- Internal metadata serialization prevention: PASSED
+- Completed response parsing: PASSED
+- Refusal classification: PASSED
+- Incomplete-response rejection: PASSED
+- Malformed-response rejection: PASSED
+- Multiple-output rejection: PASSED
+- Responses API endpoint mapping: PASSED
+- Bearer authorization transport: PASSED
+- HTTP failure classification: PASSED
+- Timeout classification: PASSED
+- Interruption classification: PASSED
+- Interrupt-flag restoration: PASSED
+- Network-failure containment: PASSED
+- Disabled-provider HTTP prevention: PASSED
+- Provider success mapping: PASSED
+- Provider-failure containment: PASSED
+- Spring application-context wiring: PASSED
+- Existing fallback regression: PASSED
+- Real OpenAI recommendation: VERIFIED
+- Provider-disabled fallback: VERIFIED
+- Provider-failure fallback: VERIFIED
+- AI recommendation PDF content: VERIFIED
+- Automatic Telegram delivery: VERIFIED
+- Telegram message ID persistence: VERIFIED
+- Secret exposure: NOT DETECTED
+
+## Accepted Sprint 15 Limitations
+
+The following limitations are accepted at Sprint 15 closure:
+
+- Only OpenAI is implemented as a concrete production provider.
+- Provider selection uses the existing first-available-provider behavior.
+- Explicit provider priority configuration is not implemented.
+- Provider failover is not implemented.
+- Multi-provider routing is not implemented.
+- Provider-specific transport failures collapse to the broad domain status
+  `FAILURE`.
+- Authentication failure is not separately persisted.
+- Rate-limit failure is not separately persisted.
+- Timeout failure is not separately persisted.
+- Retry-After headers are not processed.
+- Automatic OpenAI retry is not implemented.
+- Exponential backoff is not implemented.
+- Circuit breaker behavior is not implemented.
+- Provider health history is not persisted.
+- Token usage is not captured.
+- Provider cost is not captured.
+- Provider response latency is not captured.
+- Recommendation-generation duration is not captured.
+- Provider request IDs are not persisted.
+- Recommendation generation remains synchronous.
+- A durable recommendation queue is not implemented.
+- Recommendation idempotency is not defined.
+- Duplicate recommendation prevention is not implemented.
+- Recommendation regeneration is not implemented.
+- Recommendation supersession is not implemented.
+- Recommendation approval is not implemented.
+- Recommendation quality feedback is not implemented.
+- Prompt administration is not implemented.
+- Prompt experimentation is not implemented.
+- External secret-manager integration is not implemented.
+- Authentication and role-based authorization remain deferred.
+- AI-generated unresolved-risk impact analysis remains deferred.
+
+These limitations do not invalidate the Sprint 15 architecture.
+
+They define later production-hardening and recommendation-lifecycle work.
+
+## Deferred Architecture Items
+
+The following remain deferred:
+
+- second concrete AI provider;
+- explicit provider priority;
+- provider failover;
+- multi-provider routing;
+- provider-specific persisted failure classification;
+- automatic retry;
+- exponential backoff;
+- Retry-After processing;
+- circuit breaker;
+- provider health monitoring;
+- provider latency metrics;
+- token-usage accounting;
+- provider-cost accounting;
+- provider request-ID audit;
+- asynchronous recommendation generation;
+- durable recommendation queue;
+- recommendation idempotency policy;
+- duplicate recommendation prevention;
+- recommendation regeneration;
+- recommendation history and supersession;
+- recommendation approval workflow;
+- recommendation feedback;
+- recommendation-quality evaluation;
+- prompt administration;
+- prompt experimentation;
+- external secret management;
+- authentication;
+- role-based access control;
+- AI-generated unresolved-risk impact analysis.
+
+## Architecture Decision
+
+Sprint 15 is architecturally approved.
+
+SiteSentinel now provides a concrete production OpenAI recommendation provider
+while retaining the existing provider-neutral recommendation boundary.
+
+The system can:
+
+- build an evidence-safe recommendation context;
+- create a versioned provider request;
+- call the OpenAI Responses API;
+- request strict structured output;
+- parse a narrow approved response shape;
+- validate generated recommendation content;
+- persist AI recommendation audit metadata;
+- fall back safely when OpenAI is disabled or fails;
+- generate a PDF containing validated AI recommendations;
+- automatically deliver the PDF through Telegram;
+- preserve an auditable dispatch result.
+
+OpenAI remains an advisory infrastructure dependency.
+
+It does not control the authoritative monitoring, evidence, finding, risk,
+assessment, PDF or delivery lifecycles.
+
+Provider failure cannot invalidate a completed monitoring run.
+
+Provider-disabled and provider-failure paths continue to produce one
+rule-based remediation recommendation for every persisted risk.
+
+The approved V1 operational chain is now:
+
+Scheduled or Manual Monitoring
+↓
+Evidence-Based Risk Identification
+↓
+Validated OpenAI Remediation Recommendations
+↓
+Rule-Based Fallback When Required
+↓
+Full Monitoring Run PDF
+↓
+Automatic Telegram Delivery
+↓
+Persisted Delivery Audit
