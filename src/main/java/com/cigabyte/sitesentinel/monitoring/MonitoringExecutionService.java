@@ -7,6 +7,9 @@ import com.cigabyte.sitesentinel.engine.trust.TrustEvaluationEngine;
 import org.springframework.stereotype.Service;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationResult;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationService;
+import com.cigabyte.sitesentinel.notification.delivery.TelegramDocumentDeliveryResult;
+import com.cigabyte.sitesentinel.reporting.dispatch.AutomaticMonitoringRunReportDispatchService;
+
 
 import java.util.UUID;
 import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService;
@@ -27,6 +30,8 @@ public class MonitoringExecutionService {
             recommendationRunGenerationService;
     private final NotificationEventGenerationService
             notificationEventGenerationService;
+    private final AutomaticMonitoringRunReportDispatchService
+            automaticReportDispatchService;
 
 
 
@@ -37,7 +42,8 @@ public class MonitoringExecutionService {
             RiskEvaluationEngine riskEvaluationEngine,
             TrustEvaluationEngine trustEvaluationEngine,
             NotificationEventGenerationService notificationEventGenerationService,
-            RiskRemediationRecommendationRunGenerationService recommendationRunGenerationService
+            RiskRemediationRecommendationRunGenerationService recommendationRunGenerationService,
+            AutomaticMonitoringRunReportDispatchService automaticReportDispatchService
     ) {
         this.monitoringRunService = monitoringRunService;
         this.evidenceCollectionEngine = evidenceCollectionEngine;
@@ -48,6 +54,8 @@ public class MonitoringExecutionService {
                 notificationEventGenerationService;
         this.recommendationRunGenerationService =
                 recommendationRunGenerationService;
+        this.automaticReportDispatchService =
+                automaticReportDispatchService;
     }
 
     public MonitoringRun execute(UUID websiteId) {
@@ -79,8 +87,27 @@ public class MonitoringExecutionService {
                             monitoringRun.getId()
                     );
 
-            generateRecommendationsSafely(completedRun);
-            generateNotificationsSafely(completedRun);
+            boolean recommendationGenerationCompleted =
+                    generateRecommendationsSafely(
+                            completedRun
+                    );
+
+            if (recommendationGenerationCompleted) {
+                dispatchAutomaticReportSafely(
+                        completedRun
+                );
+            } else {
+                log.warn(
+                        "Automatic Telegram PDF dispatch was skipped "
+                                + "because recommendation generation "
+                                + "did not complete for monitoringRunId={}",
+                        completedRun.getId()
+                );
+            }
+
+            generateNotificationsSafely(
+                    completedRun
+            );
 
             return completedRun;
         } catch (RuntimeException exception) {
@@ -108,7 +135,7 @@ public class MonitoringExecutionService {
         return message;
     }
 
-    private void generateRecommendationsSafely(
+    private boolean generateRecommendationsSafely(
             MonitoringRun monitoringRun
     ) {
         try {
@@ -129,11 +156,56 @@ public class MonitoringExecutionService {
                     result.generatedCount(),
                     result.failedCount()
             );
+
+            return true;
+
         } catch (RuntimeException exception) {
             log.warn(
                     "Risk remediation recommendation run generation "
                             + "failed for monitoringRunId={}, "
                             + "failureType={}",
+                    monitoringRun.getId(),
+                    exception.getClass().getSimpleName()
+            );
+
+            return false;
+        }
+    }
+
+    private void dispatchAutomaticReportSafely(
+            MonitoringRun monitoringRun
+    ) {
+        try {
+            TelegramDocumentDeliveryResult result =
+                    automaticReportDispatchService
+                            .dispatchCompletedRun(
+                                    monitoringRun
+                            );
+
+            if (result == null) {
+                log.warn(
+                        "Automatic Telegram PDF dispatch returned "
+                                + "no result for monitoringRunId={}",
+                        monitoringRun.getId()
+                );
+
+                return;
+            }
+
+            log.info(
+                    "Automatic Telegram PDF dispatch completed "
+                            + "for monitoringRunId={}, status={}, "
+                            + "deliveryAttempted={}, successful={}",
+                    monitoringRun.getId(),
+                    result.getStatus(),
+                    result.isDeliveryAttempted(),
+                    result.isSuccessful()
+            );
+
+        } catch (RuntimeException exception) {
+            log.warn(
+                    "Automatic Telegram PDF dispatch failed "
+                            + "for monitoringRunId={}, failureType={}",
                     monitoringRun.getId(),
                     exception.getClass().getSimpleName()
             );

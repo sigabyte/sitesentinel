@@ -8,4 +8,13 @@ public interface TelegramBotApiClient {
             String chatId,
             String message
     );
+
+    default TelegramBotApiResponse sendDocument(
+            TelegramDocumentUploadRequest request
+    ) {
+        throw new UnsupportedOperationException(
+                "Telegram document upload "
+                        + "is not implemented yet."
+        );
+    }
 }

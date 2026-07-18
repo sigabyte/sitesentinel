@@ -67,6 +67,47 @@ public class JdkTelegramBotApiClient implements TelegramBotApiClient {
         return execute(request);
     }
 
+    @Override
+    public TelegramBotApiResponse sendDocument(
+            TelegramDocumentUploadRequest request
+    ) {
+        TelegramMultipartBody multipartBody =
+                TelegramMultipartBody.from(
+                        request
+                );
+
+        HttpRequest httpRequest =
+                HttpRequest.newBuilder()
+                        .uri(
+                                buildTelegramApiUri(
+                                        "sendDocument"
+                                )
+                        )
+                        .timeout(
+                                Duration.ofSeconds(
+                                        telegramDeliveryProperties
+                                                .getRequestTimeoutSeconds()
+                                )
+                        )
+                        .header(
+                                "Content-Type",
+                                multipartBody
+                                        .getContentTypeHeaderValue()
+                        )
+                        .POST(
+                                HttpRequest.BodyPublishers
+                                        .ofByteArray(
+                                                multipartBody
+                                                        .getBodyBytes()
+                                        )
+                        )
+                        .build();
+
+        return execute(
+                httpRequest
+        );
+    }
+
     private TelegramBotApiResponse execute(HttpRequest request) {
         try {
             HttpResponse<String> response = httpClient.send(

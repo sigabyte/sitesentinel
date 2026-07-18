@@ -61,4 +61,41 @@ public class TelegramBotApiResponse {
             return false;
         }
     }
+
+    public Long getTelegramMessageId() {
+        if (!indicatesSuccessfulTelegramResponse()) {
+            return null;
+        }
+
+        try {
+            JsonNode rootNode =
+                    JSON_MAPPER.readTree(body);
+
+            if (rootNode == null || !rootNode.isObject()) {
+                return null;
+            }
+
+            JsonNode resultNode =
+                    rootNode.get("result");
+
+            if (resultNode == null || !resultNode.isObject()) {
+                return null;
+            }
+
+            JsonNode messageIdNode =
+                    resultNode.get("message_id");
+
+            if (messageIdNode == null
+                    || !messageIdNode.isIntegralNumber()
+                    || !messageIdNode.canConvertToLong()) {
+
+                return null;
+            }
+
+            return messageIdNode.longValue();
+
+        } catch (JacksonException exception) {
+            return null;
+        }
+    }
 }

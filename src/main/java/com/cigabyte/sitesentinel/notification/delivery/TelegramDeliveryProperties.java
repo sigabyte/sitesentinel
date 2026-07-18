@@ -10,6 +10,9 @@ public class TelegramDeliveryProperties {
 
     private boolean enabled = false;
 
+    private boolean automaticPdfDispatchEnabled =
+            false;
+
     private String botToken = "";
 
     private String chatId = "";
@@ -26,6 +29,17 @@ public class TelegramDeliveryProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isAutomaticPdfDispatchEnabled() {
+        return automaticPdfDispatchEnabled;
+    }
+
+    public void setAutomaticPdfDispatchEnabled(
+            boolean automaticPdfDispatchEnabled
+    ) {
+        this.automaticPdfDispatchEnabled =
+                automaticPdfDispatchEnabled;
     }
 
     public String getBotToken() {

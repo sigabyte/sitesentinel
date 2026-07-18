@@ -83,25 +83,55 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ---
 
-## Notification and Report Dispatch
+## AI Unresolved-Risk Impact Analysis
 
-- Design automatic notification and report dispatch rules.
-- Define eligible notification event types.
-- Define severity-based dispatch rules.
-- Define manual and automatic dispatch boundaries.
-- Define scheduled monitoring dispatch behavior.
-- Add a Telegram document-upload client boundary.
-- Keep Telegram document delivery separate from Telegram text-message delivery.
-- Automatically dispatch the persisted full monitoring run PDF after successful report generation.
-- Require the monitoring run to be completed before automatic report dispatch.
-- Require recommendation generation processing to finish before PDF report rendering.
-- Do not dispatch when no valid PDF artifact is available.
-- Persist report dispatch lifecycle and audit metadata.
-- Define report destination ownership.
-- Prevent duplicate automatic report dispatch.
-- Define report dispatch idempotency requirements.
-- Add manual report re-dispatch controls.
-- Preserve notification generation when recommendation or report dispatch fails safely.
+* Generate potential impact analysis for validated monitoring risks when they remain unresolved.
+* Explain what technical, operational, security, availability, customer, financial, compliance, or reputational 
+consequences may occur if a risk is not remediated.
+* Generate only impact categories that are relevant to the finding and supported by available evidence.
+* Link every generated impact statement to the originating risk, finding, evidence, monitoring run, prompt version, 
+and recommendation generation record.
+* Include an impact category for every generated consequence.
+* Include likelihood or urgency when it can be supported safely.
+* Include confidence for every generated impact statement.
+* Use non-deterministic language such as `may`, `could`, or `is likely to` unless the consequence follows directly 
+from verified technical evidence.
+* Prevent unsupported claims, exaggerated business consequences, and speculative legal, regulatory, or financial 
+conclusions.
+* Preserve the rule-based fallback path when AI-generated impact analysis is unavailable or invalid.
+* Validate AI-generated impact analysis before persistence or external presentation.
+* Store validated impact analysis as structured data rather than generating it inside the PDF renderer.
+* Make validated impact analysis reusable by PDF reports, web views, APIs, notification summaries, and future 
+executive dashboards.
+* Keep unresolved-risk impact analysis separate from risk detection, severity calculation, trust assessment, 
+and evidence analysis.
+* Do not allow AI-generated impact analysis to modify the authoritative risk severity or monitoring result.
+* Define impact-analysis generation idempotency.
+* Prevent duplicate impact-analysis generation for the same risk and recommendation lifecycle.
+* Define regeneration, supersession, history retention, and approval rules.
+* Optimize impact generation for monitoring runs containing many risks.
+
+
+## Notification and Report Dispatch Follow-Up
+
+- Define risk- and severity-based automatic report-dispatch eligibility.
+- Decide whether every completed monitoring run should produce an external
+  dispatch.
+- Define the approved behavior for completed runs containing no risks.
+- Define report-destination ownership.
+- Define recipient ownership and recipient authorization boundaries.
+- Evaluate whether report dispatch should be correlated with notification
+  events without merging their persistence models.
+- Evaluate asynchronous post-monitoring report dispatch.
+- Add a durable report-dispatch work queue if asynchronous delivery is
+  approved.
+- Define recovery and reconciliation for indefinitely PENDING dispatch
+  attempts.
+- Add report-dispatch operational metrics.
+- Add report-dispatch latency and failure-rate reporting.
+- Add operational alerting for repeated report-dispatch failures.
+- Add a dedicated dispatch administration and audit page.
+- Evaluate additional document-delivery providers.
 
 ---
 
@@ -133,19 +163,23 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ## Delivery Retry and Failure Handling
 
-- Add delivery retry policy.
-- Classify retryable and non-retryable failures.
+- Add automatic delivery retry policy.
+- Classify retryable and non-retryable provider failures.
+- Add Telegram rate-limit classification.
+- Add Telegram `retry_after` handling when available.
 - Add exponential backoff.
-- Add maximum retry count.
+- Add maximum automatic retry count.
+- Add durable retry scheduling.
 - Add dead-letter handling.
-- Add manual retry action.
-- Add retry audit visibility.
 - Add delivery queue support.
-- Add PDF report dispatch retry classification.
-- Add Telegram document-upload retry handling.
-- Prevent retry from creating duplicate dispatch records.
-- Preserve the original PDF artifact across delivery retries.
-- Define recovery for report generation success followed by dispatch failure.
+- Define recovery for indefinitely PENDING dispatch attempts.
+- Add dispatch reconciliation after application or infrastructure failure.
+- Prevent concurrent automatic retry workers from creating duplicate
+  attempts.
+- Define operational escalation after retry exhaustion.
+- Preserve the existing immutable PDF artifact across all future automatic
+  retries.
+- Keep manual retry history append-only.
 
 ---
 
@@ -212,15 +246,17 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ## Data Integrity and Idempotency
 
-- Add database-level uniqueness constraints for idempotent assessment outputs.
+- Add database-level uniqueness constraints for any remaining assessment
+  outputs that require idempotent persistence.
 - Define recommendation generation idempotency.
 - Define duplicate recommendation prevention rules.
 - Define recommendation supersession integrity rules.
-- Define notification dispatch idempotency.
-- Define report dispatch idempotency.
-- Define delivery attempt uniqueness rules.
-- Define duplicate Telegram document dispatch prevention.
-- Define duplicate provider check handling.
+- Define notification-event dispatch idempotency.
+- Define duplicate provider-check handling.
+- Define idempotency for future asynchronous dispatch jobs.
+- Define concurrency control for automatic retry workers.
+- Define reconciliation rules for PENDING attempts whose provider outcome is
+  unknown.
 
 ---
 
@@ -235,15 +271,30 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 - Add notification delivery settings controller and template integration tests.
 - Add concrete AI provider contract tests.
 - Add AI provider HTTP integration tests using controlled stub responses.
+- Add unresolved-risk impact generation service tests.
+- Add impact-analysis structured output validation tests.
+- Add risk, finding, evidence, and impact traceability tests.
+- Add unsupported and speculative impact rejection tests.
+- Add non-deterministic wording validation tests.
+- Add impact category, likelihood, and confidence validation tests.
+- Add impact-analysis idempotency and duplicate-prevention tests.
+- Add impact-analysis regeneration and supersession tests.
+- Add PDF rendering tests for validated unresolved-risk impacts.
+- Verify that the PDF renderer does not independently generate impact statements.
 - Add provider timeout, rate-limit, and failure-classification tests.
 - Add recommendation generation idempotency tests.
 - Add recommendation supersession tests.
-- Add Telegram document-upload safety tests.
-- Add automatic report dispatch ordering tests.
-- Add report dispatch idempotency tests.
-- Add duplicate document-dispatch prevention tests.
-- Add report delivery retry and recovery tests.
-- Add end-to-end completed-run-to-Telegram-report tests.
+- Add automatic report-dispatch retry-policy tests.
+- Add provider rate-limit and `retry_after` handling tests.
+- Add exponential-backoff scheduling tests.
+- Add dispatch queue recovery tests.
+- Add indefinitely PENDING attempt reconciliation tests.
+- Add concurrent retry-worker idempotency tests.
+- Add dead-letter transition tests.
+- Add multi-recipient dispatch isolation tests when recipient management is
+  implemented.
+- Add authentication and authorization tests for report retry operations
+  when access control is implemented.
 
 ---
 
@@ -287,63 +338,64 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 - Decide which scanner signals should be visible by default.
 - Decide whether AI may ever participate in risk, finding, or evidence analysis beyond the approved advisory 
 remediation recommendation boundary.
-- Decide whether AI-generated recommendations require human approval before external report dispatch.
+- Decide whether AI-generated recommendations require human approval before external report dispatch. 
+- Decide whether unresolved-risk impact analysis should be generated for every risk or only for configured severity levels.
+- Decide which impact categories may be displayed to external report recipients.
+- Decide whether AI-generated impact analysis requires human approval before external report dispatch.
+- Decide whether likelihood should use descriptive levels or a numeric probability.
+- Decide whether financial, legal, regulatory, and reputational impacts require stricter validation or exclusion 
+  from the initial implementation.
+- Decide how regenerated impact analysis supersedes or remains alongside previous validated versions.
+- Decide whether reports should clearly distinguish verified technical consequences from contextual potential impacts.
 - Decide whether repeated recommendations replace, supersede, or remain alongside previous recommendation history.
 - Decide whether report dispatch should include all completed runs or only runs meeting configured risk and severity 
-rules.
+  rules.
 - Decide whether the full PDF report or a short notification should be sent when a completed run contains no risks.
+- Decide whether synchronous post-monitoring Telegram PDF dispatch remains
+  acceptable for production-scale monitoring.
+- Decide whether future automatic retries should occur without human
+  intervention or require an operational approval boundary.
 
-## Automatic Monitoring Report Dispatch Chain
+## Report Dispatch Production Hardening
 
-### Automatic PDF generation
+Sprint 14 completed the synchronous V1 monitoring-to-PDF-to-Telegram
+dispatch chain.
 
-Generate the existing versioned full monitoring run PDF artifact
-automatically after a monitoring run completes.
+Future production hardening must build on the existing:
 
-The future implementation must reuse the Sprint 13 renderer, generation and
-artifact persistence boundaries. It must not introduce a parallel PDF model.
+- immutable and versioned PDF artifact model;
+- SHA-256 integrity validation;
+- dedicated report-dispatch attempt model;
+- application- and database-level automatic idempotency;
+- append-only manual retry lineage;
+- configured Telegram destination boundary;
+- completed-run lifecycle isolation.
 
-### Telegram PDF document dispatch
+Future work may include:
 
-Upload and dispatch the persisted full monitoring run PDF through the
-controlled Telegram delivery provider.
+- asynchronous dispatch execution;
+- durable dispatch queue;
+- automatic retry scheduling;
+- exponential backoff;
+- provider rate-limit handling;
+- `retry_after` support;
+- dead-letter processing;
+- PENDING-attempt recovery;
+- provider-outcome reconciliation;
+- dispatch latency and success-rate metrics;
+- operational failure alerting;
+- dedicated dispatch administration;
+- recipient ownership;
+- multi-recipient routing;
+- notification subscriptions;
+- additional document-delivery providers.
 
-The Telegram message may include a concise summary, but the persisted PDF
-artifact remains the authoritative full monitoring report.
+Future implementations must not:
 
-### Dispatch persistence and audit
-
-Persist the relationship between:
-
-- monitoring run;
-- PDF artifact;
-- notification event;
-- Telegram delivery attempt;
-- provider response;
-- delivery status;
-- failure category;
-- timestamps.
-
-### Recommendation and dispatch idempotency
-
-Prevent duplicate recommendation generation, duplicate PDF generation and
-duplicate Telegram document dispatch for the same monitoring lifecycle event.
-
-Sprint 12 recommendation persistence and lifecycle-isolation boundaries,
-together with Sprint 13 PDF run/version uniqueness, must be reused rather
-than bypassed.
-
-Recommendation generation idempotency remains future work and must be
-defined before automatic report dispatch is approved.
-
-### Retry and failure isolation
-
-Telegram upload or dispatch failure must not:
-
-- roll back a completed monitoring run;
-- delete or corrupt the PDF artifact;
-- regenerate recommendations;
-- create duplicate PDF artifacts;
-- create uncontrolled repeated dispatch attempts.
-
-Retry, backoff and queue behavior require a separate approved scope.
+- replace the existing PDF artifact model;
+- overwrite historical dispatch attempts;
+- regenerate the PDF during delivery retry;
+- reopen or modify a completed monitoring run;
+- merge report-dispatch persistence into the notification-event attempt
+  model;
+- persist provider credentials or raw secret-bearing responses.

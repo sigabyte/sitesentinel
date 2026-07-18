@@ -260,6 +260,213 @@
   </div>
 </section>
 
+<section class="output-section">
+  <h2>Telegram PDF dispatch</h2>
+
+  <p class="output-note">
+    Automatic dispatch sends the persisted full monitoring run PDF through
+    the configured Telegram destination. Every automatic dispatch and manual
+    retry is preserved as a separate auditable attempt.
+  </p>
+
+  <div class="assessment-summary"
+       th:if="${reportDispatchStatus == 'SUCCESS'}">
+
+    <p>
+      <strong th:text="${reportDispatchMessage}">
+        Telegram PDF report was sent successfully.
+      </strong>
+    </p>
+  </div>
+
+  <div class="failure-box"
+       th:if="${reportDispatchStatus == 'FAILURE'}">
+
+    <p>
+      <strong th:text="${reportDispatchMessage}">
+        Telegram PDF report delivery was not successful.
+      </strong>
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${reportDispatchStatus == 'UNAVAILABLE'}">
+
+    <p>
+      <strong th:text="${reportDispatchMessage}">
+        Telegram PDF report delivery is unavailable.
+      </strong>
+    </p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Dispatch Attempts
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${reportDispatchAttemptCount}">
+        0
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Latest Status
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${latestReportDispatchAttempt != null
+                    ? latestReportDispatchAttempt.status
+                    : 'NOT ATTEMPTED'}">
+        NOT ATTEMPTED
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Latest Attempt Number
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${latestReportDispatchAttempt != null
+                    ? latestReportDispatchAttempt.attemptNumber
+                    : 'NOT AVAILABLE'}">
+        NOT AVAILABLE
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Manual Retry
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${reportDispatchRetryAvailable
+                    ? 'AVAILABLE'
+                    : 'UNAVAILABLE'}">
+        UNAVAILABLE
+      </span>
+    </div>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${#lists.isEmpty(reportDispatchAttempts)}">
+
+    <p>
+      No Telegram PDF dispatch attempt has been recorded for this monitoring
+      run.
+    </p>
+
+    <p class="output-note">
+      Automatic dispatch is separately controlled and is disabled by default.
+      Manual retry becomes available only after a recorded dispatch attempt
+      fails.
+    </p>
+  </div>
+
+  <div th:if="${!#lists.isEmpty(reportDispatchAttempts)}">
+    <h3>Dispatch history</h3>
+
+    <table class="notification-table">
+      <thead>
+      <tr>
+        <th>Attempt</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Attempted At</th>
+        <th>Completed At</th>
+        <th>Telegram Message ID</th>
+        <th>Result</th>
+        <th>Technical Detail</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr th:each="attempt : ${reportDispatchAttempts}">
+        <td th:text="${attempt.attemptNumber}">
+          1
+        </td>
+
+        <td th:text="${attempt.dispatchType}">
+          AUTOMATIC
+        </td>
+
+        <td th:text="${attempt.status}">
+          SENT
+        </td>
+
+        <td th:text="${attempt.attemptedAt}">
+          Attempted at
+        </td>
+
+        <td th:text="${attempt.completedAt != null
+                ? attempt.completedAt
+                : 'Not completed'}">
+          Not completed
+        </td>
+
+        <td th:text="${attempt.telegramMessageId != null
+                ? attempt.telegramMessageId
+                : 'Not available'}">
+          Not available
+        </td>
+
+        <td th:text="${attempt.resultMessage != null
+                ? attempt.resultMessage
+                : 'Pending'}">
+          Pending
+        </td>
+
+        <td th:text="${attempt.technicalDetail != null
+                ? attempt.technicalDetail
+                : 'Pending'}">
+          Pending
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p class="output-note">
+      Dispatch history is append-only. A retry creates a new attempt and does
+      not overwrite the previous failure.
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${reportDispatchRetryAvailable
+               && latestReportDispatchAttempt != null}">
+
+    <h3>Retry latest failed dispatch</h3>
+
+    <p>
+      Retry the latest failed Telegram dispatch using the same persisted and
+      integrity-validated PDF artifact.
+    </p>
+
+    <p>
+      Failed attempt:
+      <strong th:text="${latestReportDispatchAttempt.id}">
+        Dispatch attempt ID
+      </strong>
+    </p>
+
+    <form method="post"
+          th:action="@{/websites/{websiteId}/monitoring-runs/{runId}/report/dispatch-attempts/{attemptId}/retry(websiteId=${website.id}, runId=${monitoringRun.id}, attemptId=${latestReportDispatchAttempt.id})}">
+
+      <button type="submit">
+        Retry Telegram PDF dispatch
+      </button>
+    </form>
+
+    <p class="output-note">
+      Manual retry requires the Telegram provider to be enabled and fully
+      configured. It does not require automatic PDF dispatch to be enabled.
+    </p>
+  </div>
+</section>
+
 <section>
   <h2>Website</h2>
 

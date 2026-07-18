@@ -3594,3 +3594,326 @@ Sprint 13 is closed as the Full Monitoring Run PDF Artifact Baseline.
 The system can manually generate, persist, review and download an immutable
 full monitoring run PDF. Automatic post-completion PDF generation and Telegram
 document dispatch remain explicitly deferred.
+
+# Sprint 14 Opening — Automatic Telegram PDF Dispatch and Audit
+
+## Status
+
+OPENED
+
+## Baseline
+
+Sprint 14 started from the completed Sprint 13 baseline:
+
+- Compile: SUCCESS
+- Tests run: 143
+- Latest migration: V17
+- Working tree: CLEAN
+- Full monitoring run PDF artifact generation: COMPLETE
+- Immutable PDF artifact persistence: COMPLETE
+- SHA-256 integrity verification: COMPLETE
+- Ownership-safe PDF download: COMPLETE
+
+## Objective
+
+Complete the V1 monitoring-to-report delivery chain by automatically
+generating or reusing the persisted full monitoring run PDF and dispatching
+it through Telegram after recommendation processing completes.
+
+## Approved Scope
+
+- Telegram multipart document-upload capability.
+- Binary-safe PDF document transport.
+- Telegram `sendDocument` response handling.
+- Telegram message ID extraction.
+- Separate document-delivery result contract.
+- Separate report-dispatch persistence model.
+- Automatic dispatch idempotency.
+- Dispatch audit history.
+- Dispatch failure isolation.
+- Manual retry using the same immutable PDF artifact.
+- Report-page dispatch history and retry controls.
+- Default-disabled automatic PDF dispatch configuration.
+- Controlled end-to-end and real Telegram verification.
+
+## Explicit Exclusions
+
+- Automatic retry scheduler.
+- Exponential backoff.
+- Delivery queue or dead-letter queue.
+- Multi-recipient dispatch.
+- Recipient subscriptions.
+- Additional document-delivery providers.
+- PDF artifact regeneration or overwrite.
+- Authentication and role-based authorization.
+- AI-generated unresolved-risk impact analysis.
+
+# Sprint 14 Closure — Automatic Telegram PDF Dispatch and Audit
+
+## Status
+
+COMPLETED
+
+## Objective
+
+Complete the V1 monitoring lifecycle by generating or resolving the
+versioned full monitoring run PDF after recommendation processing,
+dispatching it through Telegram, and preserving an auditable delivery
+history without changing the authoritative monitoring result.
+
+## Implemented Baseline
+
+### Telegram Document Transport
+
+- Added `TelegramDocumentUploadRequest`.
+- Added defensive copying for document binary content.
+- Added multipart metadata validation.
+- Added binary-safe `TelegramMultipartBody`.
+- Added Telegram Bot API `sendDocument` support.
+- Preserved the existing text-message delivery boundary.
+- Added successful Telegram `message_id` extraction.
+- Added secret-safe handling of unsuccessful and exceptional responses.
+
+### Document Delivery Boundary
+
+- Added `TelegramDocumentDeliveryStatus`.
+- Added `TelegramDocumentDeliveryResult`.
+- Added `TelegramDocumentDeliveryService`.
+- Added explicit `SENT`, `FAILED`, `DISABLED`, and
+  `CONFIGURATION_MISSING` outcomes.
+- Prevented provider calls when Telegram is disabled or incomplete.
+- Restricted delivery to the configured Telegram destination.
+- Prevented raw provider responses and exception messages from entering
+  user-facing delivery results.
+
+### Dispatch Persistence and Audit
+
+- Added `MonitoringRunReportDispatchAttempt`.
+- Added automatic and manual-retry dispatch types.
+- Added `PENDING`, `SENT`, and `FAILED` lifecycle states.
+- Added V18 report-dispatch persistence schema.
+- Added monitoring-run-to-PDF-artifact ownership constraints.
+- Added database-level automatic dispatch idempotency.
+- Added attempt-number uniqueness.
+- Added retry lineage constraints.
+- Added terminal-state database invariants.
+- Added Telegram message ID persistence for successful attempts.
+- Added append-only dispatch history.
+
+### PDF Resolution and Integrity
+
+- Added `MonitoringRunPdfArtifactResolutionService`.
+- Reused the existing immutable V1 PDF artifact when available.
+- Generated the V1 PDF artifact when no current artifact existed.
+- Revalidated artifact ownership before dispatch.
+- Revalidated PDF binary size before dispatch.
+- Recalculated and verified SHA-256 before dispatch.
+- Prevented corrupted artifacts from entering automatic or manual
+  Telegram delivery.
+
+### Automatic Dispatch Orchestration
+
+- Added `AutomaticMonitoringRunReportDispatchService`.
+- Added a separate automatic PDF dispatch configuration gate.
+- Kept automatic PDF dispatch disabled by default.
+- Required the Telegram provider to be enabled and configured.
+- Required a completed monitoring run.
+- Required recommendation generation processing to complete before PDF
+  dispatch.
+- Generated or resolved the PDF before creating the dispatch attempt.
+- Persisted the PENDING attempt before calling Telegram.
+- Performed the Telegram network call outside the dispatch persistence
+  transaction.
+- Persisted SENT or FAILED terminal state after the provider call.
+- Prevented duplicate automatic delivery for the same run and artifact.
+- Isolated PDF generation and Telegram delivery failures from the
+  completed monitoring run lifecycle.
+
+### Monitoring Completion Integration
+
+The completed post-monitoring flow is:
+
+`MonitoringRun COMPLETED`
+→ recommendation generation
+→ existing-or-generate PDF resolution
+→ PDF integrity verification
+→ automatic PENDING dispatch attempt
+→ Telegram document upload
+→ SENT or FAILED dispatch persistence
+→ notification event generation
+
+Recommendation subsystem failure suppresses automatic PDF dispatch so that
+an incomplete recommendation report is not sent.
+
+Telegram or dispatch failure does not change the completed monitoring run
+to FAILED.
+
+### Manual Retry
+
+- Added manual retry persistence lifecycle.
+- Allowed retries only from the latest FAILED attempt.
+- Rejected retries from PENDING or SENT attempts.
+- Prevented retry-chain branching.
+- Preserved the original failed attempt.
+- Reused the exact same immutable PDF artifact.
+- Revalidated artifact integrity before retry creation.
+- Created a new PENDING attempt for each accepted retry.
+- Persisted manual retry as SENT or FAILED.
+- Kept automatic PDF dispatch enablement separate from explicit manual
+  retry.
+
+### Web and Report UI
+
+- Added the manual retry POST endpoint.
+- Enforced website-to-run ownership before retry execution.
+- Prevented provider and exception details from being exposed through
+  flash messages.
+- Added dispatch history to the full monitoring run report.
+- Added latest dispatch status and attempt-number visibility.
+- Added successful Telegram message ID visibility.
+- Added retry availability only for the latest FAILED attempt.
+- Preserved historical attempts as read-only audit records.
+
+### Configuration and Operational Safety
+
+Added separate automatic dispatch configuration:
+
+`sitesentinel.notification.delivery.telegram.automatic-pdf-dispatch-enabled`
+
+Environment variable:
+
+`SITESENTINEL_TELEGRAM_AUTOMATIC_PDF_DISPATCH_ENABLED`
+
+Automatic PDF dispatch remains disabled by default.
+
+Scheduler enablement is now environment-controlled:
+
+`sitesentinel.scheduler.enabled=${SITESENTINEL_SCHEDULER_ENABLED:true}`
+
+This permits controlled verification with:
+
+`SITESENTINEL_SCHEDULER_ENABLED=false`
+
+without changing the normal default-enabled scheduler behavior.
+
+## Database
+
+Sprint 14 introduced:
+
+- `V18__create_monitoring_run_report_dispatch_attempts_table.sql`
+
+Latest migration:
+
+- V18
+
+V18 preserves:
+
+- run-to-artifact ownership;
+- automatic dispatch uniqueness;
+- attempt sequence uniqueness;
+- manual retry lineage;
+- terminal-state consistency;
+- successful Telegram message ID requirements;
+- append-only attempt history.
+
+The existing V17 PDF artifact schema remains preserved.
+
+## Verification
+
+### Automated Verification
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 228
+- Telegram upload request validation: PASSED
+- Binary-safe multipart generation: PASSED
+- JDK `sendDocument` transport: PASSED
+- Telegram message ID extraction: PASSED
+- Document delivery classification: PASSED
+- Secret-safe exception handling: PASSED
+- Dispatch domain lifecycle: PASSED
+- V18 repository integration: PASSED
+- Automatic dispatch idempotency: PASSED
+- Artifact ownership enforcement: PASSED
+- Retry lineage enforcement: PASSED
+- PDF pre-dispatch integrity validation: PASSED
+- Automatic orchestration: PASSED
+- Monitoring completion ordering: PASSED
+- Monitoring lifecycle failure isolation: PASSED
+- Manual retry orchestration: PASSED
+- Controller ownership and safe-feedback tests: PASSED
+- Dispatch history template tests: PASSED
+- Controlled end-to-end multipart integration: PASSED
+- Same-artifact manual retry integration: PASSED
+
+### Controlled Real Telegram Verification
+
+- Application startup: SUCCESS
+- Latest migration: V18
+- Telegram provider readiness: READY
+- Telegram provider health check: HEALTHY
+- Controlled monitoring run: COMPLETED
+- Recommendation generation before dispatch: VERIFIED
+- Real PDF generation: VERIFIED
+- Real Telegram document delivery: VERIFIED
+- Telegram PDF received and opened: VERIFIED
+- Automatic dispatch attempt status: SENT
+- Telegram message ID persistence: VERIFIED
+- Dispatch history UI: VERIFIED
+- Manual retry suppression after successful delivery: VERIFIED
+- Secret values in source or logs: NOT DETECTED
+- External Telegram call: PERFORMED TO CONTROLLED DESTINATION
+
+## Architectural Guarantees
+
+- The PDF renderer does not perform Telegram delivery.
+- Telegram delivery does not modify monitoring, risk, trust, finding, or
+  recommendation output.
+- The notification-event delivery-attempt model is not reused for PDF
+  report dispatch.
+- Dispatch attempts are persisted in a separate audit model.
+- External Telegram calls do not run inside the dispatch write
+  transaction.
+- A Telegram failure cannot roll back the completed monitoring run.
+- A dispatch failure cannot delete or regenerate the PDF artifact.
+- Manual retries do not overwrite historical attempts.
+- Automatic duplicate dispatch is blocked at application and database
+  levels.
+- Secret values are not stored in source, dispatch records, result
+  messages, or operational logs.
+
+## Deferred Items
+
+The following remain deferred:
+
+- Automatic retry scheduling.
+- Exponential backoff and retry classification.
+- Durable dispatch queue.
+- Dead-letter processing.
+- Recovery of indefinitely PENDING attempts.
+- Multi-recipient and recipient ownership management.
+- Notification subscriptions and destination preferences.
+- Additional document-delivery providers.
+- Dispatch metrics and operational alerting.
+- Authentication and role-based authorization.
+- PDF artifact retention and cleanup automation.
+- AI-generated unresolved-risk impact analysis.
+- Recommendation approval and supersession workflows.
+
+## Result
+
+Sprint 14 is approved as technically complete.
+
+SiteSentinel now completes the V1 monitoring-to-report-to-Telegram chain.
+
+A completed monitoring run can produce evidence-grounded remediation
+recommendations, generate or reuse an integrity-validated full monitoring
+run PDF, automatically dispatch that PDF through Telegram, and preserve an
+auditable delivery record.
+
+Failed deliveries remain isolated from the authoritative monitoring
+lifecycle and can be manually retried using the same immutable PDF
+artifact.
+
+Automatic dispatch and scheduler execution remain independently
+controllable through environment-based configuration.

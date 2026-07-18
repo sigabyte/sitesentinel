@@ -57,6 +57,20 @@ public class MonitoringRunPdfArtifactService {
         );
     }
 
+    public void validateIntegrity(
+            MonitoringRunPdfArtifact artifact
+    ) {
+        MonitoringRunPdfArtifact requiredArtifact =
+                Objects.requireNonNull(
+                        artifact,
+                        "Monitoring run PDF artifact is required."
+                );
+
+        validateArtifactIntegrity(
+                requiredArtifact
+        );
+    }
+
     @Transactional(readOnly = true)
     public Optional<MonitoringRunPdfArtifact>
     findByMonitoringRunIdAndReportVersion(

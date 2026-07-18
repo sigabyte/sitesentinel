@@ -6,6 +6,7 @@ import com.cigabyte.sitesentinel.engine.risk.RiskEvaluationEngine;
 import com.cigabyte.sitesentinel.engine.trust.TrustEvaluationEngine;
 import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationService;
+import com.cigabyte.sitesentinel.reporting.dispatch.AutomaticMonitoringRunReportDispatchService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -50,6 +51,12 @@ class MonitoringExecutionRecommendationSafetyTests {
             notificationEventGenerationService =
             mock(NotificationEventGenerationService.class);
 
+    private final AutomaticMonitoringRunReportDispatchService
+            automaticReportDispatchService =
+            mock(
+                    AutomaticMonitoringRunReportDispatchService.class
+            );
+
     private final MonitoringExecutionService
             monitoringExecutionService =
             new MonitoringExecutionService(
@@ -59,7 +66,8 @@ class MonitoringExecutionRecommendationSafetyTests {
                     riskEvaluationEngine,
                     trustEvaluationEngine,
                     notificationEventGenerationService,
-                    recommendationRunGenerationService
+                    recommendationRunGenerationService,
+                    automaticReportDispatchService
             );
 
     @Test
@@ -123,6 +131,13 @@ class MonitoringExecutionRecommendationSafetyTests {
         completionOrder.verify(
                 notificationEventGenerationService
         ).generateForRun(completedRun);
+
+        verify(
+                automaticReportDispatchService,
+                never()
+        ).dispatchCompletedRun(
+                org.mockito.ArgumentMatchers.any()
+        );
     }
 
     @Test
@@ -202,6 +217,13 @@ class MonitoringExecutionRecommendationSafetyTests {
                 monitoringRunService,
                 never()
         ).markCompleted(
+                org.mockito.ArgumentMatchers.any()
+        );
+
+        verify(
+                automaticReportDispatchService,
+                never()
+        ).dispatchCompletedRun(
                 org.mockito.ArgumentMatchers.any()
         );
     }

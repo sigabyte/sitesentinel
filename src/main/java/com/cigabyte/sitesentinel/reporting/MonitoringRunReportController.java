@@ -4,6 +4,9 @@ import com.cigabyte.sitesentinel.notification.NotificationEventService;
 import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifact;
 import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifactService;
 import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfVersion;
+import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchAttempt;
+import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchAttemptService;
+import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,13 +31,18 @@ public class MonitoringRunReportController {
     private final MonitoringRunPdfArtifactService
             pdfArtifactService;
 
+    private final MonitoringRunReportDispatchAttemptService
+            reportDispatchAttemptService;
+
     public MonitoringRunReportController(
             MonitoringRunReportService
                     monitoringRunReportService,
             NotificationEventService
                     notificationEventService,
             MonitoringRunPdfArtifactService
-                    pdfArtifactService
+                    pdfArtifactService,
+            MonitoringRunReportDispatchAttemptService
+                    reportDispatchAttemptService
     ) {
         this.monitoringRunReportService =
                 monitoringRunReportService;
@@ -44,6 +52,9 @@ public class MonitoringRunReportController {
 
         this.pdfArtifactService =
                 pdfArtifactService;
+
+        this.reportDispatchAttemptService =
+                reportDispatchAttemptService;
     }
 
     @GetMapping
@@ -74,6 +85,24 @@ public class MonitoringRunReportController {
         boolean pdfArtifactGenerationAvailable =
                 report.isCompletedRun()
                         && !pdfArtifactAvailable;
+
+        List<MonitoringRunReportDispatchAttempt>
+                reportDispatchAttempts =
+                reportDispatchAttemptService
+                        .findAttemptsForMonitoringRun(
+                                runId
+                        );
+
+        MonitoringRunReportDispatchAttempt
+                latestReportDispatchAttempt =
+                findLatestReportDispatchAttempt(
+                        reportDispatchAttempts
+                );
+
+        boolean reportDispatchRetryAvailable =
+                latestReportDispatchAttempt != null
+                        && latestReportDispatchAttempt.getStatus()
+                        == MonitoringRunReportDispatchStatus.FAILED;
 
         model.addAttribute(
                 "report",
@@ -134,7 +163,41 @@ public class MonitoringRunReportController {
                         .getValue()
         );
 
+        model.addAttribute(
+                "reportDispatchAttempts",
+                reportDispatchAttempts
+        );
+
+        model.addAttribute(
+                "reportDispatchAttemptCount",
+                reportDispatchAttempts.size()
+        );
+
+        model.addAttribute(
+                "latestReportDispatchAttempt",
+                latestReportDispatchAttempt
+        );
+
+        model.addAttribute(
+                "reportDispatchRetryAvailable",
+                reportDispatchRetryAvailable
+        );
+
         return "reports/monitoring-run-report";
+    }
+
+    private MonitoringRunReportDispatchAttempt
+    findLatestReportDispatchAttempt(
+            List<MonitoringRunReportDispatchAttempt>
+                    reportDispatchAttempts
+    ) {
+        if (reportDispatchAttempts == null
+                || reportDispatchAttempts.isEmpty()) {
+
+            return null;
+        }
+
+        return reportDispatchAttempts.get(0);
     }
 
     private MonitoringRunPdfArtifact
