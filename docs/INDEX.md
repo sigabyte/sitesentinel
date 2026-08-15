@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 16A is complete.
+Sprint 16 is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 16A
-Implemented baseline: UPDATED THROUGH SPRINT 16A
-Latest completed sprint: SPRINT 16A
+Current implementation status: SPRINT 16
+Implemented baseline: UPDATED THROUGH SPRINT 16
+Latest completed sprint: SPRINT 16
 Latest migration: V18
-Final test baseline: 333
+Final test baseline: 341
 
 The authoritative website assessment lifecycle remains:
 
@@ -110,6 +110,30 @@ delivery audit, manual retry, and controlled real Telegram verification.
 Sprint 15 completed the first concrete production AI recommendation provider
 baseline.
 
+Sprint 16 completed adaptive HTTP response-body processing and the Risk and
+Potential Impact Summary baseline.
+
+Sprint 16A introduced adaptive in-memory and temporary-file response
+collection, large-response spillover, full analysis after spillover, streaming
+fingerprinting and deterministic response-resource cleanup without response
+truncation.
+
+Sprint 16B expanded persisted remediation recommendations so that each risk is
+presented through the following canonical structure:
+
+1. Risk Type, Severity and Score
+2. Risk and Potential Impact Summary
+3. Remediation Steps
+4. Verification Steps
+5. Recommendation Audit Metadata
+
+Risk explanations now describe what was detected, what the risk means, why it
+matters, what it may cause if unresolved, what the evidence confirms and what
+the evidence does not confirm.
+
+Potential impacts remain conditional, and unsupported authoritative attack,
+compromise, breach, incident or exploitation claims are rejected.
+
 The existing provider-neutral recommendation architecture now includes:
 
 - default-disabled OpenAI configuration;
@@ -158,7 +182,7 @@ lifecycles.
 Telegram delivery failure does not change a completed monitoring run to
 FAILED.
 
-## Implemented Baseline Through Sprint 15
+## Implemented Baseline Through Sprint 16
 
 - Website registration
 - Website detail view
@@ -548,6 +572,24 @@ authentication failure, timeout, unreachable, and invalid-response states
 * Real AI recommendation PDF-content verification
 * Real AI PDF automatic Telegram-delivery verification
 * OpenAI secret-exposure regression verification
+- Adaptive HTTP response-body collection
+- In-memory handling for smaller responses
+- Temporary-file spillover for larger responses
+- Full response analysis after spillover
+- Streaming response fingerprint calculation
+- HTML streaming-analysis orchestration
+- Non-HTML fingerprint and snippet preservation
+- Redirect and optional-resource response cleanup
+- Response analysis without truncation
+- Prompt and output contract V2
+- Structured Risk and Potential Impact Summary
+- Evidence-confirmed and evidence-not-confirmed explanation boundary
+- Unsupported authoritative incident-claim validation
+- Rule-based fallback V2
+- Risk-specific fallback explanations
+- Safe generic explanation for unknown future risk types
+- Canonical five-section HTML recommendation reporting
+- Canonical five-section PDF recommendation reporting
 
 ## Previous Completed Sprint
 
@@ -1136,13 +1178,16 @@ Sprint 16A verification baseline:
 
 ## Next Phase
 
-Sprint 16A is complete.
+Sprint 16 is complete.
 
-No Sprint 16B scope has yet been approved.
+No Sprint 17 scope has yet been approved.
 
-The V1 monitoring-to-AI-recommendation-to-report-to-Telegram chain is complete:
+The completed monitoring-to-recommendation-to-report-to-Telegram chain now
+includes:
 
 Scheduled or Manual Monitoring
+↓
+Adaptive Full Response Collection
 ↓
 Evidence Collection and Normalization
 ↓
@@ -1150,56 +1195,112 @@ Finding, Risk and Trust Assessment
 ↓
 Evidence-Safe Recommendation Context
 ↓
-Validated OpenAI Remediation Recommendations
+Risk and Potential Impact Explanation
 ↓
-Rule-Based Fallback When Required
+Validated OpenAI Recommendation or Rule-Based Fallback
 ↓
-Immutable and Versioned Full Monitoring Run PDF
+Canonical HTML and PDF Report Structure
+↓
+Immutable Full Monitoring Run PDF
 ↓
 Automatic Telegram Document Dispatch
 ↓
 Persisted and Auditable Delivery Outcome
 
-Controlled production verification confirmed:
 
-* four persisted risks;
-* four validated OpenAI recommendations;
-* provider name `OpenAI`;
-* model name `gpt-5.6-terra`;
-* AI recommendation content in the generated PDF;
-* successful automatic Telegram PDF delivery;
-* persisted Telegram message ID;
-* one automatic dispatch attempt;
-* no detected secret exposure.
+Sprint 16 final verification confirmed:
 
-Controlled resilience verification confirmed:
+- adaptive response handling without truncation;
+- full analysis after temporary-file spillover;
+- prompt and output contract V2;
+- fallback rule V2;
+- dedicated explanations for 12 supported risk types;
+- safe generic explanation for unknown future risk types;
+- conditional potential-impact language;
+- unsupported incident-claim rejection;
+- synchronized HTML and PDF recommendation structures;
+- preserved provider-disabled fallback;
+- preserved provider-failure fallback;
+- preserved automatic Telegram delivery;
+- preserved manual retry;
+- 341 automated tests passed;
+- zero failures;
+- zero errors.
 
-* provider disabled → `PROVIDER_UNAVAILABLE` fallback;
-* invalid provider credentials → `PROVIDER_FAILURE` fallback;
-* four risks → four fallback recommendations;
-* monitoring run remained `COMPLETED`;
-* provider failure did not alter authoritative monitoring results.
-
-The next phase should focus on an explicitly approved product objective,
-recommendation-lifecycle capability or production-hardening requirement rather
-than extending Sprint 15 implicitly.
+The next phase must be based on an explicitly approved Sprint 17 objective.
 
 Potential future directions include:
 
-* provider production hardening;
-* recommendation quality evaluation;
-* recommendation idempotency and lifecycle;
-* unresolved-risk impact analysis;
-* asynchronous recommendation or report processing;
-* automatic retry and reconciliation;
-* recipient management;
-* authentication and authorization;
-* operational metrics and alerting;
-* artifact retention and cleanup.
+- recommendation quality evaluation;
+- recommendation idempotency and lifecycle management;
+- provider production hardening and failover;
+- asynchronous recommendation or report processing;
+- automated retry and reconciliation;
+- operational metrics and alerting;
+- artifact retention and cleanup;
+- recipient management;
+- authentication and role-based authorization.
+
+---
 
 ---
 
 ## Latest Completed Sprint
+
+### Sprint 16 — Adaptive Response Analysis and Risk Explanation Baseline
+
+Sprint 16 completed adaptive HTTP response-body processing and evidence-bounded
+risk explanation reporting.
+
+Implemented capabilities include:
+
+- adaptive response collection;
+- smaller-response in-memory retention;
+- larger-response temporary-file spillover;
+- full response analysis after spillover;
+- streaming response fingerprinting;
+- HTML analysis orchestration;
+- non-HTML fingerprint and snippet preservation;
+- deterministic response-resource cleanup;
+- prompt schema `risk-remediation-v2`;
+- output schema `risk-remediation-output-v2`;
+- fallback rule `risk-remediation-fallback-v2`;
+- Risk and Potential Impact Summary;
+- evidence-confirmed and evidence-not-confirmed distinctions;
+- conditional potential-consequence language;
+- unsupported authoritative incident-claim rejection;
+- 12 supported risk-specific fallback explanations;
+- safe generic future-risk fallback;
+- canonical five-section HTML reporting;
+- canonical five-section PDF reporting.
+
+Sprint 16 preserved:
+
+- authoritative persisted monitoring evidence;
+- finding and risk authority;
+- existing risk severity and scores;
+- confidence and trust scores;
+- provider-neutral recommendation orchestration;
+- production OpenAI integration;
+- rule-based availability fallback;
+- recommendation persistence and auditability;
+- immutable PDF artifact generation;
+- automatic Telegram delivery;
+- manual delivery retry;
+- monitoring lifecycle isolation.
+
+Sprint 16 verification:
+
+- Sprint 16A baseline: 329 tests passed;
+- recommendation/report regression: 96 tests passed;
+- final full regression: 341 tests passed;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- latest migration: V18;
+- database migration added: NO.
+
+### Historical Sprint 15 Baseline
 
 ### Sprint 15 — Production OpenAI Recommendation Provider Baseline
 

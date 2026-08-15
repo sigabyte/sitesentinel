@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Locale;
 
 @Component
 public class RiskRemediationRecommendationValidator {
@@ -14,6 +15,23 @@ public class RiskRemediationRecommendationValidator {
 
     private static final int STEP_MAX_LENGTH = 1200;
     private static final int STEP_MAX_COUNT = 12;
+
+    private static final List<String>
+            UNSUPPORTED_AUTHORITATIVE_INCIDENT_PHRASES =
+            List.of(
+                    "was exploited",
+                    "has been exploited",
+                    "had been exploited",
+                    "was compromised",
+                    "has been compromised",
+                    "had been compromised",
+                    "an attack occurred",
+                    "a data breach occurred",
+                    "the data breach occurred",
+                    "an incident occurred",
+                    "the incident occurred",
+                    "exploitation occurred because"
+            );
 
     private final RiskRemediationRecommendationContextSanitizer
             textSafetyBoundary;
@@ -106,6 +124,14 @@ public class RiskRemediationRecommendationValidator {
         );
 
         validateSensitiveContent(
+                title,
+                summary,
+                remediationSteps,
+                verificationSteps,
+                issues
+        );
+
+        validateUnsupportedIncidentClaims(
                 title,
                 summary,
                 remediationSteps,
@@ -305,6 +331,69 @@ public class RiskRemediationRecommendationValidator {
                             .SENSITIVE_CONTENT_DETECTED
             );
         }
+    }
+
+    private void validateUnsupportedIncidentClaims(
+            String title,
+            String summary,
+            List<String> remediationSteps,
+            List<String> verificationSteps,
+            List<RiskRemediationRecommendationValidationIssueCode>
+                    issues
+    ) {
+        boolean unsupportedClaimDetected =
+                containsUnsupportedIncidentClaim(title)
+                        || containsUnsupportedIncidentClaim(summary)
+                        || containsUnsupportedIncidentClaim(
+                        remediationSteps
+                )
+                        || containsUnsupportedIncidentClaim(
+                        verificationSteps
+                );
+
+        if (unsupportedClaimDetected) {
+            issues.add(
+                    RiskRemediationRecommendationValidationIssueCode
+                            .UNSUPPORTED_INCIDENT_CLAIM
+            );
+        }
+    }
+
+    private boolean containsUnsupportedIncidentClaim(
+            List<String> values
+    ) {
+        for (String value : values) {
+            if (containsUnsupportedIncidentClaim(value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean containsUnsupportedIncidentClaim(
+            String value
+    ) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+
+        String normalizedValue =
+                value.toLowerCase(
+                        Locale.ROOT
+                );
+
+        for (String unsupportedPhrase :
+                UNSUPPORTED_AUTHORITATIVE_INCIDENT_PHRASES) {
+
+            if (normalizedValue.contains(
+                    unsupportedPhrase
+            )) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean containsSensitiveMaterial(

@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class RiskRemediationPromptAndContextTests {
 
@@ -83,12 +84,12 @@ class RiskRemediationPromptAndContextTests {
                 );
 
         assertEquals(
-                "risk-remediation-v1",
+                "risk-remediation-v2",
                 request.promptVersion()
         );
 
         assertEquals(
-                "risk-remediation-output-v1",
+                "risk-remediation-output-v2",
                 request.outputSchemaVersion()
         );
 
@@ -100,7 +101,7 @@ class RiskRemediationPromptAndContextTests {
         assertTrue(
                 request.userInstruction().contains(
                         "\"schemaVersion\": "
-                                + "\"risk-remediation-output-v1\""
+                                + "\"risk-remediation-output-v2\""
                 )
         );
 
@@ -188,6 +189,76 @@ class RiskRemediationPromptAndContextTests {
         assertFalse(
                 prompt.contains(
                         "\"collectedEvidenceId\""
+                )
+        );
+    }
+
+    @Test
+    void promptDefinesRiskExplanationAndPotentialImpactSummaryContract() {
+        ContextFixture fixture = fixture(
+                "strict-transport-security-missing"
+        );
+
+        RiskRemediationAiRequest request =
+                promptFactory.create(
+                        fixture.context()
+                );
+
+        String systemInstruction =
+                request.systemInstruction();
+
+        String userInstruction =
+                request.userInstruction();
+
+        assertAll(
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "what was detected"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "what the risk means"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "why it matters"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "what it may cause if unresolved"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "what the supplied evidence confirms"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "what the supplied evidence does not confirm"
+                        )
+                ),
+                () -> assertTrue(
+                        userInstruction.contains(
+                                "Risk and Potential Impact Summary"
+                        )
+                ),
+                () -> assertTrue(
+                        systemInstruction.contains(
+                                "Do not claim that an attack, compromise, "
+                                        + "data breach, incident, or exploitation "
+                                        + "occurred unless the supplied persisted "
+                                        + "evidence explicitly supports that conclusion."
+                        )
+                ),
+                () -> assertTrue(
+                        systemInstruction.contains(
+                                "Potential consequences must be expressed "
+                                        + "as possibilities, not as confirmed events."
+                        )
                 )
         );
     }

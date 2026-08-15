@@ -32,6 +32,17 @@ public class OpenAiRecommendationRequestBodyFactory {
     private static final int STEP_MAX_COUNT =
             12;
 
+    private static final String SUMMARY_DESCRIPTION =
+            "Risk and Potential Impact Summary explaining "
+                    + "what was detected, what the risk means, "
+                    + "why it matters, potential consequences if "
+                    + "unresolved, what the evidence confirms, and "
+                    + "what the evidence does not confirm. Potential "
+                    + "consequences must be conditional and the summary "
+                    + "must not claim that exploitation occurred unless "
+                    + "the persisted evidence explicitly supports that "
+                    + "conclusion.";
+
     private final OpenAiRecommendationProperties properties;
 
     public OpenAiRecommendationRequestBodyFactory(
@@ -113,7 +124,8 @@ public class OpenAiRecommendationRequestBodyFactory {
         format.put(
                 "description",
                 "One advisory remediation recommendation "
-                        + "for a persisted SiteSentinel risk."
+                        + "with a risk explanation and potential impact "
+                        + "summary for a persisted SiteSentinel risk."
         );
 
         format.put(
@@ -162,7 +174,8 @@ public class OpenAiRecommendationRequestBodyFactory {
         schemaProperties.put(
                 "summary",
                 createStringProperty(
-                        SUMMARY_MAX_LENGTH
+                        SUMMARY_MAX_LENGTH,
+                        SUMMARY_DESCRIPTION
                 )
         );
 
@@ -255,6 +268,23 @@ public class OpenAiRecommendationRequestBodyFactory {
         property.put(
                 "maxLength",
                 maximumLength
+        );
+
+        return property;
+    }
+
+    private Map<String, Object> createStringProperty(
+            int maximumLength,
+            String description
+    ) {
+        Map<String, Object> property =
+                createStringProperty(
+                        maximumLength
+                );
+
+        property.put(
+                "description",
+                description
         );
 
         return property;

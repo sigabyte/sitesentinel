@@ -5,6 +5,11 @@ public enum RiskRemediationPromptVersion {
     V1(
             "risk-remediation-v1",
             "risk-remediation-output-v1"
+    ),
+
+    V2(
+            "risk-remediation-v2",
+            "risk-remediation-output-v2"
     );
 
     private final String promptVersion;

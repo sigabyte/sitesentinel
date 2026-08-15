@@ -992,6 +992,8 @@
       </span>
     </h3>
 
+    <h3>1. Risk Type, Severity and Score</h3>
+
     <div class="summary-grid">
       <div class="summary-card">
         <span class="summary-card-label">Risk Severity</span>
@@ -1039,7 +1041,7 @@
 
     <div th:if="${item.recommendationAvailable}">
       <div class="output-subsection">
-        <h3>Summary</h3>
+        <h3>2. Risk and Potential Impact Summary</h3>
 
         <div class="traceability-description"
              th:text="${item.latestRecommendation.summary}">
@@ -1048,7 +1050,7 @@
       </div>
 
       <div class="output-subsection">
-        <h3>Remediation steps</h3>
+        <h3>3. Remediation Steps</h3>
 
         <div class="traceability-description"
              th:text="${item.latestRecommendation.remediationSteps}">
@@ -1057,7 +1059,7 @@
       </div>
 
       <div class="output-subsection">
-        <h3>Verification steps</h3>
+        <h3>4. Verification Steps</h3>
 
         <div class="traceability-description"
              th:text="${item.latestRecommendation.verificationSteps}">
@@ -1066,7 +1068,7 @@
       </div>
 
       <div class="output-subsection">
-        <h3>Recommendation audit metadata</h3>
+        <h3>5. Recommendation Audit Metadata</h3>
 
         <p>
           Source:

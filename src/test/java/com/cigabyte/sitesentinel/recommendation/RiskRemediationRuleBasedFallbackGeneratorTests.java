@@ -19,7 +19,9 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
     @Test
     void generatesDeterministicVersionedFallback() {
         RiskRemediationRecommendationContext context =
-                context(RiskSeverity.HIGH);
+                context(
+                        "TLS_CONFIGURATION",
+                        RiskSeverity.HIGH);
 
         RiskRemediationRuleBasedFallbackResult first =
                 generator.generate(context);
@@ -30,7 +32,7 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
         assertEquals(first, second);
 
         assertEquals(
-                "risk-remediation-fallback-v1",
+                "risk-remediation-fallback-v2",
                 first.ruleVersion()
         );
 
@@ -44,7 +46,9 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
     void usesSeverityAwareCriticalGuidance() {
         RiskRemediationRuleBasedFallbackResult result =
                 generator.generate(
-                        context(RiskSeverity.CRITICAL)
+                        context(
+                                "TLS_CONFIGURATION",
+                                RiskSeverity.CRITICAL)
                 );
 
         assertTrue(
@@ -68,7 +72,9 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
     void doesNotEchoRationaleFindingOrEvidenceFreeText() {
         RiskRemediationRuleBasedFallbackResult result =
                 generator.generate(
-                        context(RiskSeverity.MEDIUM)
+                        context(
+                                "TLS_CONFIGURATION",
+                                RiskSeverity.MEDIUM)
                 );
 
         String generatedContent =
@@ -96,7 +102,183 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
         );
     }
 
+    @Test
+    void providesRiskSpecificExplanationsForSupportedRiskTypes() {
+        assertRiskSpecificSummary(
+                "WEBSITE_REACHABILITY_RISK",
+                "homepage could not be fetched"
+        );
+
+        assertRiskSpecificSummary(
+                "WEBSITE_AVAILABILITY_RISK",
+                "HTTP error status"
+        );
+
+        assertRiskSpecificSummary(
+                "TRANSPORT_SECURITY_RISK",
+                "not served over HTTPS"
+        );
+
+        assertRiskSpecificSummary(
+                "BROWSER_SECURITY_POLICY_RISK",
+                "Content Security Policy"
+        );
+
+        assertRiskSpecificSummary(
+                "TRANSPORT_SECURITY_POLICY_RISK",
+                "Strict Transport Security"
+        );
+
+        assertRiskSpecificSummary(
+                "CLICKJACKING_PROTECTION_RISK",
+                "framing protection"
+        );
+
+        assertRiskSpecificSummary(
+                "CONTENT_SNIFFING_PROTECTION_RISK",
+                "MIME type sniffing"
+        );
+
+        assertRiskSpecificSummary(
+                "REFERRER_PRIVACY_POLICY_RISK",
+                "referrer information"
+        );
+
+        assertRiskSpecificSummary(
+                "CONTENT_QUALITY_RISK",
+                "usable page title"
+        );
+
+        assertRiskSpecificSummary(
+                "SEARCH_PRESENTATION_RISK",
+                "meta description"
+        );
+
+        assertRiskSpecificSummary(
+                "CANONICALIZATION_RISK",
+                "canonical URL"
+        );
+
+        assertRiskSpecificSummary(
+                "ASSESSMENT_DATA_QUALITY_RISK",
+                "HTTP status evidence"
+        );
+    }
+
+    @Test
+    void riskSpecificSummaryExplainsEvidenceBoundaryWithoutIncidentClaim() {
+        RiskRemediationRuleBasedFallbackResult result =
+                generator.generate(
+                        context(
+                                "BROWSER_SECURITY_POLICY_RISK",
+                                RiskSeverity.HIGH
+                        )
+                );
+
+        String summary =
+                result.content().summary();
+
+        assertTrue(
+                summary.contains(
+                        "The persisted evidence confirms"
+                )
+        );
+
+        assertTrue(
+                summary.contains(
+                        "The evidence does not confirm"
+                )
+        );
+
+        assertTrue(
+                summary.contains(
+                        "may"
+                )
+        );
+
+        assertFalse(
+                summary.contains(
+                        "was exploited"
+                )
+        );
+
+        assertFalse(
+                summary.contains(
+                        "a data breach occurred"
+                )
+        );
+    }
+
+    @Test
+    void preservesSafeGenericExplanationForUnknownFutureRiskType() {
+        RiskRemediationRuleBasedFallbackResult result =
+                generator.generate(
+                        context(
+                                "FUTURE_UNKNOWN_RISK",
+                                RiskSeverity.MEDIUM
+                        )
+                );
+
+        String summary =
+                result.content().summary();
+
+        assertTrue(
+                summary.contains(
+                        "FUTURE_UNKNOWN_RISK"
+                )
+        );
+
+        assertTrue(
+                summary.contains(
+                        "The persisted evidence confirms"
+                )
+        );
+
+        assertTrue(
+                summary.contains(
+                        "The evidence does not confirm"
+                )
+        );
+
+        assertTrue(
+                summary.contains(
+                        "potential impact"
+                )
+        );
+
+        assertFalse(
+                summary.contains(
+                        "was exploited"
+                )
+        );
+    }
+
+    private void assertRiskSpecificSummary(
+            String riskType,
+            String expectedExplanation
+    ) {
+        RiskRemediationRuleBasedFallbackResult result =
+                generator.generate(
+                        context(
+                                riskType,
+                                RiskSeverity.MEDIUM
+                        )
+                );
+
+        String summary =
+                result.content().summary();
+
+        assertTrue(
+                summary.contains(
+                        expectedExplanation
+                ),
+                () -> "Missing risk-specific explanation for "
+                        + riskType
+        );
+    }
+
     private RiskRemediationRecommendationContext context(
+            String riskType,
             RiskSeverity severity
     ) {
         RiskRemediationRecommendationEvidenceContext evidence =
@@ -120,7 +302,7 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
         return RiskRemediationRecommendationContext.create(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                "TLS_CONFIGURATION",
+                riskType,
                 severity,
                 82,
                 91,

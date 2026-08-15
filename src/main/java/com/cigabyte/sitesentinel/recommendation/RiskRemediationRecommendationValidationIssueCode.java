@@ -38,5 +38,7 @@ public enum RiskRemediationRecommendationValidationIssueCode {
 
     SENSITIVE_CONTENT_DETECTED,
 
+    UNSUPPORTED_INCIDENT_CLAIM,
+
     CONTENT_CONTRACT_VIOLATION
 }

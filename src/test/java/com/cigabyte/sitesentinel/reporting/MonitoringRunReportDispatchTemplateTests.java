@@ -112,6 +112,79 @@ class MonitoringRunReportDispatchTemplateTests {
         );
     }
 
+    @Test
+    void templateUsesCanonicalImpactAwareRecommendationStructure()
+            throws IOException {
+
+        String template =
+                loadTemplate();
+
+        String riskContextHeading =
+                "1. Risk Type, Severity and Score";
+
+        String summaryHeading =
+                "2. Risk and Potential Impact Summary";
+
+        String remediationHeading =
+                "3. Remediation Steps";
+
+        String verificationHeading =
+                "4. Verification Steps";
+
+        String auditHeading =
+                "5. Recommendation Audit Metadata";
+
+        assertTrue(
+                template.contains(
+                        riskContextHeading
+                )
+        );
+
+        assertTrue(
+                template.contains(
+                        summaryHeading
+                )
+        );
+
+        assertTrue(
+                template.contains(
+                        remediationHeading
+                )
+        );
+
+        assertTrue(
+                template.contains(
+                        verificationHeading
+                )
+        );
+
+        assertTrue(
+                template.contains(
+                        auditHeading
+                )
+        );
+
+        assertTrue(
+                template.indexOf(riskContextHeading)
+                        < template.indexOf(summaryHeading)
+        );
+
+        assertTrue(
+                template.indexOf(summaryHeading)
+                        < template.indexOf(remediationHeading)
+        );
+
+        assertTrue(
+                template.indexOf(remediationHeading)
+                        < template.indexOf(verificationHeading)
+        );
+
+        assertTrue(
+                template.indexOf(verificationHeading)
+                        < template.indexOf(auditHeading)
+        );
+    }
+
     private String loadTemplate()
             throws IOException {
 

@@ -219,6 +219,68 @@ class PdfBoxMonitoringRunPdfRendererTests {
                         "a".repeat(64)
                 )
         );
+
+        assertTrue(
+                extractedText.contains(
+                        "1. Risk Type, Severity and Score"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "2. Risk and Potential Impact Summary"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "3. Remediation Steps"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "4. Verification Steps"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "5. Recommendation Audit Metadata"
+                )
+        );
+
+        assertTrue(
+                extractedText.indexOf(
+                        "1. Risk Type, Severity and Score"
+                ) < extractedText.indexOf(
+                        "2. Risk and Potential Impact Summary"
+                )
+        );
+
+        assertTrue(
+                extractedText.indexOf(
+                        "2. Risk and Potential Impact Summary"
+                ) < extractedText.indexOf(
+                        "3. Remediation Steps"
+                )
+        );
+
+        assertTrue(
+                extractedText.indexOf(
+                        "3. Remediation Steps"
+                ) < extractedText.indexOf(
+                        "4. Verification Steps"
+                )
+        );
+
+        assertTrue(
+                extractedText.indexOf(
+                        "4. Verification Steps"
+                ) < extractedText.indexOf(
+                        "5. Recommendation Audit Metadata"
+                )
+        );
     }
 
     @Test

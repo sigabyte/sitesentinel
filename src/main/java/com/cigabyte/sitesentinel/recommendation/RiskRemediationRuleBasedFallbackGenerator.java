@@ -11,7 +11,7 @@ public class RiskRemediationRuleBasedFallbackGenerator {
 
     private static final RiskRemediationFallbackRuleVersion
             CURRENT_VERSION =
-            RiskRemediationFallbackRuleVersion.V1;
+            RiskRemediationFallbackRuleVersion.V2;
 
     public RiskRemediationRuleBasedFallbackResult generate(
             RiskRemediationRecommendationContext context
@@ -59,14 +59,171 @@ public class RiskRemediationRuleBasedFallbackGenerator {
     private String buildSummary(
             RiskRemediationRecommendationContext context
     ) {
+        RiskExplanation explanation =
+                resolveRiskExplanation(
+                        context.getRiskType()
+                );
+
         return """
-                This advisory recommendation is based only on the persisted %s risk, its %s severity classification, %d linked findings, and %d normalized evidence items. Confirm the affected control and root cause before applying a corrective change. The recommendation does not create a new risk or modify any risk, confidence, severity, or trust score.
-                """.formatted(
+            The persisted evidence confirms a %s risk with %s severity, supported by %d linked findings and %d normalized evidence items. %s If unresolved, %s The evidence does not confirm that an attack, compromise, data breach, incident, or exploitation occurred. Confirm the affected control and root cause before applying a corrective change. This advisory explanation does not create a new risk or modify any risk, confidence, severity, or trust score.
+            """.formatted(
                 context.getRiskType(),
                 context.getSeverity().name(),
                 context.getFindingCount(),
-                context.getEvidenceCount()
+                context.getEvidenceCount(),
+                explanation.meaning(),
+                explanation.potentialImpact()
         ).strip();
+    }
+
+    private RiskExplanation resolveRiskExplanation(
+            String riskType
+    ) {
+        return switch (riskType) {
+            case "WEBSITE_REACHABILITY_RISK" ->
+                    new RiskExplanation(
+                            "The homepage could not be fetched "
+                                    + "successfully, meaning the monitoring "
+                                    + "run could not establish normal "
+                                    + "website reachability.",
+                            "the condition may prevent users and monitoring "
+                                    + "systems from reaching the website or "
+                                    + "may conceal the current state of its "
+                                    + "public content and controls."
+                    );
+
+            case "WEBSITE_AVAILABILITY_RISK" ->
+                    new RiskExplanation(
+                            "The homepage returned an HTTP error status, "
+                                    + "meaning the requested public resource "
+                                    + "was not delivered successfully.",
+                            "the condition may interrupt user access, reduce "
+                                    + "service availability, and prevent "
+                                    + "dependent monitoring or business "
+                                    + "processes from completing normally."
+                    );
+
+            case "TRANSPORT_SECURITY_RISK" ->
+                    new RiskExplanation(
+                            "The homepage final URL is not served over HTTPS, "
+                                    + "meaning transport protection was not "
+                                    + "confirmed for the final destination.",
+                            "traffic may be exposed to interception or "
+                                    + "modification risks while travelling "
+                                    + "between a user and the website."
+                    );
+
+            case "BROWSER_SECURITY_POLICY_RISK" ->
+                    new RiskExplanation(
+                            "A Content Security Policy was not observed, "
+                                    + "meaning the browser was not given an "
+                                    + "explicit policy restricting approved "
+                                    + "content sources.",
+                            "the absence of this defense-in-depth control may "
+                                    + "increase exposure to browser-based "
+                                    + "content injection and script execution "
+                                    + "risks if another weakness is present."
+                    );
+
+            case "TRANSPORT_SECURITY_POLICY_RISK" ->
+                    new RiskExplanation(
+                            "A Strict Transport Security policy was not "
+                                    + "observed, meaning compatible browsers "
+                                    + "were not instructed to enforce future "
+                                    + "HTTPS-only access.",
+                            "users may remain more exposed to protocol "
+                                    + "downgrade or insecure first-connection "
+                                    + "risks."
+                    );
+
+            case "CLICKJACKING_PROTECTION_RISK" ->
+                    new RiskExplanation(
+                            "Explicit framing protection was not observed, "
+                                    + "meaning the page may be permitted to "
+                                    + "load inside another site's frame.",
+                            "the condition may increase exposure to deceptive "
+                                    + "interface overlays or clickjacking if "
+                                    + "the page contains actionable controls."
+                    );
+
+            case "CONTENT_SNIFFING_PROTECTION_RISK" ->
+                    new RiskExplanation(
+                            "Protection against MIME type sniffing was not "
+                                    + "observed, meaning browsers may attempt "
+                                    + "to infer a resource type instead of "
+                                    + "strictly following its declared type.",
+                            "misclassified content may be interpreted in an "
+                                    + "unsafe way under certain browser and "
+                                    + "content conditions."
+                    );
+
+            case "REFERRER_PRIVACY_POLICY_RISK" ->
+                    new RiskExplanation(
+                            "A policy controlling outbound referrer "
+                                    + "information was not observed.",
+                            "navigation requests may disclose more source URL "
+                                    + "or path information than intended to "
+                                    + "external destinations."
+                    );
+
+            case "CONTENT_QUALITY_RISK" ->
+                    new RiskExplanation(
+                            "A usable page title was not observed, meaning "
+                                    + "the homepage lacks a basic descriptive "
+                                    + "signal used by users, browsers, and "
+                                    + "assistive technologies.",
+                            "the page may be harder to identify in browser "
+                                    + "tabs, bookmarks, search results, and "
+                                    + "accessibility workflows."
+                    );
+
+            case "SEARCH_PRESENTATION_RISK" ->
+                    new RiskExplanation(
+                            "A usable meta description was not observed, "
+                                    + "meaning the site does not provide a "
+                                    + "preferred descriptive summary for "
+                                    + "search presentation.",
+                            "search platforms may generate less relevant or "
+                                    + "less consistent result descriptions, "
+                                    + "which may reduce clarity and "
+                                    + "engagement."
+                    );
+
+            case "CANONICALIZATION_RISK" ->
+                    new RiskExplanation(
+                            "A canonical URL was not observed, meaning the "
+                                    + "homepage does not explicitly identify "
+                                    + "its preferred URL representation.",
+                            "duplicate or alternate URLs may be indexed or "
+                                    + "evaluated inconsistently, potentially "
+                                    + "fragmenting search signals."
+                    );
+
+            case "ASSESSMENT_DATA_QUALITY_RISK" ->
+                    new RiskExplanation(
+                            "The HTTP status evidence could not be interpreted "
+                                    + "reliably, meaning the assessment could "
+                                    + "not establish a dependable response "
+                                    + "status conclusion.",
+                            "the potential impact is reduced assessment "
+                                    + "confidence, and availability or response "
+                                    + "conditions may remain unresolved until "
+                                    + "valid evidence is collected."
+                    );
+
+            default ->
+                    new RiskExplanation(
+                            "The persisted findings produced the "
+                                    + riskType
+                                    + " classification, but no dedicated "
+                                    + "risk-specific explanation is available "
+                                    + "for this future or unknown risk type.",
+                            "the potential impact cannot be stated more "
+                                    + "specifically without adding unsupported "
+                                    + "facts; the linked findings and normalized "
+                                    + "evidence should be reviewed before action."
+                    );
+        };
     }
 
     private List<String> buildRemediationSteps(
@@ -216,5 +373,11 @@ public class RiskRemediationRuleBasedFallbackGenerator {
         }
 
         return formattedSteps.toString();
+    }
+
+    private record RiskExplanation(
+            String meaning,
+            String potentialImpact
+    ) {
     }
 }

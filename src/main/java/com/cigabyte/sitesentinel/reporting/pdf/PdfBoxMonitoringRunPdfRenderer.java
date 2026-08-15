@@ -814,21 +814,20 @@ public class PdfBoxMonitoringRunPdfRenderer
             return;
         }
 
-        int recommendationNumber = 0;
-
         for (
                 MonitoringRunReportRiskRecommendationView item :
                 reportView.getRiskRecommendationViews()
         ) {
-            recommendationNumber++;
 
             Risk risk = item.getRisk();
 
             layout.writeSubsectionHeading(
-                    "Recommendation Context "
-                            + recommendationNumber
-                            + " - "
-                            + risk.getRiskType()
+                    "1. Risk Type, Severity and Score"
+            );
+
+            layout.writeKeyValue(
+                    "Risk Type",
+                    risk.getRiskType()
             );
 
             layout.writeKeyValue(
@@ -878,7 +877,7 @@ public class PdfBoxMonitoringRunPdfRenderer
         );
 
         layout.writeSubsectionHeading(
-                "Summary"
+                "2. Risk and Potential Impact Summary"
         );
 
         layout.writeParagraph(
@@ -886,7 +885,7 @@ public class PdfBoxMonitoringRunPdfRenderer
         );
 
         layout.writeSubsectionHeading(
-                "Remediation Steps"
+                "3. Remediation Steps"
         );
 
         layout.writeParagraph(
@@ -894,7 +893,7 @@ public class PdfBoxMonitoringRunPdfRenderer
         );
 
         layout.writeSubsectionHeading(
-                "Verification Steps"
+                "4. Verification Steps"
         );
 
         layout.writeParagraph(
@@ -902,7 +901,7 @@ public class PdfBoxMonitoringRunPdfRenderer
         );
 
         layout.writeSubsectionHeading(
-                "Recommendation Audit Metadata"
+                "5. Recommendation Audit Metadata"
         );
 
         layout.writeKeyValue(

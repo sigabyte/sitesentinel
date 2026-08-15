@@ -270,6 +270,82 @@ class OpenAiRecommendationRequestBodyFactoryTests {
         );
     }
 
+    @Test
+    void structuredOutputDescribesRiskAndPotentialImpactSummary()
+            throws JacksonException {
+
+        JsonNode formatNode =
+                createFormatNode();
+
+        JsonNode summaryNode =
+                formatNode.get("schema")
+                        .get("properties")
+                        .get("summary");
+
+        assertAll(
+                () -> assertTrue(
+                        formatNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "risk explanation and "
+                                                + "potential impact"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.has("description")
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "what was detected"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "what the risk means"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "why it matters"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "potential consequences"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "what the evidence confirms"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "what the evidence does not confirm"
+                                )
+                ),
+                () -> assertTrue(
+                        summaryNode.get("description")
+                                .textValue()
+                                .contains(
+                                        "must not claim that exploitation occurred"
+                                )
+                )
+        );
+    }
+
     private JsonNode createFormatNode()
             throws JacksonException {
 

@@ -2,7 +2,13 @@ package com.cigabyte.sitesentinel.recommendation;
 
 public enum RiskRemediationFallbackRuleVersion {
 
-    V1("risk-remediation-fallback-v1");
+    V1(
+            "risk-remediation-fallback-v1"
+    ),
+
+    V2(
+            "risk-remediation-fallback-v2"
+    );
 
     private final String version;
 

@@ -4853,3 +4853,277 @@ analysis.
 
 The monitoring lifecycle remains evidence-driven and behavior-compatible while
 avoiding an unconditional full-response in-memory requirement.
+
+# Sprint 16 — Adaptive Response Analysis and Risk Explanation Baseline
+
+## Status
+
+Sprint 16 is complete.
+
+The sprint was delivered in two controlled phases:
+
+- Sprint 16A — Adaptive Response Body Processing
+- Sprint 16B — Risk and Potential Impact Explanation
+
+Final automated verification:
+
+- Tests run: 341
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+
+## Sprint 16A — Adaptive Response Body Processing
+
+Sprint 16A removed the fixed in-memory string response assumption from the
+HTTP evidence collection path.
+
+The completed implementation introduced adaptive response handling that can
+retain smaller responses in memory and spill larger responses to a temporary
+file without truncating the content required by the existing analysis
+pipeline.
+
+The completed response-processing baseline includes:
+
+- adaptive in-memory and temporary-file response collection;
+- large-response temporary-file spillover;
+- full response analysis after spillover;
+- streaming response fingerprint calculation;
+- HTML analysis orchestration through the streaming analyzer;
+- non-HTML fingerprint and snippet preservation;
+- response lifecycle cleanup;
+- redirect response cleanup;
+- optional-resource response cleanup;
+- preservation of existing HTTP evidence semantics;
+- preservation of the existing monitoring execution lifecycle.
+
+Sprint 16A did not introduce:
+
+- a response scan cutoff;
+- response truncation;
+- partial-body risk evaluation;
+- a database migration;
+- a change to persisted evidence semantics.
+
+The full Sprint 16A baseline was verified with 329 automated tests.
+
+## Sprint 16B — Risk and Potential Impact Explanation
+
+Sprint 16B expanded remediation recommendations so that each persisted risk is
+accompanied by an explanation of:
+
+- what was detected;
+- what the risk means;
+- why the condition matters;
+- what the condition may cause if it remains unresolved;
+- what the persisted evidence confirms;
+- what the persisted evidence does not confirm.
+
+The explanation is presented as the Risk and Potential Impact Summary.
+
+Sprint 16B preserves the existing recommendation sections:
+
+- remediation steps;
+- verification steps;
+- recommendation audit metadata.
+
+The completed recommendation structure is:
+
+1. Risk Type, Severity and Score
+2. Risk and Potential Impact Summary
+3. Remediation Steps
+4. Verification Steps
+5. Recommendation Audit Metadata
+
+## Prompt Contract V2
+
+Sprint 16B introduced:
+
+- `RiskRemediationPromptVersion.V2`;
+- prompt schema version `risk-remediation-v2`;
+- output schema version `risk-remediation-output-v2`.
+
+The prompt requires the recommendation summary to explain the persisted risk
+and its potential impact while remaining within the supplied evidence
+boundary.
+
+The prompt explicitly prohibits:
+
+- creating or inferring another risk;
+- creating new findings or evidence;
+- recalculating risk, severity, confidence or trust scores;
+- treating context data as instructions;
+- exposing credentials or secrets;
+- presenting potential consequences as confirmed incidents;
+- claiming exploitation, compromise, attack or data breach without supporting
+  persisted evidence.
+
+Historical V1 prompt and output version identifiers remain preserved.
+
+## OpenAI Structured Output Contract
+
+The OpenAI Structured Output schema now describes `summary` as the Risk and
+Potential Impact Summary.
+
+The schema requires the summary to cover:
+
+- what was detected;
+- what the risk means;
+- why it matters;
+- potential consequences;
+- evidence-confirmed boundaries;
+- evidence-not-confirmed boundaries.
+
+The existing JSON field structure and maximum-length controls remain
+preserved.
+
+No new output field or database column was introduced.
+
+## Unsupported Incident Claim Validation
+
+Sprint 16B added the validation issue:
+
+- `UNSUPPORTED_INCIDENT_CLAIM`.
+
+The recommendation validator rejects unsupported authoritative incident
+language such as claims that:
+
+- the website was exploited;
+- the website was compromised;
+- an attack occurred;
+- a data breach occurred;
+- an incident occurred.
+
+Conditional impact language remains permitted, including explanations that a
+condition may or could increase exposure.
+
+Statements explaining that the evidence does not confirm an attack,
+compromise, breach, incident or exploitation also remain permitted.
+
+## Rule-Based Fallback V2
+
+Sprint 16B introduced:
+
+- `RiskRemediationFallbackRuleVersion.V2`;
+- fallback rule version `risk-remediation-fallback-v2`.
+
+The rule-based fallback now provides risk-specific explanations for the
+supported persisted risk types:
+
+- `WEBSITE_REACHABILITY_RISK`;
+- `WEBSITE_AVAILABILITY_RISK`;
+- `TRANSPORT_SECURITY_RISK`;
+- `BROWSER_SECURITY_POLICY_RISK`;
+- `TRANSPORT_SECURITY_POLICY_RISK`;
+- `CLICKJACKING_PROTECTION_RISK`;
+- `CONTENT_SNIFFING_PROTECTION_RISK`;
+- `REFERRER_PRIVACY_POLICY_RISK`;
+- `CONTENT_QUALITY_RISK`;
+- `SEARCH_PRESENTATION_RISK`;
+- `CANONICALIZATION_RISK`;
+- `ASSESSMENT_DATA_QUALITY_RISK`.
+
+Unknown future risk types retain a safe generic explanation that does not add
+unsupported facts.
+
+Historical fallback V1 remains preserved.
+
+## HTML and PDF Reporting
+
+The HTML monitoring-run report and PDF renderer now use the same canonical
+five-section recommendation structure.
+
+Both outputs display:
+
+1. Risk Type, Severity and Score
+2. Risk and Potential Impact Summary
+3. Remediation Steps
+4. Verification Steps
+5. Recommendation Audit Metadata
+
+The report continues to read persisted recommendation records.
+
+HTML rendering and PDF generation do not:
+
+- regenerate recommendations;
+- rerun monitoring;
+- call the AI provider;
+- modify risk or trust output;
+- change persisted recommendation content.
+
+## Preserved Recommendation Behavior
+
+Sprint 16B preserved:
+
+- provider-neutral recommendation orchestration;
+- production OpenAI provider integration;
+- provider-disabled rule-based fallback;
+- provider-failure rule-based fallback;
+- recommendation persistence and audit metadata;
+- recommendation context fingerprinting;
+- monitoring lifecycle isolation;
+- PDF artifact generation;
+- automatic Telegram PDF dispatch;
+- manual dispatch retry;
+- existing dispatch idempotency.
+
+## Database
+
+Sprint 16 introduced no database migration.
+
+Latest migration remains:
+
+- V18
+
+The existing recommendation persistence model already supports the expanded
+summary semantics.
+
+## Automated Verification
+
+Controlled verification completed during Sprint 16B:
+
+- prompt and context tests: 5 passed;
+- OpenAI request-body tests: 7 passed;
+- recommendation validator tests: 8 passed;
+- rule-based fallback tests: 6 passed;
+- HTML and PDF canonical structure tests: 10 passed;
+- recommendation, report, PDF and dispatch regression: 96 passed;
+- full project regression: 341 passed.
+
+Final result:
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 341
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+
+## Architectural Guarantees
+
+Sprint 16 preserves the following guarantees:
+
+- persisted risks remain authoritative;
+- recommendations remain advisory;
+- recommendations do not create findings;
+- recommendations do not create risks;
+- risk severity and risk score are not recalculated;
+- confidence and trust scores are not recalculated;
+- potential impacts are expressed conditionally;
+- unsupported incident conclusions are rejected;
+- provider failure cannot fail a completed monitoring run;
+- PDF generation remains separate from recommendation generation;
+- Telegram delivery remains separate from recommendation generation;
+- credentials and secret values remain externally configured.
+
+## Result
+
+Sprint 16 is technically complete.
+
+SiteSentinel can now analyze large HTTP responses without response truncation
+and can explain each persisted risk, its meaning and its potential impact
+alongside remediation and verification guidance.
+
+The completed implementation preserves evidence authority, recommendation
+advisory boundaries, existing fallback behavior, reporting, PDF generation
+and Telegram delivery.

@@ -5224,3 +5224,277 @@ Memory Threshold ≠ Scan Cutoff
 A response may move from memory to temporary storage, but it must continue
 through the existing full analysis and evidence lifecycle unless a future
 explicit response-size security policy is separately approved.
+
+# SiteSentinel Architecture Review-16
+
+## Review Status
+
+- Sprint: Sprint 16
+- Scope: Adaptive Response Analysis and Risk Explanation Baseline
+- Result: APPROVED
+- Final tests: 341 passed
+- Latest migration: V18
+
+## Architectural Outcome
+
+Sprint 16 completed two related production-hardening objectives:
+
+1. adaptive processing of HTTP response bodies without response truncation;
+2. evidence-bounded risk and potential-impact explanations in remediation
+   recommendations and reports.
+
+The implementation preserves the existing monitoring, evidence, risk,
+recommendation, reporting and delivery boundaries.
+
+## Adaptive Response Processing Decision
+
+APPROVED
+
+The HTTP evidence collection path no longer depends on
+`BodyHandlers.ofString()` for response-body collection.
+
+The adaptive response boundary supports:
+
+- smaller response bodies retained in memory;
+- larger response bodies spilled to a temporary file;
+- full-body analysis after spillover;
+- streaming fingerprint calculation;
+- HTML analysis orchestration;
+- non-HTML fingerprint and snippet preservation;
+- deterministic response-resource cleanup.
+
+No response scan cutoff or truncation boundary was introduced.
+
+The resulting evidence semantics remain compatible with the existing finding
+and risk evaluation pipeline.
+
+## Temporary-File Lifecycle Decision
+
+APPROVED
+
+Large-response temporary files are lifecycle-owned resources.
+
+Cleanup is performed for:
+
+- normally processed responses;
+- redirect responses;
+- optional-resource responses;
+- response paths that no longer require retained body content.
+
+Temporary-file spillover does not create a new persistence model and does not
+change the monitoring-run transaction boundary.
+
+## Risk Explanation Decision
+
+APPROVED
+
+A persisted risk recommendation now includes a Risk and Potential Impact
+Summary explaining:
+
+- what was detected;
+- what the risk means;
+- why it matters;
+- what may happen if it remains unresolved;
+- what the evidence confirms;
+- what the evidence does not confirm.
+
+The explanation remains advisory and cannot replace or modify the persisted
+risk assessment.
+
+## Evidence Authority Decision
+
+APPROVED
+
+The recommendation layer may explain supplied persisted evidence but may not:
+
+- create another risk;
+- create findings or evidence;
+- alter risk severity or risk score;
+- alter confidence or trust scores;
+- infer an incident unsupported by persisted evidence;
+- present potential consequences as confirmed events.
+
+Persisted evidence, findings and risks remain authoritative.
+
+## Unsupported Incident Claim Decision
+
+APPROVED
+
+The validator now rejects unsupported authoritative incident or exploitation
+claims through:
+
+- `UNSUPPORTED_INCIDENT_CLAIM`.
+
+The validator permits conditional impact descriptions using language such as
+`may` or `could`.
+
+It also permits explicit evidence-boundary statements explaining that an
+attack, compromise, breach, incident or exploitation was not confirmed.
+
+This validation is a safety boundary for recommendation content and is not an
+incident-detection subsystem.
+
+## Versioning Decision
+
+APPROVED
+
+Sprint 16B introduced:
+
+- `RiskRemediationPromptVersion.V2`;
+- prompt schema `risk-remediation-v2`;
+- output schema `risk-remediation-output-v2`;
+- `RiskRemediationFallbackRuleVersion.V2`;
+- fallback rule `risk-remediation-fallback-v2`.
+
+Historical V1 identifiers remain preserved for existing persisted records and
+audit interpretation.
+
+No historical record is rewritten.
+
+## Structured Output Decision
+
+APPROVED
+
+The OpenAI Structured Output schema retains the existing recommendation JSON
+shape:
+
+- `schemaVersion`;
+- `title`;
+- `summary`;
+- `remediationSteps`;
+- `verificationSteps`;
+- `advisory`.
+
+The semantic contract of `summary` is expanded to represent the Risk and
+Potential Impact Summary.
+
+No new transport field, persistence field or database column is required.
+
+## Rule-Based Fallback Decision
+
+APPROVED
+
+The rule-based fallback remains the authoritative availability mechanism when:
+
+- the AI provider is disabled;
+- the AI provider fails;
+- provider output is invalid;
+- provider output violates the recommendation contract.
+
+Fallback V2 provides dedicated explanations for the currently supported risk
+types and a safe generic explanation for unknown future risk types.
+
+The generic explanation does not invent risk-specific facts.
+
+## Reporting Decision
+
+APPROVED
+
+HTML and PDF reports use the same recommendation structure:
+
+1. Risk Type, Severity and Score
+2. Risk and Potential Impact Summary
+3. Remediation Steps
+4. Verification Steps
+5. Recommendation Audit Metadata
+
+Both report paths consume persisted recommendation output.
+
+Neither renderer:
+
+- calls the AI provider;
+- regenerates recommendations;
+- reruns monitoring;
+- recalculates risk or trust output;
+- modifies persisted recommendation content.
+
+## Dispatch Decision
+
+APPROVED
+
+Automatic Telegram PDF delivery and manual retry continue to operate on the
+generated persisted report artifact.
+
+Recommendation explanation changes do not alter:
+
+- dispatch idempotency;
+- delivery-attempt persistence;
+- Telegram delivery isolation;
+- monitoring-run completion state;
+- manual retry semantics.
+
+## Database Decision
+
+APPROVED
+
+Sprint 16 requires no database migration.
+
+Latest migration remains:
+
+- V18
+
+Existing response evidence and recommendation persistence models remain
+sufficient.
+
+## Security Decision
+
+APPROVED
+
+Sprint 16 preserves:
+
+- external secret configuration;
+- no secret values in recommendation context;
+- context sanitization;
+- prompt-injection resistance through data-only context handling;
+- provider-disabled safe behavior;
+- provider-failure isolation;
+- advisory-only recommendation output;
+- deterministic fallback availability.
+
+Potential consequence language does not establish that an attack or incident
+occurred.
+
+## Regression Decision
+
+APPROVED
+
+Automated verification completed successfully:
+
+- Sprint 16A full baseline: 329 tests passed;
+- Sprint 16B recommendation/report regression: 96 tests passed;
+- Sprint 16 final full regression: 341 tests passed;
+- failures: 0;
+- errors: 0;
+- skipped: 0.
+
+## Accepted Limitations
+
+The following limitations remain accepted:
+
+- recommendations remain advisory and do not apply remediation automatically;
+- incident confirmation remains outside the recommendation subsystem;
+- the validator targets explicit unsupported incident language and is not a
+  general natural-language fact-verification engine;
+- only the currently supported risk types have dedicated fallback
+  explanations;
+- unknown future risk types use a safe generic explanation;
+- response-body processing remains bounded by available runtime and temporary
+  storage resources;
+- authentication and role-based authorization remain deferred;
+- artifact retention and cleanup policy remains deferred;
+- multi-provider failover remains deferred.
+
+These limitations do not invalidate the Sprint 16 baseline.
+
+## Architecture Decision
+
+Sprint 16 is architecturally approved.
+
+The completed system can process large HTTP response bodies without
+truncating the content used by analysis and can communicate the meaning and
+potential impact of persisted risks without weakening evidence authority or
+claiming unsupported incidents.
+
+Result:
+
+- APPROVED

@@ -49,7 +49,8 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ## AI Remediation Recommendation Production Hardening
 
-Sprint 15 completed the first concrete production AI provider baseline.
+Sprint 16 completed the adaptive response-analysis and evidence-bounded risk
+explanation baseline on top of the production OpenAI provider.
 
 The completed foundation includes:
 
@@ -69,6 +70,16 @@ The completed foundation includes:
 - AI-enriched PDF generation;
 - automatic Telegram delivery of the AI-enriched PDF;
 - secret-safe request, response, and error handling.
+- prompt and output contract V2;
+- Risk and Potential Impact Summary;
+- conditional potential-consequence language;
+- evidence-confirmed and evidence-not-confirmed boundaries;
+- unsupported authoritative incident-claim validation;
+- fallback rule V2;
+- dedicated explanations for 12 supported risk types;
+- safe generic explanation for unknown future risk types;
+- canonical five-section HTML and PDF recommendation reporting;
+- adaptive response-body processing without truncation.
 
 Future work must build on the existing provider-neutral boundary and must not
 replace the rule-based fallback path.
@@ -148,34 +159,53 @@ Future implementations must not:
 
 ---
 
-## AI Unresolved-Risk Impact Analysis
+## Recommendation Explanation Follow-Up
 
-- Generate potential impact analysis for validated monitoring risks when they remain unresolved.
-- Explain what technical, operational, security, availability, customer, financial, compliance, or reputational 
-consequences may occur if a risk is not remediated.
-- Generate only impact categories that are relevant to the finding and supported by available evidence.
-- Link every generated impact statement to the originating risk, finding, evidence, monitoring run, prompt version, 
-and recommendation generation record.
-- Include an impact category for every generated consequence.
-- Include likelihood or urgency when it can be supported safely.
-- Include confidence for every generated impact statement.
-- Use non-deterministic language such as `may`, `could`, or `is likely to` unless the consequence follows directly 
-from verified technical evidence.
-- Prevent unsupported claims, exaggerated business consequences, and speculative legal, regulatory, or financial 
-conclusions.
-- Preserve the rule-based fallback path when AI-generated impact analysis is unavailable or invalid.
-- Validate AI-generated impact analysis before persistence or external presentation.
-- Store validated impact analysis as structured data rather than generating it inside the PDF renderer.
-- Make validated impact analysis reusable by PDF reports, web views, APIs, notification summaries, and future 
-executive dashboards.
-- Keep unresolved-risk impact analysis separate from risk detection, severity calculation, trust assessment, 
-and evidence analysis.
-- Do not allow AI-generated impact analysis to modify the authoritative risk severity or monitoring result.
-- Define impact-analysis generation idempotency.
-- Prevent duplicate impact-analysis generation for the same risk and recommendation lifecycle.
-- Define regeneration, supersession, history retention, and approval rules.
-- Optimize impact generation for monitoring runs containing many risks.
+Sprint 16 completed the initial Risk and Potential Impact Summary baseline.
 
+Completed behavior includes:
+
+- explaining what was detected;
+- explaining what the persisted risk means;
+- explaining why the condition matters;
+- explaining what it may cause if unresolved;
+- distinguishing what the evidence confirms from what it does not confirm;
+- expressing potential consequences conditionally;
+- rejecting unsupported authoritative incident and exploitation claims;
+- providing rule-based explanations for all currently supported risk types;
+- presenting the same explanation structure in HTML and PDF reports.
+
+The completed summary remains part of the existing persisted recommendation
+record. It does not create a separate impact-analysis aggregate or persistence
+model.
+
+The following advanced capabilities remain deferred and require a separate
+future design decision:
+
+- structured impact categories;
+- separately persisted impact statements;
+- impact-specific likelihood or urgency;
+- impact-specific confidence scores;
+- impact-specific generation records;
+- impact regeneration and supersession;
+- impact approval workflow;
+- configurable impact visibility by report recipient;
+- executive impact dashboards;
+- stricter policy controls for financial, legal, regulatory and reputational
+  impact categories;
+- lifecycle rules for separately versioned impact-analysis records.
+
+Future structured impact work must:
+
+- reuse the persisted risk, finding and evidence traceability chain;
+- remain separate from risk detection and severity calculation;
+- preserve conditional consequence language;
+- reject unsupported or exaggerated conclusions;
+- preserve rule-based recommendation availability;
+- avoid duplicating the completed Risk and Potential Impact Summary unless a
+  separately approved product requirement requires structured impact data.
+
+---
 
 ## Notification and Report Dispatch Follow-Up
 
@@ -320,6 +350,11 @@ and evidence analysis.
 - Add operational metrics for scan duration and failure rates.
 - Add advanced scanner signals.
 - Add external reputation integrations.
+- Evaluate a configurable operational response-body limit only with an explicit
+  evidence-completeness and safe-failure policy; do not silently truncate
+  analyzed response content.
+- Add temporary-file storage capacity monitoring and cleanup metrics for
+  adaptive response spillover.
 
 ---
 
@@ -348,16 +383,14 @@ and evidence analysis.
 - Add trust evaluation tests.
 - Add notification event generation tests.
 - Add notification delivery settings controller and template integration tests.
-- Add unresolved-risk impact generation service tests.
-- Add impact-analysis structured output validation tests.
-- Add risk, finding, evidence, and impact traceability tests.
-- Add unsupported and speculative impact rejection tests.
-- Add non-deterministic wording validation tests.
-- Add impact category, likelihood, and confidence validation tests.
-- Add impact-analysis idempotency and duplicate-prevention tests.
-- Add impact-analysis regeneration and supersession tests.
-- Add PDF rendering tests for validated unresolved-risk impacts.
-- Verify that the PDF renderer does not independently generate impact statements.
+- Add broader recommendation-language fixtures for conditional potential-impact
+  validation.
+- Add validator fixtures for additional unsupported authoritative incident
+  phrasings when observed.
+- Add risk-specific explanation regression coverage whenever a new persisted
+  risk type is introduced.
+  - Add structured impact-analysis tests only if a separate structured impact
+    model is approved in a future sprint.
 - Add recommendation generation idempotency tests.
 - Add recommendation supersession tests.
 - Add repeatable AI recommendation quality-evaluation tests across approved
@@ -428,14 +461,15 @@ and evidence analysis.
 - Decide whether AI may ever participate in risk, finding, or evidence analysis beyond the approved advisory 
 remediation recommendation boundary.
 - Decide whether AI-generated recommendations require human approval before external report dispatch. 
-- Decide whether unresolved-risk impact analysis should be generated for every risk or only for configured severity levels.
-- Decide which impact categories may be displayed to external report recipients.
-- Decide whether AI-generated impact analysis requires human approval before external report dispatch.
-- Decide whether likelihood should use descriptive levels or a numeric probability.
-- Decide whether financial, legal, regulatory, and reputational impacts require stricter validation or exclusion 
-  from the initial implementation.
-- Decide how regenerated impact analysis supersedes or remains alongside previous validated versions.
-- Decide whether reports should clearly distinguish verified technical consequences from contextual potential impacts.
+- Decide whether a future structured impact model is required beyond the
+  completed Risk and Potential Impact Summary.
+- Decide which structured impact categories may be supported if separately
+  persisted impact analysis is approved.
+- Decide whether structured financial, legal, regulatory or reputational
+  impacts should remain excluded unless supported by a stricter validation
+  policy.
+- Decide whether separately persisted structured impact analysis would require
+  approval, regeneration, supersession and retention rules.
 - Decide whether repeated recommendations replace, supersede, or remain alongside previous recommendation history.
 - Decide whether report dispatch should include all completed runs or only runs meeting configured risk and severity 
   rules.

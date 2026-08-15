@@ -226,6 +226,80 @@ class RiskRemediationRecommendationValidatorTests {
         );
     }
 
+    @Test
+    void rejectsUnsupportedAuthoritativeIncidentClaim() {
+        RiskRemediationAiOutput output =
+                new RiskRemediationAiOutput(
+                        "risk-remediation-output-v2",
+                        "Correct the persisted condition",
+                        "The website was exploited and a data breach "
+                                + "occurred because the security control "
+                                + "was missing.",
+                        List.of(
+                                "Review the affected control.",
+                                "Apply the corrective change."
+                        ),
+                        List.of(
+                                "Re-run the monitoring checks."
+                        ),
+                        true
+                );
+
+        RiskRemediationRecommendationValidationResult result =
+                validator.validate(
+                        output,
+                        RiskRemediationPromptVersion.V2
+                );
+
+        assertFalse(result.isValid());
+
+        assertTrue(
+                result.getIssues()
+                        .stream()
+                        .anyMatch(
+                                issue -> issue.name().equals(
+                                        "UNSUPPORTED_INCIDENT_CLAIM"
+                                )
+                        )
+        );
+
+        assertTrue(result.getContent().isEmpty());
+    }
+
+    @Test
+    void acceptsConditionalPotentialImpactWithoutIncidentClaim() {
+        RiskRemediationAiOutput output =
+                new RiskRemediationAiOutput(
+                        "risk-remediation-output-v2",
+                        "Correct the persisted condition",
+                        "The persisted evidence confirms that the "
+                                + "security control is missing. If left "
+                                + "unresolved, the condition may increase "
+                                + "exposure to browser-based attacks. The "
+                                + "evidence does not confirm that an attack, "
+                                + "compromise, data breach, incident, or "
+                                + "exploitation occurred.",
+                        List.of(
+                                "Review the affected control.",
+                                "Apply the corrective change."
+                        ),
+                        List.of(
+                                "Re-run the monitoring checks."
+                        ),
+                        true
+                );
+
+        RiskRemediationRecommendationValidationResult result =
+                validator.validate(
+                        output,
+                        RiskRemediationPromptVersion.V2
+                );
+
+        assertTrue(result.isValid());
+        assertTrue(result.getIssues().isEmpty());
+        assertTrue(result.getContent().isPresent());
+    }
+
     private RiskRemediationAiOutput validOutput(
             String schemaVersion
     ) {
