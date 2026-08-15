@@ -4567,3 +4567,289 @@ Full Monitoring Run PDF
 Automatic Telegram Delivery
 ↓
 Persisted Delivery Audit
+
+
+# Sprint 16A — Adaptive and Streaming HTTP Response Processing
+
+## Status
+
+Implementation complete and runtime verified.
+
+## Objective
+
+Sprint 16A removes the requirement to retain every HTTP response body entirely
+in memory before evidence analysis.
+
+The HTTP evidence collection pipeline now supports bounded in-memory collection,
+temporary-file spillover and streaming analysis while preserving the existing
+evidence, finding, risk, trust, recommendation, PDF and Telegram delivery
+semantics.
+
+The configured memory threshold is a spillover boundary only.
+
+It is not a response-size scan cutoff and does not truncate the response body.
+
+## Implemented Scope
+
+Sprint 16A introduced:
+
+- adaptive response-body collection;
+- bounded in-memory response storage;
+- temporary-file spillover for larger response bodies;
+- full response-body analysis after spillover;
+- streaming SHA-256 fingerprint calculation;
+- streaming response-body length calculation;
+- bounded snippet extraction;
+- streaming HTML-visible-text extraction;
+- script and style content filtering;
+- response-body lifecycle ownership;
+- deterministic temporary-file cleanup;
+- redirect-response cleanup;
+- optional-resource response cleanup;
+- configurable in-memory spillover threshold;
+- optional configured temporary-directory support;
+- disabled truncation semantics;
+- preservation of existing collected-evidence behavior.
+
+## New Production Components
+
+The following production files were introduced:
+
+- `AdaptiveResponseBodyCollector.java`
+- `AdaptiveResponseBodyHandler.java`
+- `CollectedHttpResponse.java`
+- `CountingReader.java`
+- `ResponseBodyAnalysisResult.java`
+- `ScriptAndStyleFilteringReader.java`
+- `StoredResponseBody.java`
+- `StreamingHtmlContentExtractor.java`
+- `StreamingResponseBodyAnalyzer.java`
+- `StreamingResponseBodyFingerprintCalculator.java`
+- `ScannerProperties.java`
+
+The following existing production components were updated:
+
+- `HttpEvidenceCollectionEngine.java`
+- `WebsiteTargetValidator.java`
+- `application.properties`
+
+## Adaptive Storage Model
+
+Response-body storage now follows this lifecycle:[]
+
+HTTP Response Body
+↓
+Adaptive Response Body Handler
+↓
+Bounded In-Memory Collection
+↓
+Memory Threshold Reached
+↓
+Temporary-File Spillover
+↓
+Full Streaming Analysis
+↓
+Evidence Persistence
+↓
+Deterministic Response Cleanup
+
+```
+
+A response that exceeds the configured memory threshold continues to be read and
+analysed in full.
+
+The threshold controls where the body is stored.
+
+It does not control how much of the body is analysed.
+
+## Streaming Analysis
+
+The streaming analysis pipeline produces the existing evidence-compatible
+outputs without requiring a complete in-memory response string.
+
+Supported analysis includes:
+
+- complete response-body byte length;
+- complete SHA-256 body fingerprint;
+- bounded response-body snippet;
+- HTML visible-text extraction;
+- exclusion of script content;
+- exclusion of style content;
+- preservation of non-HTML fingerprint and snippet behavior.
+
+The analysis pipeline does not introduce a scan cutoff.
+
+## Response Lifecycle and Cleanup
+
+`CollectedHttpResponse.java` owns the stored response-body lifecycle.
+
+The collection engine closes collected responses after analysis.
+
+Cleanup applies to:
+
+- primary responses;
+- redirect responses;
+- robots.txt responses;
+- sitemap.xml responses;
+- in-memory response storage;
+- temporary-file response storage;
+- successful processing;
+- supported failure paths.
+
+Temporary-file spillover does not create a persistent response-body archive.
+
+Temporary files are implementation-owned transient resources and are removed
+when the collected response is closed.
+
+## Configuration
+
+The following scanner configuration was introduced:
+
+```properties
+sitesentinel.scanner.in-memory-body-threshold-bytes=1048576
+sitesentinel.scanner.temporary-directory=
+```
+
+`in-memory-body-threshold-bytes` defines the memory spillover threshold.
+
+It does not truncate or limit response analysis.
+
+An empty `temporary-directory` value delegates temporary-file placement to the
+operating system.
+
+## Preserved Behavior
+
+Sprint 16A preserves:
+
+- existing HTTP evidence types;
+- canonical URL evidence;
+- requested and final URL evidence;
+- response status evidence;
+- response content-type evidence;
+- security-header evidence;
+- body length evidence;
+- body fingerprint evidence;
+- bounded body snippet evidence;
+- metadata evidence;
+- robots.txt evidence;
+- sitemap.xml evidence;
+- finding generation;
+- risk evaluation;
+- trust assessment;
+- AI recommendation generation;
+- rule-based recommendation fallback;
+- PDF artifact generation;
+- automatic Telegram PDF dispatch;
+- notification deduplication behavior.
+
+No database migration was required.
+
+The latest migration remains V18.
+
+## Runtime Verification
+
+A controlled monitoring run against `ventofurniture.com` completed successfully.
+
+Observed lifecycle output:
+
+- monitoring status: `COMPLETED`;
+- execution outcome: `TRUST_ASSESSED`;
+- collected evidence: 43;
+- normalized evidence: 27;
+- findings: 4;
+- risks: 4;
+- trust assessments: 1;
+- trust status: `HIGH_RISK`;
+- trust score: 35;
+- confidence: 90;
+- generated recommendations: 4;
+- failed recommendations: 0;
+- automatic Telegram PDF dispatch status: `SENT`;
+- Telegram delivery attempted: true;
+- Telegram delivery successful: true.
+
+Additional scheduled runs also completed and delivered their PDF artifacts
+successfully after runtime Telegram opt-in was enabled.
+
+## Notification Explanation Clarification
+
+Runtime verification confirmed that an unchanged existing high-risk condition
+does not require a duplicate notification event.
+
+The existing notification deduplication behavior was preserved.
+
+The empty-notification explanation on the monitoring run detail page was
+updated so that it no longer incorrectly claims that no high-risk assessment
+was detected.
+
+The page now explains that no new notification may be expected when an existing
+high-risk condition remains unchanged and no comparison-based notification rule
+matches.
+
+No notification generation or deduplication logic was changed.
+
+## Dispatch Completion Timestamp Hardening
+
+Closure regression detected an intermittent dispatch integration failure.
+
+A persisted dispatch attempt timestamp could be marginally later than a newly
+generated completion timestamp because of timestamp precision and persistence
+timing.
+
+The dispatch attempt entity correctly rejected this invalid ordering:
+
+completedAt < attemptedAt
+
+## Test Coverage
+
+New test coverage includes:
+
+- adaptive response-body collection;
+- memory-threshold spillover;
+- temporary-file storage;
+- response lifecycle cleanup;
+- response handler integration;
+- collected-response invariants;
+- counting-reader behavior;
+- response analysis result invariants;
+- script and style filtering;
+- stored response-body behavior;
+- streaming HTML extraction;
+- streaming response-body analysis;
+- streaming SHA-256 fingerprint calculation;
+- non-HTML response preservation;
+- notification empty-state explanation;
+- safe Telegram configuration defaults;
+- safe OpenAI configuration defaults.
+
+## Verification Baseline
+
+- Targeted streaming tests: PASSED
+- Template regression tests: 5 PASSED
+- Configuration binding regression tests: 4 PASSED
+- Full regression tests: 333 PASSED
+- Failures: 0
+- Errors: 0
+- Build: SUCCESS
+- `git diff --check`: PASSED
+- `git diff --cached --check`: PASSED
+- Database migration added: NO
+- Latest migration: V18
+- Response truncation introduced: NO
+- Response scan cutoff introduced: NO
+- Secret exposure detected: NO
+- Generated PDF artifacts included: NO
+- Temporary response artifacts included: NO
+
+## Architectural Result
+
+Sprint 16A establishes an adaptive response-processing boundary for HTTP
+evidence collection.
+
+Small responses remain efficiently in memory.
+
+Larger responses spill to temporary storage and continue through full streaming
+analysis.
+
+The monitoring lifecycle remains evidence-driven and behavior-compatible while
+avoiding an unconditional full-response in-memory requirement.

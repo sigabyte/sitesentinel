@@ -4840,3 +4840,387 @@ Full Monitoring Run PDF
 Automatic Telegram Delivery
 ↓
 Persisted Delivery Audit
+
+# SiteSentinel Architecture Review-16A Closure
+
+## Decision
+
+Sprint 16A is architecturally approved.
+
+SiteSentinel now supports adaptive HTTP response-body storage and streaming
+analysis without introducing response truncation or changing the authoritative
+monitoring lifecycle.
+
+The memory threshold is approved as a storage spillover boundary only.
+
+It is not approved as a response-size scan cutoff.
+
+## Architectural Outcome
+
+The previous HTTP collection path required response bodies to be materialized
+as complete in-memory strings before evidence analysis.
+
+Sprint 16A replaces that unconditional storage assumption with an adaptive
+response-processing boundary.
+
+The approved lifecycle is:
+
+```text
+HTTP Response
+↓
+Adaptive Body Handler
+↓
+Bounded In-Memory Storage
+↓
+Temporary-File Spillover When Required
+↓
+Full Streaming Analysis
+↓
+Existing Collected Evidence
+↓
+Existing Finding, Risk and Trust Lifecycle
+↓
+Validated Recommendation
+↓
+PDF Artifact
+↓
+Telegram Dispatch
+```
+
+This change is internal to HTTP evidence acquisition and analysis.
+
+It does not create a parallel evidence model.
+
+## Adaptive Response Storage Boundary
+
+`AdaptiveResponseBodyCollector.java` controls whether response bytes remain in
+memory or spill to temporary storage.
+
+`StoredResponseBody.java` represents the completed storage result.
+
+`CollectedHttpResponse.java` combines HTTP response metadata with ownership of
+the stored response body.
+
+The storage decision is based on the configured in-memory threshold.
+
+Crossing that threshold changes the storage medium.
+
+It does not stop response consumption or analysis.
+
+## Streaming Analysis Boundary
+
+`StreamingResponseBodyAnalyzer.java` coordinates response-body analysis without
+requiring a complete response string.
+
+The streaming analysis boundary delegates to:
+
+- `StreamingResponseBodyFingerprintCalculator.java`;
+- `StreamingHtmlContentExtractor.java`;
+- `CountingReader.java`;
+- `ScriptAndStyleFilteringReader.java`.
+
+The resulting `ResponseBodyAnalysisResult.java` provides the evidence-compatible
+analysis output required by the existing collection engine.
+
+The architecture preserves:
+
+- full body-length calculation;
+- full SHA-256 fingerprint calculation;
+- bounded snippet extraction;
+- visible HTML-text extraction;
+- script-content exclusion;
+- style-content exclusion;
+- non-HTML body analysis.
+
+## Response Lifecycle Ownership
+
+`CollectedHttpResponse.java` is approved as the lifecycle owner for the stored
+response body associated with an HTTP response.
+
+The response must be closed when processing finishes.
+
+This ownership rule applies to:
+
+- primary website responses;
+- redirected responses;
+- robots.txt responses;
+- sitemap.xml responses;
+- in-memory storage;
+- temporary-file storage.
+
+The collection engine must not abandon a temporary-file-backed response without
+closing it.
+
+## Temporary-File Architecture
+
+Temporary-file spillover is transient infrastructure behavior.
+
+It is not:
+
+- evidence persistence;
+- an artifact model;
+- a response archive;
+- a reporting input;
+- a user-downloadable resource.
+
+Temporary-file content must be removed after the collected response lifecycle
+finishes.
+
+The configured temporary directory remains optional.
+
+When no directory is configured, the operating-system temporary directory is
+used.
+
+## Evidence Compatibility Decision
+
+Sprint 16A preserves the existing collected-evidence contract.
+
+The adaptive pipeline continues to produce the evidence required for:
+
+- requested URL;
+- final URL;
+- canonical URL;
+- fetch outcome;
+- HTTP status;
+- response content type;
+- security headers;
+- response-body length;
+- response-body fingerprint;
+- bounded body snippet;
+- HTML metadata;
+- robots.txt;
+- sitemap.xml.
+
+No downstream component needs to understand whether a response body was stored
+in memory or in a temporary file.
+
+This storage detail remains encapsulated inside the evidence collection
+boundary.
+
+## Configuration Architecture
+
+The approved scanner configuration is:
+
+```properties
+sitesentinel.scanner.in-memory-body-threshold-bytes=1048576
+sitesentinel.scanner.temporary-directory=
+```
+
+The threshold property must remain clearly documented as a spillover threshold.
+
+It must not be interpreted as:
+
+- a maximum downloadable response size;
+- a maximum analysable response size;
+- an evidence truncation boundary;
+- a security scan cutoff.
+
+A future maximum-response-size policy, if introduced, must use a separate
+property and an explicit product and security decision.
+
+## Monitoring Lifecycle Preservation
+
+Sprint 16A does not change the authoritative lifecycle:
+
+
+Monitoring Run
+↓
+Collected Evidence
+↓
+Normalized Evidence
+↓
+Finding
+↓
+Risk
+↓
+Trust Assessment
+↓
+Remediation Recommendation
+↓
+PDF Artifact
+↓
+Telegram Dispatch
+
+The adaptive storage layer cannot:
+
+- create findings;
+- create risks;
+- alter risk severity;
+- alter trust scores;
+- alter recommendation content;
+- bypass recommendation validation;
+- modify PDF rendering rules;
+- modify Telegram dispatch rules.
+
+## Notification Decision
+
+Runtime verification produced an unchanged existing high-risk condition.
+
+The absence of a duplicate notification event was determined to be correct
+behavior.
+
+Repeated unchanged risks should not create repeated notification noise.
+
+The existing notification deduplication logic is preserved.
+
+Only the empty-notification explanation on the monitoring run detail page was
+clarified.
+
+The UI must not claim that no high-risk assessment was detected when a high-risk
+assessment exists but does not qualify for a new notification.
+
+## Security Review
+
+Sprint 16A improves memory behavior for larger HTTP responses, but it does not
+claim to provide a complete response-size denial-of-service policy.
+
+The following security properties are preserved:
+
+- private-target restrictions;
+- redirect validation;
+- configured redirect limits;
+- bounded body-snippet persistence;
+- no complete response-body persistence;
+- no temporary response-body artifact exposure;
+- deterministic temporary-file cleanup;
+- no secret persistence;
+- no raw provider-response persistence.
+
+No authentication or authorization boundary was changed.
+
+No credential-handling behavior was changed.
+
+## Operational Review
+
+Small responses remain in memory.
+
+Responses exceeding the configured threshold spill to temporary storage.
+
+The complete response remains available for streaming analysis after spillover.
+
+Operational correctness depends on:
+
+- writable temporary storage;
+- sufficient temporary disk capacity;
+- reliable response closure;
+- cleanup on supported failure paths;
+- suitable threshold configuration.
+
+The current implementation does not add persistent temporary-file inventory or
+temporary-disk utilization metrics.
+
+These remain possible future operational-hardening items.
+
+## Dispatch Timestamp Stability
+
+Closure regression identified a timing-dependent dispatch completion failure.
+
+The persisted attempt timestamp and newly generated completion timestamp could
+be separated by sub-millisecond precision behavior.
+
+The dispatch service now guarantees:
+
+completionTimestamp = max(currentUtcTimestamp, persistedAttemptTimestamp)
+
+## Runtime Verification
+
+Controlled runtime verification confirmed:
+
+- monitoring completion;
+- full evidence collection;
+- normalized evidence production;
+- finding generation;
+- risk generation;
+- trust assessment;
+- recommendation generation;
+- PDF artifact generation;
+- successful Telegram PDF delivery.
+
+Observed controlled-run result:
+
+- collected evidence: 43;
+- normalized evidence: 27;
+- findings: 4;
+- risks: 4;
+- trust assessments: 1;
+- trust status: `HIGH_RISK`;
+- trust score: 35;
+- recommendation count: 4;
+- recommendation failures: 0;
+- Telegram dispatch status: `SENT`;
+- Telegram delivery attempted: true;
+- Telegram delivery successful: true.
+
+## Verification Baseline
+
+- Full regression tests: 333 PASSED
+- Failures: 0
+- Errors: 0
+- Build: SUCCESS
+- Template regression tests: PASSED
+- Configuration binding tests: PASSED
+- Runtime monitoring lifecycle: VERIFIED
+- Runtime recommendation generation: VERIFIED
+- Runtime PDF generation: VERIFIED
+- Runtime Telegram delivery: VERIFIED
+- Database migration added: NO
+- Latest migration: V18
+- Response truncation introduced: NO
+- Response scan cutoff introduced: NO
+- Existing evidence semantics: PRESERVED
+- Notification deduplication behavior: PRESERVED
+- Secret exposure detected: NO
+- Generated artifacts staged: NO
+- Temporary response files staged: NO
+
+## Accepted Sprint 16A Limitations
+
+The following limitations are accepted:
+
+- response analysis remains synchronous;
+- temporary-file disk utilization is not measured;
+- temporary-file cleanup metrics are not recorded;
+- temporary-directory health monitoring is not implemented;
+- a distinct maximum-response-size security policy is not implemented;
+- response download rate limiting is not implemented;
+- per-host response-size history is not recorded;
+- spillover frequency metrics are not recorded;
+- spillover byte-volume metrics are not recorded;
+- operator alerts for temporary-storage pressure are not implemented;
+- distributed temporary storage is not implemented;
+- authentication and role-based authorization remain deferred.
+
+These limitations do not invalidate the adaptive streaming-response baseline.
+
+## Deferred Architecture Items
+
+The following remain deferred:
+
+- explicit maximum-response-size security policy;
+- temporary-storage capacity monitoring;
+- spillover metrics;
+- cleanup-failure metrics;
+- response-processing latency metrics;
+- slow-response protection;
+- response download rate limits;
+- asynchronous evidence analysis;
+- operational alerts for temporary-storage pressure;
+- configurable cleanup reconciliation;
+- authentication;
+- role-based authorization.
+
+## Architecture Decision
+
+Sprint 16A is approved as a behavior-preserving HTTP evidence collection
+hardening increment.
+
+The implementation removes unconditional full-response in-memory storage while
+preserving complete response analysis.
+
+The approved invariant is:
+
+Memory Threshold ≠ Scan Cutoff
+
+A response may move from memory to temporary storage, but it must continue
+through the existing full analysis and evidence lifecycle unless a future
+explicit response-size security policy is separately approved.

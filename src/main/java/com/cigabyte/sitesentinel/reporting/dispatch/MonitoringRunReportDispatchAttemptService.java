@@ -177,7 +177,9 @@ public class MonitoringRunReportDispatchAttemptService {
                 telegramMessageId,
                 resultMessage,
                 technicalDetail,
-                nowUtc()
+                completionTimestampFor(
+                        attempt
+                )
         );
 
         return dispatchAttemptRepository.saveAndFlush(
@@ -201,7 +203,9 @@ public class MonitoringRunReportDispatchAttemptService {
         attempt.markFailed(
                 resultMessage,
                 technicalDetail,
-                nowUtc()
+                completionTimestampFor(
+                        attempt
+                )
         );
 
         return dispatchAttemptRepository.saveAndFlush(
@@ -266,6 +270,24 @@ public class MonitoringRunReportDispatchAttemptService {
                                         + requiredAttemptId
                         )
                 );
+    }
+
+    private OffsetDateTime completionTimestampFor(
+            MonitoringRunReportDispatchAttempt attempt
+    ) {
+        OffsetDateTime currentTimestamp =
+                nowUtc();
+
+        OffsetDateTime attemptedAt =
+                attempt.getAttemptedAt();
+
+        if (currentTimestamp.isBefore(
+                attemptedAt
+        )) {
+            return attemptedAt;
+        }
+
+        return currentTimestamp;
     }
 
     private OffsetDateTime nowUtc() {

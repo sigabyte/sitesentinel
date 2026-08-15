@@ -1,6 +1,6 @@
 package com.cigabyte.sitesentinel.website;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.cigabyte.sitesentinel.scanner.ScannerProperties;
 import org.springframework.stereotype.Component;
 
 import java.net.Inet6Address;
@@ -18,9 +18,10 @@ public class WebsiteTargetValidator {
     private final boolean allowPrivateTargets;
 
     public WebsiteTargetValidator(
-            @Value("${sitesentinel.scanner.allow-private-targets:false}") boolean allowPrivateTargets
+            ScannerProperties scannerProperties
     ) {
-        this.allowPrivateTargets = allowPrivateTargets;
+        this.allowPrivateTargets =
+                scannerProperties.isAllowPrivateTargets();
     }
 
     public void validateConfiguredHost(String host) {

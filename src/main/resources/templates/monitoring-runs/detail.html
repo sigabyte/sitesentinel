@@ -51,10 +51,9 @@
     </p>
 
     <div th:if="${#lists.isEmpty(notificationEvents)}">
-        <p>No notification events recorded for this monitoring run.</p>
+        <p>No new notification event was generated for this monitoring run.</p>
         <p class="output-note">
-            This is expected when the run did not fail, no high-risk assessment was detected,
-            and no comparison-based notification rule matched.
+            This may be expected when an existing high-risk condition remains unchanged and no comparison-based notification rule matched.
         </p>
     </div>
 

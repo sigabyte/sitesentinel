@@ -298,7 +298,21 @@ and evidence analysis.
 
 - Add request rate limiting.
 - Add scan queue controls.
-- Add configurable maximum response body size.
+- Define an explicit maximum-response-size security policy separately from the
+  completed adaptive in-memory spillover threshold.
+- Preserve the Sprint 16A invariant that the memory spillover threshold is not a
+  response scan cutoff.
+- Define response-size rejection, failure classification and audit behavior
+  before introducing any maximum-response-size limit.
+- Add temporary-storage capacity monitoring.
+- Add temporary-storage health checks.
+- Add response-body spillover frequency metrics.
+- Add response-body spillover byte-volume metrics.
+- Add temporary-file cleanup success and failure metrics.
+- Add response-processing latency metrics.
+- Add operational alerting for temporary-storage pressure.
+- Add slow-response protection.
+- Add response download rate limiting.
 - Add structured logging for scan execution.
 - Add scanner failure classification.
 - Add retry policy for transient scanner failures.

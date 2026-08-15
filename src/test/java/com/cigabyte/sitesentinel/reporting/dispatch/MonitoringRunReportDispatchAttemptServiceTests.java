@@ -16,14 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -283,6 +282,63 @@ class MonitoringRunReportDispatchAttemptServiceTests {
         assertEquals(
                 MonitoringRunReportDispatchStatus.FAILED,
                 attempts.get(0).getStatus()
+        );
+    }
+
+    @Test
+    void markFailedDoesNotCompleteBeforePersistedAttemptTimestamp() {
+        MonitoringRun monitoringRun =
+                persistCompletedRun(
+                        persistWebsite()
+                );
+
+        MonitoringRunPdfArtifact artifact =
+                persistArtifact(
+                        monitoringRun,
+                        "monotonic-failed-timestamp-test"
+                );
+
+        OffsetDateTime persistedAttemptTimestamp =
+                OffsetDateTime.now(
+                        ZoneOffset.UTC
+                ).plusSeconds(1);
+
+        MonitoringRunReportDispatchAttempt pendingAttempt =
+                MonitoringRunReportDispatchAttempt
+                        .automatic(
+                                monitoringRun.getId(),
+                                artifact.getId(),
+                                persistedAttemptTimestamp
+                        );
+
+        MonitoringRunReportDispatchAttempt savedAttempt =
+                dispatchAttemptRepository.saveAndFlush(
+                        pendingAttempt
+                );
+
+        MonitoringRunReportDispatchAttempt failedAttempt =
+                dispatchAttemptService.markFailed(
+                        savedAttempt.getId(),
+                        monitoringRun.getId(),
+                        "Telegram report dispatch failed.",
+                        "Telegram Bot API returned an unsuccessful response."
+                );
+
+        assertEquals(
+                MonitoringRunReportDispatchStatus.FAILED,
+                failedAttempt.getStatus()
+        );
+
+        assertNotNull(
+                failedAttempt.getCompletedAt()
+        );
+
+        assertFalse(
+                failedAttempt
+                        .getCompletedAt()
+                        .isBefore(
+                                failedAttempt.getAttemptedAt()
+                        )
         );
     }
 
@@ -608,6 +664,64 @@ class MonitoringRunReportDispatchAttemptServiceTests {
                 dispatchAttemptRepository
                         .countByMonitoringRunId(
                                 ownerRun.getId()
+                        )
+        );
+    }
+
+    @Test
+    void markSentDoesNotCompleteBeforePersistedAttemptTimestamp() {
+        MonitoringRun monitoringRun =
+                persistCompletedRun(
+                        persistWebsite()
+                );
+
+        MonitoringRunPdfArtifact artifact =
+                persistArtifact(
+                        monitoringRun,
+                        "monotonic-sent-timestamp-test"
+                );
+
+        OffsetDateTime persistedAttemptTimestamp =
+                OffsetDateTime.now(
+                        ZoneOffset.UTC
+                ).plusSeconds(1);
+
+        MonitoringRunReportDispatchAttempt pendingAttempt =
+                MonitoringRunReportDispatchAttempt
+                        .automatic(
+                                monitoringRun.getId(),
+                                artifact.getId(),
+                                persistedAttemptTimestamp
+                        );
+
+        MonitoringRunReportDispatchAttempt savedAttempt =
+                dispatchAttemptRepository.saveAndFlush(
+                        pendingAttempt
+                );
+
+        MonitoringRunReportDispatchAttempt sentAttempt =
+                dispatchAttemptService.markSent(
+                        savedAttempt.getId(),
+                        monitoringRun.getId(),
+                        2468L,
+                        "Telegram report was sent successfully.",
+                        "Telegram Bot API accepted the document."
+                );
+
+        assertEquals(
+                MonitoringRunReportDispatchStatus.SENT,
+                sentAttempt.getStatus()
+        );
+
+        assertNotNull(
+                sentAttempt.getCompletedAt()
+        );
+
+        assertFalse(
+                sentAttempt
+                        .getCompletedAt()
+                        .isBefore(
+                                sentAttempt.getAttemptedAt()
                         )
         );
     }

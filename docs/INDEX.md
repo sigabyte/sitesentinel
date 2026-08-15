@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 15 is complete.
+Sprint 16A is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 15
-Implemented baseline: UPDATED THROUGH SPRINT 15
-Latest completed sprint: SPRINT 15
+Current implementation status: SPRINT 16A
+Implemented baseline: UPDATED THROUGH SPRINT 16A
+Latest completed sprint: SPRINT 16A
 Latest migration: V18
-Final test baseline: 277
+Final test baseline: 333
 
 The authoritative website assessment lifecycle remains:
 
@@ -1023,11 +1023,122 @@ Future implementations must not:
 Future report-delivery work must continue to build on the completed Sprint 14
 dispatch baseline and reuse immutable persisted PDF artifacts.
 
+## Latest Completed Sprint — Sprint 16A
+
+Sprint 16A introduced adaptive and streaming HTTP response-body processing.
+
+Sprint 16A closure also hardened report-dispatch completion timestamps.
+
+Successful and failed dispatch attempts now preserve the monotonic invariant:
+
+completedAt >= attemptedAt
+
+The completed response-processing path is:
+
+HTTP Response
+↓
+Adaptive Response Body Handler
+↓
+Bounded In-Memory Storage
+↓
+Temporary-File Spillover When Required
+↓
+Full Streaming Analysis
+↓
+Existing Collected Evidence
+↓
+Existing Assessment Lifecycle
+
+Sprint 16A added:
+
+- bounded in-memory response-body collection;
+- temporary-file spillover for larger response bodies;
+- complete response analysis after spillover;
+- streaming response-body length calculation;
+- streaming SHA-256 fingerprint calculation;
+- bounded snippet extraction;
+- streaming HTML-visible-text extraction;
+- script and style filtering;
+- explicit stored-response lifecycle ownership;
+- redirect-response cleanup;
+- robots.txt response cleanup;
+- sitemap.xml response cleanup;
+- configurable memory spillover threshold;
+- optional temporary-directory configuration.
+
+The following invariant is now part of the active implementation baseline:
+
+Memory Spillover Threshold ≠ Response Scan Cutoff
+
+Crossing the configured threshold changes the response storage medium.
+
+It does not truncate the response and does not stop response analysis.
+
+Sprint 16A preserved:
+
+- existing collected-evidence semantics;
+- normalized evidence;
+- finding generation;
+- risk evaluation;
+- trust assessment;
+- AI recommendation generation;
+- rule-based fallback;
+- PDF artifact generation;
+- automatic Telegram PDF dispatch;
+- notification deduplication.
+
+Runtime verification confirmed:
+
+- completed monitoring runs;
+- persisted evidence;
+- finding and risk generation;
+- trust assessment;
+- successful recommendation generation;
+- generated monitoring-run PDF artifacts;
+- successful real Telegram PDF delivery.
+
+The controlled Vento Furniture monitoring run produced:
+
+- 43 collected evidence records;
+- 27 normalized evidence records;
+- 4 findings;
+- 4 risks;
+- 1 trust assessment;
+- trust status `HIGH_RISK`;
+- trust score 35;
+- 4 generated recommendations;
+- 0 failed recommendations;
+- Telegram dispatch status `SENT`;
+- successful Telegram document delivery.
+
+The monitoring run detail empty-notification explanation was clarified.
+
+An unchanged existing high-risk condition does not require a duplicate
+notification event.
+
+No notification generation or deduplication logic was changed.
+
+Sprint 16A introduced no database migration.
+
+Latest migration remains V18.
+
+Sprint 16A verification baseline:
+
+- full tests: 333 PASSED;
+- failures: 0;
+- errors: 0;
+- build: SUCCESS;
+- response truncation: NOT INTRODUCED;
+- response scan cutoff: NOT INTRODUCED;
+- secret exposure: NOT DETECTED;
+- generated PDF artifacts: NOT INCLUDED;
+- temporary response files: NOT INCLUDED.
+
 ## Next Phase
 
-Sprint 15 is complete.
+Sprint 16A is complete.
 
-No Sprint 16 scope has yet been approved.
+No Sprint 16B scope has yet been approved.
 
 The V1 monitoring-to-AI-recommendation-to-report-to-Telegram chain is complete:
 
