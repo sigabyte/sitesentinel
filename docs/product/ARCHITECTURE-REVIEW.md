@@ -5498,3 +5498,271 @@ claiming unsupported incidents.
 Result:
 
 - APPROVED
+
+# SiteSentinel Architecture Review-17
+
+## Review Status
+
+- Sprint: Sprint 17
+- Review scope: Recommendation Idempotency and Lifecycle Safety
+- Decision: APPROVED
+- Database migration: NOT REQUIRED
+- Latest migration: V18
+- Full regression: 349 PASSED
+
+## Architectural Outcome
+
+Sprint 17 introduces an application-level automatic idempotency boundary for
+risk remediation recommendation generation.
+
+Before automatic generation begins for a persisted risk, the run-level
+orchestrator checks whether recommendation history already exists for the
+specific:
+
+- monitoring run ID;
+- risk ID.
+
+If the complete pair already has a persisted recommendation, generation is
+skipped.
+
+The AI provider, rule-based fallback generator and recommendation persistence
+path are not invoked again for that pair.
+
+## Idempotency Boundary Decision
+
+The idempotency decision is implemented in:
+
+- `RiskRemediationRecommendationRunGenerationService.java`.
+
+The persistence lookup is provided by:
+
+- `RiskRemediationRecommendationRepository.java`;
+- `existsByRiskIdAndMonitoringRunId(...)`.
+
+This is the correct boundary because
+`RiskRemediationRecommendationRunGenerationService.java` owns automatic
+per-run and per-risk recommendation orchestration.
+
+The lower-level
+`RiskRemediationRecommendationGenerationService.java` remains responsible for
+explicit recommendation generation.
+
+It does not silently decide whether historical recommendation records may be
+regenerated, replaced or superseded.
+
+This separation preserves a future explicit regeneration or supersession
+policy without weakening the current automatic idempotency guarantee.
+
+## Identity Decision
+
+Automatic recommendation identity is defined by the complete pair:
+
+- `monitoringRunId`;
+- `riskId`.
+
+A match on only one identifier is insufficient.
+
+Recommendation history for another risk in the same monitoring run does not
+block generation.
+
+Recommendation history associated with another monitoring run does not block
+generation.
+
+Repository integration verification confirms exact pair matching.
+
+## Lifecycle Result Decision
+
+`RiskRemediationRecommendationRunGenerationResult.java` now distinguishes:
+
+- generated recommendations;
+- skipped recommendations;
+- failed recommendations.
+
+The required lifecycle invariant is:
+
+`generatedCount + skippedCount + failedCount = riskCount`
+
+A persisted recommendation produces a skipped result.
+
+Skipped is considered a successful idempotent outcome and does not increment
+the failure count.
+
+The existing four-argument constructor remains available with
+`skippedCount = 0` to preserve compatibility with existing monitoring and
+report-dispatch test fixtures.
+
+## Provider Invocation Decision
+
+For a monitoring-run and risk pair without recommendation history, existing
+generation behavior remains unchanged.
+
+The system may continue through:
+
+- provider selection;
+- evidence-safe context construction;
+- prompt construction;
+- OpenAI provider execution;
+- provider-output validation;
+- rule-based fallback generation;
+- recommendation persistence.
+
+For a pair with persisted recommendation history, this chain is not entered.
+
+This guarantees that repeated automatic execution does not call either the AI
+provider or fallback generator after persistence is observed.
+
+## Failure Isolation Decision
+
+The recommendation existence query remains inside the existing per-risk
+failure-isolation boundary.
+
+A lookup or generation failure affecting one risk:
+
+- is recorded as a failed recommendation outcome;
+- does not stop recommendation processing for later risks;
+- does not fail the completed monitoring run.
+
+This preserves the monitoring lifecycle isolation established in the existing
+recommendation architecture.
+
+## Recommendation History Decision
+
+Sprint 17 does not alter persisted recommendation history.
+
+The implementation does not:
+
+- delete a recommendation;
+- replace a recommendation;
+- update historical recommendation content;
+- mark a recommendation as superseded;
+- select a different latest-recommendation algorithm.
+
+The existing history and latest queries remain authoritative.
+
+HTML and PDF reporting continue to consume persisted recommendation history
+and display the latest recommendation for each risk.
+
+## Monitoring Execution Decision
+
+`MonitoringExecutionService.java` continues to call
+`RiskRemediationRecommendationRunGenerationService.java` after a monitoring
+run is completed.
+
+There is no second production automatic path that directly calls
+`RiskRemediationRecommendationGenerationService.java`.
+
+The completed production call path remains:
+
+1. Complete monitoring execution.
+2. Invoke run-level recommendation orchestration.
+3. Check persisted recommendation history per risk.
+4. Generate missing recommendations or skip existing recommendations.
+5. Continue to automatic report dispatch.
+6. Continue to notification generation.
+
+This preserves recommendation-before-report ordering.
+
+## PDF and Telegram Decision
+
+Sprint 17 does not modify the PDF or Telegram boundaries.
+
+The following behavior remains unchanged:
+
+- monitoring-run report construction;
+- latest-recommendation resolution;
+- PDF rendering;
+- PDF artifact persistence;
+- PDF artifact reuse;
+- automatic Telegram PDF dispatch;
+- manual Telegram retry;
+- Telegram document delivery;
+- report-dispatch idempotency.
+
+A skipped recommendation remains available to reporting through its existing
+persisted record.
+
+## Database Decision
+
+Sprint 17 introduces no database migration.
+
+Latest migration remains:
+
+- V18
+
+A database unique constraint was intentionally excluded from the sprint.
+
+The implemented existence check protects sequential and repeated automatic
+execution after persisted history becomes visible.
+
+It does not claim to prevent two concurrent transactions from both passing the
+existence check before either transaction persists a recommendation.
+
+Database-level concurrency enforcement requires a separate uniqueness,
+locking or serialization decision.
+
+## Security Decision
+
+Sprint 17 preserves the existing recommendation security boundaries:
+
+- AI credentials remain externally configured;
+- Telegram credentials remain externally configured;
+- providers remain disabled by default;
+- evidence-safe recommendation context remains enforced;
+- recommendation validation remains mandatory;
+- recommendations remain advisory;
+- recommendations do not create findings or risks;
+- recommendations do not apply remediation;
+- unsupported incident claims remain rejected.
+
+The idempotency lookup uses persisted identifiers and does not add external
+input or provider data to the security boundary.
+
+## Regression Decision
+
+Sprint 17 verification confirms:
+
+- run-generation service tests: 6 passed;
+- run-generation result tests: 4 passed;
+- recommendation repository tests: 8 passed;
+- combined recommendation and fallback regression: 25 passed;
+- monitoring execution and report-dispatch safety tests: 5 passed;
+- PDF and Telegram regression tests: 34 passed;
+- full regression: 349 passed;
+- failures: 0;
+- errors: 0;
+- skipped: 0.
+
+Provider-disabled and provider-failure fallback behavior remains verified.
+
+Recommendation history and latest-recommendation behavior remain verified.
+
+PDF and Telegram behavior remains verified.
+
+## Accepted Limitations
+
+Sprint 17 accepts the following limitations:
+
+- no database unique constraint;
+- no concurrent check-and-insert protection;
+- no recommendation regeneration UI;
+- no recommendation supersession model;
+- no human approval workflow;
+- no provider retry or backoff;
+- no asynchronous recommendation queue;
+- no second AI provider;
+- no recommendation lifecycle mutation.
+
+These limitations do not invalidate the sequential automatic idempotency
+baseline completed in Sprint 17.
+
+## Architecture Decision
+
+Sprint 17 is architecturally approved.
+
+SiteSentinel now prevents repeated automatic recommendation generation when a
+persisted recommendation already exists for the same monitoring-run and risk
+pair.
+
+The implementation places idempotency at the automatic orchestration boundary,
+preserves the explicit generation service, maintains recommendation history,
+and leaves reporting, PDF generation and Telegram delivery unchanged.

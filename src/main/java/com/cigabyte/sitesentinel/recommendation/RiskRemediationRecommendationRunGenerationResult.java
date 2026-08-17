@@ -6,6 +6,7 @@ public record RiskRemediationRecommendationRunGenerationResult(
         UUID monitoringRunId,
         int riskCount,
         int generatedCount,
+        int skippedCount,
         int failedCount
 ) {
 
@@ -27,16 +28,40 @@ public record RiskRemediationRecommendationRunGenerationResult(
         );
 
         validateCount(
+                skippedCount,
+                "Skipped recommendation count"
+        );
+
+        validateCount(
                 failedCount,
                 "Failed recommendation count"
         );
 
-        if (generatedCount + failedCount != riskCount) {
+        if (generatedCount
+                + skippedCount
+                + failedCount
+                != riskCount) {
+
             throw new IllegalArgumentException(
-                    "Generated and failed recommendation counts "
-                            + "must equal the risk count."
+                    "Generated, skipped and failed recommendation "
+                            + "counts must equal the risk count."
             );
         }
+    }
+
+    public RiskRemediationRecommendationRunGenerationResult(
+            UUID monitoringRunId,
+            int riskCount,
+            int generatedCount,
+            int failedCount
+    ) {
+        this(
+                monitoringRunId,
+                riskCount,
+                generatedCount,
+                0,
+                failedCount
+        );
     }
 
     private static void validateCount(

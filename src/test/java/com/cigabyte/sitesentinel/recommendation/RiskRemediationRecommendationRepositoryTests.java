@@ -641,6 +641,62 @@ class RiskRemediationRecommendationRepositoryTests {
         );
     }
 
+    @Test
+    void existenceQueryRequiresMatchingRiskAndMonitoringRunPair() {
+        Website website = persistWebsite();
+
+        MonitoringRun firstRun =
+                persistCompletedRun(website);
+
+        MonitoringRun secondRun =
+                persistCompletedRun(website);
+
+        Risk firstRunRisk = persistRisk(
+                website,
+                firstRun,
+                "TLS_CONFIGURATION"
+        );
+
+        Risk secondRunRisk = persistRisk(
+                website,
+                secondRun,
+                "SECURITY_HEADERS"
+        );
+
+        recommendationRepository.saveAndFlush(
+                aiRecommendation(
+                        firstRun,
+                        firstRunRisk,
+                        "existing-recommendation",
+                        FUTURE_BASE_TIME
+                )
+        );
+
+        assertTrue(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                firstRunRisk.getId(),
+                                firstRun.getId()
+                        )
+        );
+
+        assertFalse(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                secondRunRisk.getId(),
+                                firstRun.getId()
+                        )
+        );
+
+        assertFalse(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                firstRunRisk.getId(),
+                                secondRun.getId()
+                        )
+        );
+    }
+
     private Website persistWebsite() {
         String uniqueValue =
                 UUID.randomUUID().toString();

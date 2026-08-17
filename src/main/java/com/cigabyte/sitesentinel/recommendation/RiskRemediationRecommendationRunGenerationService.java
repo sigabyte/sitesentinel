@@ -21,15 +21,22 @@ public class RiskRemediationRecommendationRunGenerationService {
 
     private final RiskRepository riskRepository;
 
+    private final RiskRemediationRecommendationRepository
+            recommendationRepository;
+
     private final RiskRemediationRecommendationGenerationService
             recommendationGenerationService;
 
     public RiskRemediationRecommendationRunGenerationService(
             RiskRepository riskRepository,
+            RiskRemediationRecommendationRepository
+                    recommendationRepository,
             RiskRemediationRecommendationGenerationService
                     recommendationGenerationService
     ) {
         this.riskRepository = riskRepository;
+        this.recommendationRepository =
+                recommendationRepository;
         this.recommendationGenerationService =
                 recommendationGenerationService;
     }
@@ -66,10 +73,23 @@ public class RiskRemediationRecommendationRunGenerationService {
                         );
 
         int generatedCount = 0;
+        int skippedCount = 0;
         int failedCount = 0;
 
         for (Risk risk : risks) {
             try {
+                boolean recommendationAlreadyExists =
+                        recommendationRepository
+                                .existsByRiskIdAndMonitoringRunId(
+                                        risk.getId(),
+                                        requiredMonitoringRun.getId()
+                                );
+
+                if (recommendationAlreadyExists) {
+                    skippedCount++;
+                    continue;
+                }
+
                 recommendationGenerationService
                         .generateAndPersist(
                                 requiredMonitoringRun.getId(),
@@ -95,6 +115,7 @@ public class RiskRemediationRecommendationRunGenerationService {
                 requiredMonitoringRun.getId(),
                 risks.size(),
                 generatedCount,
+                skippedCount,
                 failedCount
         );
     }

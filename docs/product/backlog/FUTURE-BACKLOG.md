@@ -49,8 +49,9 @@ generation, and report dispatch should use a durable post-monitoring work queue.
 
 ## AI Remediation Recommendation Production Hardening
 
-Sprint 16 completed the adaptive response-analysis and evidence-bounded risk
-explanation baseline on top of the production OpenAI provider.
+Sprint 17 completed application-level automatic recommendation idempotency on
+top of the adaptive response-analysis, evidence-bounded risk explanation and
+production OpenAI provider baseline.
 
 The completed foundation includes:
 
@@ -80,6 +81,15 @@ The completed foundation includes:
 - safe generic explanation for unknown future risk types;
 - canonical five-section HTML and PDF recommendation reporting;
 - adaptive response-body processing without truncation.
+
+Sprint 17 added the following completed capabilities:
+
+- exact monitoring-run and risk pair recommendation existence checks;
+- automatic generation skip when persisted recommendation history exists;
+- generated, skipped and failed recommendation lifecycle accounting;
+- prevention of repeated automatic AI-provider invocation after persistence;
+- prevention of repeated automatic fallback generation after persistence;
+- preservation of recommendation history and latest-recommendation behavior.
 
 Future work must build on the existing provider-neutral boundary and must not
 replace the rule-based fallback path.
@@ -126,8 +136,12 @@ Remaining production-hardening work:
 - Define model-version upgrade and rollback procedures.
 - Define behavior when a configured model is retired or unavailable.
 - Add recommendation regeneration controls.
-- Define recommendation generation idempotency.
-- Prevent accidental duplicate recommendation generation.
+- Decide whether database-level recommendation uniqueness is required for
+  concurrent automatic generation.
+- Define transaction, locking or serialization behavior for concurrent
+  recommendation generation.
+- Define how recommendation persistence conflicts should be classified without
+  invoking the AI provider or fallback generator again.
 - Define recommendation supersession rules.
 - Define recommendation history retention.
 - Add recommendation approval workflow.
@@ -360,10 +374,18 @@ Future structured impact work must:
 
 ## Data Integrity and Idempotency
 
-- Add database-level uniqueness constraints for any remaining assessment
-  outputs that require idempotent persistence.
-- Define recommendation generation idempotency.
-- Define duplicate recommendation prevention rules.
+Sprint 17 completed sequential application-level automatic recommendation
+idempotency for persisted monitoring-run and risk pairs.
+
+Remaining work:
+
+- Decide whether recommendation persistence requires a database unique
+  constraint for the monitoring-run and risk pair.
+- Define concurrency control for simultaneous recommendation generation.
+- Define transaction, locking or serialization behavior for recommendation
+  check-and-insert races.
+- Define safe handling when concurrent generation has already called an
+  external provider before a persistence conflict is detected.
 - Define recommendation supersession integrity rules.
 - Define notification-event dispatch idempotency.
 - Define duplicate provider-check handling.
@@ -391,7 +413,10 @@ Future structured impact work must:
   risk type is introduced.
   - Add structured impact-analysis tests only if a separate structured impact
     model is approved in a future sprint.
-- Add recommendation generation idempotency tests.
+- Add concurrent recommendation-generation tests if database-level
+  idempotency is approved.
+- Add persistence-conflict tests if a recommendation unique constraint is
+  introduced.
 - Add recommendation supersession tests.
 - Add repeatable AI recommendation quality-evaluation tests across approved
   monitoring-risk fixtures.
@@ -470,7 +495,8 @@ remediation recommendation boundary.
   policy.
 - Decide whether separately persisted structured impact analysis would require
   approval, regeneration, supersession and retention rules.
-- Decide whether repeated recommendations replace, supersede, or remain alongside previous recommendation history.
+- Decide whether explicitly regenerated recommendations replace, supersede or
+  remain alongside previous recommendation history.
 - Decide whether report dispatch should include all completed runs or only runs meeting configured risk and severity 
   rules.
 - Decide whether the full PDF report or a short notification should be sent when a completed run contains no risks.

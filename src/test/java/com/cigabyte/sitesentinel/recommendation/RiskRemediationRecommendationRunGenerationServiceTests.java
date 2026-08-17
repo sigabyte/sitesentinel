@@ -30,12 +30,77 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                     RiskRemediationRecommendationGenerationService.class
             );
 
+    private final RiskRemediationRecommendationRepository
+            recommendationRepository =
+            mock(
+                    RiskRemediationRecommendationRepository.class
+            );
+
     private final RiskRemediationRecommendationRunGenerationService
             runGenerationService =
             new RiskRemediationRecommendationRunGenerationService(
                     riskRepository,
+                    recommendationRepository,
                     generationService
             );
+
+    @Test
+    void skipsGenerationWhenRecommendationAlreadyExistsForRunAndRisk() {
+        MonitoringRun completedRun =
+                completedRun();
+
+        Risk persistedRisk =
+                risk(
+                        completedRun,
+                        "TLS_CONFIGURATION"
+                );
+
+        when(
+                riskRepository
+                        .findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(
+                                completedRun.getId()
+                        )
+        ).thenReturn(
+                List.of(persistedRisk)
+        );
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                persistedRisk.getId(),
+                                completedRun.getId()
+                        )
+        ).thenReturn(true);
+
+        RiskRemediationRecommendationRunGenerationResult result =
+                runGenerationService
+                        .generateForCompletedRun(
+                                completedRun
+                        );
+
+        assertEquals(1, result.riskCount());
+        assertEquals(0, result.generatedCount());
+        assertEquals(1, result.skippedCount());
+        assertEquals(0, result.failedCount());
+
+        assertTrue(result.isFullySuccessful());
+        assertFalse(result.isEmpty());
+
+        verify(
+                recommendationRepository
+        ).existsByRiskIdAndMonitoringRunId(
+                persistedRisk.getId(),
+                completedRun.getId()
+        );
+
+        verify(
+                generationService,
+                never()
+        ).generateAndPersist(
+                completedRun.getId(),
+                persistedRisk.getId()
+        );
+    }
 
     @Test
     void isolatesPerRiskFailureAndContinuesRemainingRisks() {
@@ -206,6 +271,214 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         ).generateAndPersist(
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void reportsGeneratedSkippedAndFailedRisksSeparately() {
+        MonitoringRun completedRun =
+                completedRun();
+
+        Risk existingRecommendationRisk =
+                risk(
+                        completedRun,
+                        "TLS_CONFIGURATION"
+                );
+
+        Risk newlyGeneratedRisk =
+                risk(
+                        completedRun,
+                        "SECURITY_HEADERS"
+                );
+
+        Risk failedGenerationRisk =
+                risk(
+                        completedRun,
+                        "CONTENT_INTEGRITY"
+                );
+
+        when(
+                riskRepository
+                        .findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(
+                                completedRun.getId()
+                        )
+        ).thenReturn(
+                List.of(
+                        existingRecommendationRisk,
+                        newlyGeneratedRisk,
+                        failedGenerationRisk
+                )
+        );
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                existingRecommendationRisk.getId(),
+                                completedRun.getId()
+                        )
+        ).thenReturn(true);
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                newlyGeneratedRisk.getId(),
+                                completedRun.getId()
+                        )
+        ).thenReturn(false);
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                failedGenerationRisk.getId(),
+                                completedRun.getId()
+                        )
+        ).thenReturn(false);
+
+        when(
+                generationService.generateAndPersist(
+                        completedRun.getId(),
+                        newlyGeneratedRisk.getId()
+                )
+        ).thenReturn(
+                mock(
+                        RiskRemediationRecommendation.class
+                )
+        );
+
+        when(
+                generationService.generateAndPersist(
+                        completedRun.getId(),
+                        failedGenerationRisk.getId()
+                )
+        ).thenThrow(
+                new IllegalStateException(
+                        "isolated-generation-failure"
+                )
+        );
+
+        RiskRemediationRecommendationRunGenerationResult result =
+                runGenerationService
+                        .generateForCompletedRun(
+                                completedRun
+                        );
+
+        assertEquals(
+                completedRun.getId(),
+                result.monitoringRunId()
+        );
+
+        assertEquals(3, result.riskCount());
+        assertEquals(1, result.generatedCount());
+        assertEquals(1, result.skippedCount());
+        assertEquals(1, result.failedCount());
+
+        assertFalse(result.isFullySuccessful());
+        assertFalse(result.isEmpty());
+
+        verify(
+                generationService,
+                never()
+        ).generateAndPersist(
+                completedRun.getId(),
+                existingRecommendationRisk.getId()
+        );
+
+        verify(
+                generationService
+        ).generateAndPersist(
+                completedRun.getId(),
+                newlyGeneratedRisk.getId()
+        );
+
+        verify(
+                generationService
+        ).generateAndPersist(
+                completedRun.getId(),
+                failedGenerationRisk.getId()
+        );
+    }
+
+    @Test
+    void repeatedRunGenerationDoesNotGenerateRecommendationAgainAfterPersistence() {
+        MonitoringRun completedRun =
+                completedRun();
+
+        Risk persistedRisk =
+                risk(
+                        completedRun,
+                        "TLS_CONFIGURATION"
+                );
+
+        when(
+                riskRepository
+                        .findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(
+                                completedRun.getId()
+                        )
+        ).thenReturn(
+                List.of(persistedRisk)
+        );
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunId(
+                                persistedRisk.getId(),
+                                completedRun.getId()
+                        )
+        ).thenReturn(
+                false,
+                true
+        );
+
+        when(
+                generationService.generateAndPersist(
+                        completedRun.getId(),
+                        persistedRisk.getId()
+                )
+        ).thenReturn(
+                mock(
+                        RiskRemediationRecommendation.class
+                )
+        );
+
+        RiskRemediationRecommendationRunGenerationResult firstResult =
+                runGenerationService
+                        .generateForCompletedRun(
+                                completedRun
+                        );
+
+        RiskRemediationRecommendationRunGenerationResult secondResult =
+                runGenerationService
+                        .generateForCompletedRun(
+                                completedRun
+                        );
+
+        assertEquals(1, firstResult.riskCount());
+        assertEquals(1, firstResult.generatedCount());
+        assertEquals(0, firstResult.skippedCount());
+        assertEquals(0, firstResult.failedCount());
+
+        assertEquals(1, secondResult.riskCount());
+        assertEquals(0, secondResult.generatedCount());
+        assertEquals(1, secondResult.skippedCount());
+        assertEquals(0, secondResult.failedCount());
+
+        assertTrue(firstResult.isFullySuccessful());
+        assertTrue(secondResult.isFullySuccessful());
+
+        verify(
+                recommendationRepository,
+                org.mockito.Mockito.times(2)
+        ).existsByRiskIdAndMonitoringRunId(
+                persistedRisk.getId(),
+                completedRun.getId()
+        );
+
+        verify(
+                generationService,
+                org.mockito.Mockito.times(1)
+        ).generateAndPersist(
+                completedRun.getId(),
+                persistedRisk.getId()
         );
     }
 

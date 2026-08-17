@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 16 is complete.
+Sprint 17 is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 16
-Implemented baseline: UPDATED THROUGH SPRINT 16
-Latest completed sprint: SPRINT 16
+Current implementation status: SPRINT 17
+Implemented baseline: UPDATED THROUGH SPRINT 17
+Latest completed sprint: SPRINT 17
 Latest migration: V18
-Final test baseline: 341
+Final test baseline: 349
 
 The authoritative website assessment lifecycle remains:
 
@@ -134,6 +134,32 @@ the evidence does not confirm.
 Potential impacts remain conditional, and unsupported authoritative attack,
 compromise, breach, incident or exploitation claims are rejected.
 
+Sprint 17 added automatic recommendation idempotency for persisted
+monitoring-run and risk pairs.
+
+Before automatic recommendation generation begins, the run-level orchestrator
+checks whether recommendation history already exists for the complete:
+
+- monitoring run ID;
+- risk ID.
+
+When matching recommendation history exists, generation is skipped.
+
+The AI provider and rule-based fallback generator are not called again for
+that monitoring-run and risk pair.
+
+Recommendation run results now distinguish:
+
+- generated recommendations;
+- skipped recommendations;
+- failed recommendations.
+
+Skipped recommendations remain successful lifecycle outcomes.
+
+Recommendation history, latest-recommendation selection, provider-disabled
+fallback, provider-failure fallback, PDF generation and Telegram delivery
+remain unchanged.
+
 The existing provider-neutral recommendation architecture now includes:
 
 - default-disabled OpenAI configuration;
@@ -182,7 +208,7 @@ lifecycles.
 Telegram delivery failure does not change a completed monitoring run to
 FAILED.
 
-## Implemented Baseline Through Sprint 16
+## Implemented Baseline Through Sprint 17
 
 - Website registration
 - Website detail view
@@ -839,6 +865,10 @@ architecture decision.
 
 ## Current Baseline
 
+Sprint 17 completed application-level automatic recommendation idempotency on
+top of the adaptive response-analysis, evidence-bounded risk explanation and
+production OpenAI provider baseline.
+
 Implemented platform capabilities:
 
 - Website assessment lifecycle.
@@ -861,6 +891,11 @@ Implemented platform capabilities:
 - Deterministic rule-based fallback.
 - Recommendation audit metadata.
 - Monitoring lifecycle-safe recommendation generation.
+- Automatic recommendation idempotency by monitoring-run and risk pair.
+- Persisted recommendation existence checks before automatic generation.
+- Generated, skipped and failed recommendation lifecycle accounting.
+- Repeated automatic AI-provider and fallback invocation prevention.
+- Preserved recommendation history and latest-recommendation selection.
 - Risk detail recommendation visibility.
 - Monitoring run recommendation report visibility.
 - Full monitoring run PDF rendering.
@@ -1065,7 +1100,7 @@ Future implementations must not:
 Future report-delivery work must continue to build on the completed Sprint 14
 dispatch baseline and reuse immutable persisted PDF artifacts.
 
-## Latest Completed Sprint — Sprint 16A
+## Sprint 16A Implementation Baseline
 
 Sprint 16A introduced adaptive and streaming HTTP response-body processing.
 
@@ -1178,61 +1213,54 @@ Sprint 16A verification baseline:
 
 ## Next Phase
 
-Sprint 16 is complete.
-
-No Sprint 17 scope has yet been approved.
+Sprint 17 is complete.
 
 The completed monitoring-to-recommendation-to-report-to-Telegram chain now
 includes:
 
-Scheduled or Manual Monitoring
-↓
-Adaptive Full Response Collection
-↓
-Evidence Collection and Normalization
-↓
-Finding, Risk and Trust Assessment
-↓
-Evidence-Safe Recommendation Context
-↓
-Risk and Potential Impact Explanation
-↓
-Validated OpenAI Recommendation or Rule-Based Fallback
-↓
-Canonical HTML and PDF Report Structure
-↓
-Immutable Full Monitoring Run PDF
-↓
-Automatic Telegram Document Dispatch
-↓
-Persisted and Auditable Delivery Outcome
+1. Scheduled or manual monitoring.
+2. Adaptive full response collection.
+3. Evidence collection and normalization.
+4. Finding, risk and trust assessment.
+5. Persisted recommendation existence check.
+6. Existing recommendation skip or missing recommendation generation.
+7. Evidence-safe recommendation context construction.
+8. Risk and Potential Impact explanation.
+9. Validated OpenAI recommendation or rule-based fallback.
+10. Canonical HTML and PDF report construction.
+11. Immutable full monitoring-run PDF generation.
+12. Automatic Telegram document dispatch.
+13. Persisted and auditable delivery outcome.
 
+Sprint 17 final verification confirmed:
 
-Sprint 16 final verification confirmed:
-
-- adaptive response handling without truncation;
-- full analysis after temporary-file spillover;
-- prompt and output contract V2;
-- fallback rule V2;
-- dedicated explanations for 12 supported risk types;
-- safe generic explanation for unknown future risk types;
-- conditional potential-impact language;
-- unsupported incident-claim rejection;
-- synchronized HTML and PDF recommendation structures;
+- exact monitoring-run and risk pair existence checks;
+- automatic generation skip when recommendation history exists;
+- no repeated AI-provider invocation after persistence is observed;
+- no repeated rule-based fallback invocation after persistence is observed;
+- generated, skipped and failed lifecycle accounting;
+- per-risk failure isolation;
+- preserved recommendation history;
+- preserved latest-recommendation behavior;
 - preserved provider-disabled fallback;
 - preserved provider-failure fallback;
-- preserved automatic Telegram delivery;
-- preserved manual retry;
-- 341 automated tests passed;
+- preserved PDF generation;
+- preserved automatic Telegram PDF dispatch;
+- preserved manual Telegram retry;
+- no database migration;
+- latest migration V18;
+- 349 automated tests passed;
 - zero failures;
-- zero errors.
+- zero errors;
+- zero skipped tests.
 
-The next phase must be based on an explicitly approved Sprint 17 objective.
+The next phase must be based on an explicitly approved Sprint 18 objective.
 
 Potential future directions include:
 
+- database-level concurrent recommendation idempotency;
+- recommendation regeneration and supersession;
 - recommendation quality evaluation;
-- recommendation idempotency and lifecycle management;
 - provider production hardening and failover;
 - asynchronous recommendation or report processing;
 - automated retry and reconciliation;
@@ -1243,9 +1271,74 @@ Potential future directions include:
 
 ---
 
----
-
 ## Latest Completed Sprint
+
+### Sprint 17 — Recommendation Idempotency and Lifecycle Safety
+
+Sprint 17 completed the application-level automatic recommendation
+idempotency baseline.
+
+Implemented capabilities include:
+
+- exact monitoring-run and risk pair existence checks;
+- persisted recommendation detection before automatic generation;
+- automatic generation skip when matching history exists;
+- prevention of repeated AI-provider invocation after persistence is observed;
+- prevention of repeated fallback-generator invocation after persistence is
+  observed;
+- generated recommendation lifecycle accounting;
+- skipped recommendation lifecycle accounting;
+- failed recommendation lifecycle accounting;
+- preservation of per-risk failure isolation;
+- four-argument result compatibility for existing callers.
+
+The lifecycle invariant is:
+
+`generatedCount + skippedCount + failedCount = riskCount`
+
+Sprint 17 preserved:
+
+- recommendation history;
+- latest-recommendation selection;
+- provider-neutral recommendation generation;
+- production OpenAI integration;
+- provider-disabled rule-based fallback;
+- provider-failure rule-based fallback;
+- recommendation validation;
+- advisory recommendation boundaries;
+- monitoring lifecycle isolation;
+- HTML reporting;
+- PDF artifact generation and resolution;
+- automatic Telegram PDF dispatch;
+- manual Telegram retry;
+- dispatch persistence and idempotency.
+
+Sprint 17 verification:
+
+- run-generation service tests: 6 passed;
+- run-generation result tests: 4 passed;
+- recommendation repository tests: 8 passed;
+- combined recommendation and fallback regression: 25 passed;
+- monitoring execution and report-dispatch safety tests: 5 passed;
+- PDF and Telegram regression tests: 34 passed;
+- final full regression: 349 tests passed;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- latest migration: V18;
+- database migration added: NO.
+
+Accepted limitations:
+
+- no database unique constraint;
+- no concurrent check-and-insert protection;
+- no recommendation regeneration UI;
+- no recommendation supersession;
+- no human approval;
+- no provider retry or backoff;
+- no asynchronous recommendation queue.
+
+### Historical Sprint 16 Baseline
 
 ### Sprint 16 — Adaptive Response Analysis and Risk Explanation Baseline
 

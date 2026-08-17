@@ -5127,3 +5127,262 @@ alongside remediation and verification guidance.
 The completed implementation preserves evidence authority, recommendation
 advisory boundaries, existing fallback behavior, reporting, PDF generation
 and Telegram delivery.
+
+# Sprint 17 — Recommendation Idempotency and Lifecycle Safety
+
+## Status
+
+Sprint 17 is technically complete.
+
+Final automated verification:
+
+- Tests run: 349
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+
+## Objective
+
+Sprint 17 prevents repeated automatic recommendation generation for the same
+persisted monitoring-run and risk pair.
+
+Before invoking the recommendation generation chain, the automatic run-level
+orchestrator now checks whether a recommendation already exists for:
+
+- the current monitoring run ID;
+- the current risk ID.
+
+When a persisted recommendation exists, the risk is recorded as skipped and
+the recommendation generation service is not called.
+
+This prevents repeated automatic execution from calling:
+
+- the configured AI recommendation provider;
+- provider selection;
+- prompt construction;
+- recommendation validation;
+- the rule-based fallback generator;
+- recommendation persistence
+
+for a monitoring-run and risk pair that already has recommendation history.
+
+## Automatic Idempotency Boundary
+
+Automatic idempotency is enforced by:
+
+- `RiskRemediationRecommendationRunGenerationService.java`;
+- `RiskRemediationRecommendationRepository.java`.
+
+The repository provides the derived existence query:
+
+- `existsByRiskIdAndMonitoringRunId(...)`.
+
+The query requires the complete risk-ID and monitoring-run-ID pair.
+
+A recommendation belonging to:
+
+- another risk in the same monitoring run; or
+- another monitoring run
+
+does not prevent generation for the current pair.
+
+The idempotency check remains outside
+`RiskRemediationRecommendationGenerationService.java`.
+
+This preserves the provider-neutral generation service as the explicit
+generation boundary and avoids introducing an implicit regeneration or
+supersession policy.
+
+## Recommendation Run Lifecycle Result
+
+`RiskRemediationRecommendationRunGenerationResult.java` now records:
+
+- `riskCount`;
+- `generatedCount`;
+- `skippedCount`;
+- `failedCount`.
+
+The lifecycle invariant is:
+
+`generatedCount + skippedCount + failedCount = riskCount`
+
+A skipped recommendation is a successful idempotent lifecycle outcome.
+
+It is not treated as a generation failure.
+
+The existing four-argument result constructor remains available and maps
+historical callers to:
+
+`skippedCount = 0`
+
+This compatibility boundary preserves existing monitoring execution,
+report-dispatch and test-fixture behavior.
+
+## Per-Risk Failure Isolation
+
+The persisted-recommendation existence check is performed inside the existing
+per-risk failure-isolation boundary.
+
+A repository lookup or generation failure for one risk:
+
+- increments the failed count;
+- does not terminate processing of the remaining risks;
+- does not fail the completed monitoring run.
+
+Existing provider-disabled and provider-failure fallback behavior remains
+unchanged for risks that do not already have a persisted recommendation.
+
+## Repeated Automatic Execution
+
+Repeated automatic orchestration for the same completed monitoring run now
+behaves as follows.
+
+First execution:
+
+1. Load persisted risks for the monitoring run.
+2. Check each monitoring-run and risk pair.
+3. Generate and persist recommendations for pairs without history.
+4. Report those risks as generated.
+
+Subsequent execution:
+
+1. Load the same persisted risks.
+2. Detect the persisted recommendations.
+3. Skip recommendation generation.
+4. Report those risks as skipped.
+
+The AI provider and rule-based fallback chain are therefore not called again
+after persistence is observed.
+
+## Preserved Recommendation History and Reporting
+
+Sprint 17 does not delete, replace or supersede recommendation records.
+
+The existing repository behavior remains preserved:
+
+- recommendation history is returned in descending generation order;
+- the latest recommendation query returns the newest persisted record;
+- monitoring-run reports continue to read persisted recommendations;
+- HTML and PDF reporting continue to display the latest recommendation for
+  each risk.
+
+No recommendation regeneration UI or supersession workflow was introduced.
+
+## Preserved Provider and Fallback Behavior
+
+Sprint 17 preserves:
+
+- provider-neutral recommendation orchestration;
+- production OpenAI provider integration;
+- provider-disabled rule-based fallback;
+- provider-unavailable rule-based fallback;
+- provider-failure rule-based fallback;
+- provider-output validation fallback;
+- recommendation validation;
+- recommendation audit metadata;
+- context fingerprinting;
+- advisory-only recommendation behavior.
+
+The idempotency check occurs before this chain only when matching persisted
+recommendation history already exists.
+
+## Preserved PDF and Telegram Chain
+
+Sprint 17 does not change:
+
+- monitoring-run report construction;
+- latest-recommendation selection;
+- PDF rendering;
+- PDF artifact generation;
+- PDF artifact resolution;
+- automatic Telegram PDF dispatch;
+- manual Telegram dispatch retry;
+- Telegram document delivery;
+- report-dispatch persistence or idempotency.
+
+Monitoring execution continues to complete recommendation orchestration before
+automatic report dispatch.
+
+## Database
+
+Sprint 17 introduces no database migration.
+
+Latest migration remains:
+
+- V18
+
+A database unique constraint was intentionally not added.
+
+The completed implementation prevents sequential and repeated automatic
+generation after persisted recommendation history is visible.
+
+Concurrent check-and-insert race protection remains deferred because it would
+require a database-level uniqueness or locking policy that is outside Sprint
+17 scope.
+
+## Files Changed
+
+Production:
+
+- `RiskRemediationRecommendationRepository.java`
+- `RiskRemediationRecommendationRunGenerationResult.java`
+- `RiskRemediationRecommendationRunGenerationService.java`
+
+Tests:
+
+- `RiskRemediationRecommendationRepositoryTests.java`
+- `RiskRemediationRecommendationRunGenerationResultTests.java`
+- `RiskRemediationRecommendationRunGenerationServiceTests.java`
+
+## Automated Verification
+
+Controlled Sprint 17 verification:
+
+- run-generation service tests: 6 passed;
+- run-generation result tests: 4 passed;
+- recommendation repository tests: 8 passed;
+- combined recommendation lifecycle and fallback regression: 25 passed;
+- monitoring execution and report-dispatch safety tests: 5 passed;
+- PDF and Telegram regression tests: 34 passed;
+- full project regression: 349 passed.
+
+Final result:
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 349
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Database migration added: NO
+- Latest migration: V18
+
+## Out of Scope
+
+Sprint 17 does not introduce:
+
+- a database unique constraint;
+- concurrent generation locking;
+- recommendation regeneration UI;
+- recommendation supersession;
+- human approval;
+- provider retry or backoff;
+- asynchronous recommendation processing;
+- a durable recommendation queue;
+- a second AI provider;
+- authentication or RBAC;
+- a new scanner;
+- a new risk type.
+
+## Result
+
+Sprint 17 establishes automatic recommendation idempotency for persisted
+monitoring-run and risk pairs.
+
+Repeated automatic orchestration no longer invokes the AI provider or
+rule-based fallback generator when matching recommendation history already
+exists.
+
+Recommendation history, latest-recommendation selection, provider fallback,
+PDF generation and Telegram delivery remain behavior-compatible.

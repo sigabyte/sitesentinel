@@ -26,5 +26,10 @@ public interface RiskRemediationRecommendationRepository
             UUID monitoringRunId
     );
 
+    boolean existsByRiskIdAndMonitoringRunId(
+            UUID riskId,
+            UUID monitoringRunId
+    );
+
     long countByMonitoringRunId(UUID monitoringRunId);
 }
