@@ -440,8 +440,8 @@ Remaining work:
 - Add dead-letter transition tests.
 - Add multi-recipient dispatch isolation tests when recipient management is
   implemented.
-- Add authentication and authorization tests for report retry operations
-  when access control is implemented.
+- Add role-specific authorization tests for report retry operations when
+  fine-grained RBAC is implemented.
 
 ---
 
@@ -455,14 +455,84 @@ Remaining work:
 
 ---
 
-## Security and Access Control
+## Authentication and Access Control Follow-Up
 
-- Add authentication.
-- Add user accounts.
-- Add role-based access control.
-- Add organization-level access boundaries.
-- Add audit logging for privileged actions.
+Sprint 18 completed the secure-by-default V1 single-operator authentication
+and access-protection baseline.
+
+Completed behavior includes:
+
+- environment-controlled operator username and password;
+- blank-credential startup rejection;
+- removal of generated development-password behavior;
+- application-wide authentication requirements;
+- custom form-based login;
+- generic invalid-credential feedback;
+- in-memory operator authentication;
+- the `OPERATOR` role;
+- POST-based logout;
+- dashboard sign-out control;
+- CSRF-protected logout;
+- CSRF enforcement for state-changing browser operations;
+- protected monitoring, evidence, risk, report, PDF and Telegram
+  administration surfaces;
+- test-only credential configuration separated from runtime configuration;
+- controlled runtime authentication verification.
+
+The completed V1 model intentionally supports one application-wide operator.
+
+Remaining authentication and authorization work:
+
+- Define whether SiteSentinel requires database-backed user accounts.
+- Add multi-user support only after an explicit identity-model decision.
+- Define user creation, activation, suspension and deletion.
+- Define password change and password reset workflows.
+- Define production operator-credential rotation procedures.
+- Define session idle timeout and absolute session lifetime.
+- Define concurrent-session policy.
+- Add authentication failure rate limiting.
+- Add brute-force protection.
+- Define account lockout and recovery behavior if persistent accounts are
+  introduced.
+- Define privileged-action audit requirements.
+- Define login-success, login-failure and logout audit requirements.
+- Define whether authentication events may safely include source-network
+  metadata.
+- Add role-based access control only after an approved role matrix.
+- Define permissions for monitoring execution.
+- Define permissions for schedule administration.
+- Define permissions for report and PDF access.
+- Define permissions for manual report-dispatch retry.
+- Define permissions for Telegram provider health checks.
+- Define permissions for security and provider configuration visibility.
+- Add per-website authorization only after an ownership model is approved.
+- Add organization or tenant access boundaries only after a corresponding
+  domain model is approved.
+- Evaluate multi-factor authentication.
+- Evaluate OAuth2, OIDC or SSO.
+- Evaluate API-token authentication for future non-browser clients.
 - Define provider secret access rules.
+
+Future authentication work must:
+
+- preserve secure-by-default startup;
+- preserve externally configured credentials until a replacement identity
+  model is approved;
+- avoid source-controlled production credentials;
+- keep raw passwords and provider secrets out of logs;
+- preserve CSRF protection for browser operations;
+- deny access by default;
+- avoid coupling authentication directly to monitoring, recommendation, PDF
+  or Telegram provider services.
+
+Future implementations must not:
+
+- reintroduce anonymous access to application data;
+- introduce a default production password;
+- expose whether a username exists through authentication failure messages;
+- persist raw passwords;
+- disable CSRF globally to simplify controller integration;
+- use the `OPERATOR` role as evidence that fine-grained RBAC already exists.
 
 ---
 

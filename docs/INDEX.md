@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 17 is complete.
+Sprint 18 is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 17
-Implemented baseline: UPDATED THROUGH SPRINT 17
-Latest completed sprint: SPRINT 17
+Current implementation status: SPRINT 18
+Implemented baseline: UPDATED THROUGH SPRINT 18
+Latest completed sprint: SPRINT 18
 Latest migration: V18
-Final test baseline: 349
+Final test baseline: 366
 
 The authoritative website assessment lifecycle remains:
 
@@ -160,6 +160,58 @@ Recommendation history, latest-recommendation selection, provider-disabled
 fallback, provider-failure fallback, PDF generation and Telegram delivery
 remain unchanged.
 
+Sprint 18 added secure-by-default single-operator authentication and access
+protection.
+
+All application endpoints now require authentication except for the explicit:
+
+- login endpoint;
+- required static CSS resources;
+- application error endpoint.
+
+The V1 operator identity is configured through environment variables:
+
+- `SITESENTINEL_SECURITY_USERNAME`;
+- `SITESENTINEL_SECURITY_PASSWORD`.
+
+Blank credentials prevent application startup.
+
+The application does not use a generated development password or a
+source-controlled production password.
+
+Sprint 18 also added:
+
+- a custom SiteSentinel login page;
+- generic invalid-credential feedback;
+- environment-controlled in-memory operator authentication;
+- the `OPERATOR` role;
+- authenticated dashboard access;
+- POST-based logout;
+- a visible dashboard sign-out control;
+- framework-generated logout CSRF protection;
+- CSRF enforcement for existing state-changing application operations;
+- anonymous-access protection for reports, PDF artifacts and Telegram
+  administration;
+- test-suite-only operator configuration that does not weaken production
+  startup requirements.
+
+Controlled runtime verification confirmed:
+
+- anonymous redirect to `/login`;
+- invalid-password rejection;
+- successful operator authentication;
+- authenticated dashboard access;
+- successful logout;
+- rejection of protected access after logout;
+- no generated security password.
+
+Authentication remains outside the authoritative assessment,
+recommendation, PDF and Telegram delivery domains.
+
+Sprint 18 introduces no database migration.
+
+Latest migration remains V18.
+
 The existing provider-neutral recommendation architecture now includes:
 
 - default-disabled OpenAI configuration;
@@ -208,8 +260,27 @@ lifecycles.
 Telegram delivery failure does not change a completed monitoring run to
 FAILED.
 
-## Implemented Baseline Through Sprint 17
+## Implemented Baseline Through Sprint 18
 
+- Secure-by-default application authentication
+- Environment-controlled single-operator credentials
+- Credentials-required application startup
+- Blank-credential startup rejection
+- In-memory operator authentication
+- OPERATOR application role
+- Custom SiteSentinel login page
+- Generic invalid-login feedback
+- Authenticated dashboard access
+- Application-wide protected endpoint policy
+- Anonymous login and required-static-resource access
+- POST-based logout
+- Dashboard sign-out control
+- CSRF-protected logout
+- CSRF protection for state-changing browser operations
+- Protected report and PDF artifact access
+- Protected Telegram delivery administration
+- Test-suite-only operator configuration
+- Secret-free source-controlled security configuration
 - Website registration
 - Website detail view
 - Monitoring run execution

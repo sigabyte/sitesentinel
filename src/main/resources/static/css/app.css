@@ -288,3 +288,128 @@ th {
     border-color: #bb7777;
     background: #ffecec;
 }
+
+.login-page {
+    margin: 0;
+    min-height: 100vh;
+    background: #f4f6f8;
+}
+
+.login-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    margin: 0;
+    padding: 28px;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.login-header h1 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-field label {
+    font-weight: bold;
+}
+
+.login-field input {
+    padding: 10px;
+    border: 1px solid #999999;
+    font: inherit;
+}
+
+.login-submit {
+    padding: 10px 16px;
+    border: 1px solid #333333;
+    background: #333333;
+    color: #ffffff;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-submit:hover,
+.login-submit:focus {
+    background: #111111;
+}
+
+.login-message {
+    padding: 10px;
+    margin-top: 18px;
+    border: 1px solid #cccccc;
+}
+
+.login-message--error {
+    border-color: #cc9999;
+    background: #fff7f7;
+}
+
+.login-message--success {
+    border-color: #9ac89a;
+    background: #f3fbf3;
+}
+
+.login-security-note {
+    margin-top: 22px;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.dashboard-header p {
+    margin-top: 0;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+.logout-button {
+    padding: 8px 14px;
+    border: 1px solid #666666;
+    background: #ffffff;
+    color: #222222;
+    font: inherit;
+    cursor: pointer;
+}
+
+.logout-button:hover,
+.logout-button:focus {
+    background: #f2f2f2;
+}

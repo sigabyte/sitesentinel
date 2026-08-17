@@ -6,9 +6,24 @@
   <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<h1>SiteSentinel</h1>
+<header class="dashboard-header">
+  <div>
+    <h1>SiteSentinel</h1>
 
-<p>Core platform foundation for website trust monitoring.</p>
+    <p>
+      Core platform foundation for website trust monitoring.
+    </p>
+  </div>
+
+  <form th:action="@{/logout}"
+        method="post"
+        class="logout-form">
+    <button type="submit"
+            class="logout-button">
+      Sign out
+    </button>
+  </form>
+</header>
 
 <section>
   <h2>Websites</h2>

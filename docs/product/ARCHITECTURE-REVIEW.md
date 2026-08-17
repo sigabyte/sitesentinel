@@ -5766,3 +5766,280 @@ pair.
 The implementation places idempotency at the automatic orchestration boundary,
 preserves the explicit generation service, maintains recommendation history,
 and leaves reporting, PDF generation and Telegram delivery unchanged.
+
+# SiteSentinel Architecture Review-18
+
+## Sprint
+
+Sprint 18 Closure
+
+## Result
+
+APPROVED
+
+## Product Owner
+
+Approved
+
+## Architecture Status
+
+V1 Single-Operator Authentication and Access Protection Implemented
+
+## Verification Baseline
+
+- Tests run: 366
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+- Database migration: NOT REQUIRED
+- Latest migration: V18
+- Controlled runtime authentication verification: PASSED
+
+## Architectural Outcome
+
+Sprint 18 introduces a secure-by-default authentication boundary around the
+existing SiteSentinel V1 application.
+
+All application and operational endpoints now require authentication except
+for the explicitly permitted:
+
+- login endpoint;
+- required static CSS resources;
+- application error endpoint.
+
+The implementation uses one environment-configured operator account.
+
+It does not introduce a database-backed identity aggregate, multi-user
+authorization model or organization boundary.
+
+## Security Configuration Decision
+
+`SiteSentinelSecurityConfiguration.java` owns the web authentication and
+authorization boundary.
+
+The configuration:
+
+- requires authentication for every non-permitted request;
+- uses form-based login;
+- redirects successful authentication to the dashboard;
+- preserves CSRF protection;
+- uses POST-based logout;
+- invalidates authenticated access after logout;
+- exposes no default production credential.
+
+This is the correct V1 boundary because authentication remains an application
+access concern and does not alter assessment-domain services or persisted
+assessment records.
+
+## Credential Configuration Decision
+
+Operator credentials are supplied through:
+
+- `SITESENTINEL_SECURITY_USERNAME`;
+- `SITESENTINEL_SECURITY_PASSWORD`.
+
+`SiteSentinelSecurityProperties.java` rejects blank values.
+
+Missing credentials prevent application startup.
+
+The application therefore does not fall back to:
+
+- anonymous access;
+- a generated development password;
+- a source-controlled password;
+- a database-persisted operator credential.
+
+The runtime password is encoded before being stored in the in-memory
+authentication provider.
+
+Raw credentials are not exposed through controllers, templates, logs or
+persistence.
+
+## Authentication Model Decision
+
+Sprint 18 deliberately uses a single in-memory operator identity.
+
+The operator receives the application role:
+
+- `OPERATOR`.
+
+This role establishes a stable V1 identity label without claiming that
+fine-grained RBAC has been implemented.
+
+Every authenticated V1 operator currently receives access to the complete
+SiteSentinel application.
+
+Future multi-user or role-based authorization must be introduced through a
+separate architecture decision.
+
+## Login and Logout Decision
+
+`LoginController.java` and `login.html` provide the controlled application
+login surface.
+
+The login page:
+
+- accepts username and password;
+- displays a generic authentication-failure message;
+- does not distinguish an unknown username from an incorrect password;
+- displays successful logout status;
+- exposes no configured credential data.
+
+The dashboard provides a POST-based logout form with a framework-generated
+CSRF token.
+
+After logout, protected resources require authentication again.
+
+## CSRF Decision
+
+CSRF protection remains enabled globally.
+
+Sprint 18 does not add broad CSRF exclusions.
+
+State-changing browser operations continue to require valid CSRF tokens,
+including:
+
+- logout;
+- website registration;
+- monitoring execution;
+- schedule changes;
+- notification state changes;
+- Telegram provider health checks;
+- PDF artifact generation;
+- manual Telegram report retry.
+
+Security regression tests explicitly verify rejection of representative
+critical operations when the CSRF token is absent.
+
+## Protected Resource Decision
+
+Authentication protection applies to the complete existing V1 application,
+including:
+
+- monitoring and scheduling;
+- evidence, finding and risk traceability;
+- trust assessments and comparisons;
+- notification operations;
+- Telegram delivery administration;
+- full monitoring-run reports;
+- PDF artifact generation and download;
+- manual report-dispatch retry.
+
+Required stylesheet resources remain anonymously accessible so the login
+surface can render before authentication.
+
+## Test Configuration Decision
+
+Automated tests receive controlled test-only operator values through Maven
+Surefire system properties.
+
+These values:
+
+- exist only inside test JVMs;
+- are not runtime defaults;
+- are not production secrets;
+- do not weaken credentials-required application startup;
+- keep existing Spring application-context tests independent from developer
+  credentials.
+
+Security-specific tests may provide their own explicit test properties when
+verifying authentication behavior.
+
+## Domain Isolation Decision
+
+Authentication is implemented outside the authoritative assessment domain.
+
+Sprint 18 does not change:
+
+- website identity;
+- monitoring-run lifecycle;
+- HTTP evidence collection;
+- finding generation;
+- risk evaluation;
+- trust assessment;
+- assessment comparison;
+- recommendation generation;
+- recommendation validation;
+- recommendation idempotency;
+- PDF artifact identity;
+- Telegram dispatch identity or audit history.
+
+Authentication failure cannot mutate assessment or recommendation records.
+
+No AI provider or delivery provider participates in authentication.
+
+## Persistence Decision
+
+Sprint 18 introduces no database migration.
+
+Latest migration remains:
+
+- V18
+
+The following are not persisted:
+
+- operator username;
+- operator password;
+- authentication sessions;
+- roles;
+- login attempts.
+
+A database-backed identity model requires a separate future decision.
+
+## Runtime Verification
+
+Controlled runtime verification confirmed:
+
+- application startup with explicit credentials;
+- no generated security password;
+- anonymous redirect to the custom login page;
+- invalid-password rejection;
+- successful operator authentication;
+- authenticated dashboard access;
+- CSRF-protected logout;
+- rejection of protected access after logout;
+- no OpenAI, Telegram or scheduler execution during security verification.
+
+## Regression Decision
+
+Full regression confirms:
+
+- tests run: 366;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS.
+
+The completed monitoring-to-recommendation-to-PDF-to-Telegram chain remains
+behavior-compatible.
+
+## Accepted Limitations
+
+Sprint 18 accepts the following V1 limitations:
+
+- one operator account;
+- one application-wide role;
+- no database-backed users;
+- no user administration;
+- no password reset;
+- no multi-factor authentication;
+- no per-website authorization;
+- no organization or tenant isolation;
+- no OAuth2, OIDC or SSO;
+- no API-token authentication;
+- no privileged-action audit model.
+
+These limitations do not invalidate the controlled single-operator production
+boundary.
+
+## Architecture Decision
+
+Sprint 18 is architecturally approved.
+
+SiteSentinel now requires explicit environment-controlled operator
+authentication, protects all non-public application surfaces, preserves CSRF
+protection and provides controlled login and logout behavior.
+
+The implementation remains separate from the authoritative assessment,
+recommendation, reporting and delivery domains.

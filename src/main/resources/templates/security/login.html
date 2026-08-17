@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+    <title>Sign in | SiteSentinel</title>
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+
+<main class="login-shell">
+    <section class="login-card">
+        <header class="login-header">
+            <h1>SiteSentinel</h1>
+
+            <p class="muted">
+                Sign in to access website monitoring,
+                security assessments and reports.
+            </p>
+        </header>
+
+        <div class="login-message login-message--error"
+             th:if="${param.error}">
+            The username or password is incorrect.
+        </div>
+
+        <div class="login-message login-message--success"
+             th:if="${param.logout}">
+            You have signed out successfully.
+        </div>
+
+        <form th:action="@{/login}"
+              method="post"
+              class="login-form">
+
+            <div class="login-field">
+                <label for="username">
+                    Username
+                </label>
+
+                <input id="username"
+                       name="username"
+                       type="text"
+                       autocomplete="username"
+                       required
+                       autofocus>
+            </div>
+
+            <div class="login-field">
+                <label for="password">
+                    Password
+                </label>
+
+                <input id="password"
+                       name="password"
+                       type="password"
+                       autocomplete="current-password"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="login-submit">
+                Sign in
+            </button>
+        </form>
+
+        <p class="login-security-note muted">
+            Access is restricted to authorized
+            SiteSentinel operators.
+        </p>
+    </section>
+</main>
+
+</body>
+</html>

@@ -5386,3 +5386,319 @@ exists.
 
 Recommendation history, latest-recommendation selection, provider fallback,
 PDF generation and Telegram delivery remain behavior-compatible.
+
+# Sprint 18 — V1 Single-Operator Authentication and Access Protection
+
+## Status
+
+Sprint 18 is technically complete.
+
+Final automated verification:
+
+- Tests run: 366
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+
+Controlled runtime authentication verification also completed successfully.
+
+## Objective
+
+Sprint 18 protects the existing SiteSentinel V1 application through a
+secure-by-default, single-operator authentication boundary.
+
+Before Sprint 18, application pages and operational endpoints were available
+without authentication when the application was reachable over the network.
+
+Sprint 18 now requires an authenticated operator before access is granted to:
+
+- the dashboard;
+- website registration and detail pages;
+- monitoring execution;
+- monitoring schedules;
+- collected and normalized evidence;
+- findings;
+- risks;
+- trust assessments;
+- comparison views;
+- notification management;
+- Telegram delivery settings and health checks;
+- monitoring-run reports;
+- PDF artifact generation and download;
+- manual Telegram report retry.
+
+## Single-Operator Security Boundary
+
+The V1 authentication model uses one configured operator account.
+
+Operator credentials are supplied only through environment configuration:
+
+- `SITESENTINEL_SECURITY_USERNAME`;
+- `SITESENTINEL_SECURITY_PASSWORD`.
+
+The application does not:
+
+- persist the operator password;
+- expose the password through the application UI;
+- include a default production password;
+- generate a development password;
+- log the configured password;
+- store credentials in source-controlled configuration.
+
+Blank operator username or password values fail configuration validation and
+prevent application startup.
+
+This preserves a secure-by-default runtime boundary.
+
+## Authentication Configuration
+
+`SiteSentinelSecurityConfiguration.java` defines the application security
+filter chain.
+
+The configuration:
+
+- permits anonymous access to the login page;
+- permits anonymous access to required static CSS resources;
+- permits access to the error endpoint;
+- requires authentication for every other application request;
+- uses form-based login;
+- redirects successful login to the dashboard;
+- uses POST-based logout;
+- redirects successful logout to the login page;
+- preserves Spring Security CSRF protection.
+
+The configured operator is created through an in-memory
+`UserDetailsService`.
+
+The runtime password is encoded before it is stored in the in-memory
+authentication boundary.
+
+No database-backed user, role or session persistence model was introduced.
+
+## Custom Login and Logout
+
+`LoginController.java` exposes the custom login view.
+
+`login.html` provides:
+
+- SiteSentinel-branded operator login;
+- username input;
+- password input;
+- generic invalid-credential feedback;
+- successful logout feedback;
+- authorized-operator access guidance.
+
+The login error message does not reveal whether the username or password was
+incorrect.
+
+The dashboard now provides a visible `Sign out` form.
+
+The logout form:
+
+- uses POST;
+- includes the framework-generated CSRF token;
+- invalidates the authenticated session;
+- returns the operator to `/login?logout`.
+
+Accessing the dashboard after logout requires authentication again.
+
+## CSRF Protection
+
+Spring Security CSRF protection remains enabled.
+
+The security contract verifies rejection of authenticated state-changing
+requests without a valid CSRF token for:
+
+- logout;
+- PDF artifact generation;
+- Telegram provider health checks;
+- manual Telegram report retry.
+
+Existing Thymeleaf POST forms use framework-generated CSRF inputs.
+
+No broad CSRF exclusion or disablement was introduced.
+
+## Protected Reporting and Administration Surfaces
+
+Security contract tests verify that anonymous users cannot access:
+
+- the dashboard;
+- monitoring-run PDF artifact downloads;
+- Telegram delivery settings.
+
+Required stylesheet resources remain available before authentication so that
+the custom login page renders correctly.
+
+Authenticated operators retain access to the existing dashboard and all
+authorized V1 functionality.
+
+## Test Configuration Boundary
+
+Maven Surefire supplies controlled test-only operator credentials to automated
+test JVMs.
+
+The test credentials:
+
+- are not production credentials;
+- do not change normal application startup;
+- are not packaged as runtime configuration;
+- prevent unrelated application-context tests from depending on private
+  developer credentials.
+
+Production startup still requires explicit environment configuration.
+
+## Preserved V1 Lifecycle
+
+Sprint 18 does not change the authoritative assessment lifecycle:
+
+Website
+↓
+MonitoringRun
+↓
+HTTP Evidence
+↓
+Finding
+↓
+Risk
+↓
+TrustAssessment
+↓
+Assessment Comparison
+
+Sprint 18 also preserves the completed downstream delivery chain:
+
+Completed Monitoring Run
+↓
+Validated Recommendation
+↓
+Immutable PDF Artifact
+↓
+Automatic Telegram Dispatch
+↓
+Persistent Dispatch Audit
+
+Authentication does not alter:
+
+- evidence collection;
+- finding generation;
+- risk evaluation;
+- trust assessment;
+- recommendation generation;
+- recommendation idempotency;
+- OpenAI provider behavior;
+- rule-based fallback;
+- PDF rendering;
+- Telegram delivery;
+- dispatch idempotency;
+- completed monitoring-run state.
+
+## Database
+
+Sprint 18 introduces no database migration.
+
+Latest migration remains:
+
+- V18
+
+The operator account and password are not persisted in the application
+database.
+
+## Files Added
+
+Production:
+
+- `LoginController.java`
+- `SiteSentinelSecurityConfiguration.java`
+- `SiteSentinelSecurityProperties.java`
+- `login.html`
+
+Tests:
+
+- `SiteSentinelSecurityContractTests.java`
+- `SiteSentinelSecurityPropertiesTests.java`
+
+## Files Updated
+
+- `pom.xml`
+- `application.properties`
+- `app.css`
+- `dashboard/index.html`
+
+## Automated Verification
+
+Controlled Sprint 18 verification included:
+
+- initial anonymous-dashboard RED test;
+- custom-login-page RED test;
+- application-context credential-validation RED test;
+- dashboard logout-control RED test;
+- authentication and CSRF contract tests;
+- security configuration-property validation tests;
+- existing application-context regression;
+- full project regression.
+
+Final result:
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 366
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Database migration added: NO
+- Latest migration: V18
+
+## Runtime Verification
+
+Controlled runtime verification confirmed:
+
+- application startup: SUCCESS;
+- latest migration: V18;
+- generated security password: NOT PRESENT;
+- anonymous dashboard access: REDIRECTED TO LOGIN;
+- custom login page: VERIFIED;
+- invalid login: REJECTED;
+- valid operator login: SUCCESS;
+- dashboard access after login: SUCCESS;
+- logout control: VERIFIED;
+- access after logout: REJECTED;
+- external provider calls: NOT PERFORMED.
+
+The runtime verification used environment-controlled credentials without
+placing secret values in source, Git or documentation.
+
+## Out of Scope
+
+Sprint 18 does not introduce:
+
+- database-backed user accounts;
+- user registration;
+- password reset;
+- multiple users;
+- role-based access control;
+- organization or tenant isolation;
+- per-website authorization;
+- OAuth2, OIDC or SSO;
+- multi-factor authentication;
+- API-token authentication;
+- privileged-action audit logging;
+- recipient ownership;
+- recommendation concurrency locking;
+- recommendation database uniqueness;
+- provider retry or backoff;
+- dispatch retry scheduling;
+- a new scanner;
+- a new risk type.
+
+## Result
+
+Sprint 18 establishes the minimum authentication and access-protection
+boundary required for controlled V1 production use.
+
+SiteSentinel now rejects unauthenticated application access, requires explicit
+environment-controlled operator credentials, preserves CSRF protection and
+provides controlled login and logout behavior.
+
+The existing monitoring, recommendation, PDF and Telegram delivery lifecycle
+remains behavior-compatible.
