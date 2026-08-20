@@ -1,5 +1,6 @@
 package com.cigabyte.sitesentinel.recommendation;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.risk.RiskSeverity;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +12,20 @@ public class RiskRemediationRuleBasedFallbackGenerator {
 
     private static final RiskRemediationFallbackRuleVersion
             CURRENT_VERSION =
-            RiskRemediationFallbackRuleVersion.V2;
+            RiskRemediationFallbackRuleVersion.V3;
 
     public RiskRemediationRuleBasedFallbackResult generate(
             RiskRemediationRecommendationContext context
+    ) {
+        return generate(
+                context,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public RiskRemediationRuleBasedFallbackResult generate(
+            RiskRemediationRecommendationContext context,
+            SiteSentinelReportLanguage reportLanguage
     ) {
         RiskRemediationRecommendationContext requiredContext =
                 Objects.requireNonNull(
@@ -22,25 +33,105 @@ public class RiskRemediationRuleBasedFallbackGenerator {
                         "Risk remediation recommendation context is required."
                 );
 
-        RiskRemediationRecommendationContent content =
-                new RiskRemediationRecommendationContent(
-                        buildTitle(requiredContext),
-                        buildSummary(requiredContext),
-                        formatSteps(
-                                buildRemediationSteps(
-                                        requiredContext
-                                )
-                        ),
-                        formatSteps(
-                                buildVerificationSteps(
-                                        requiredContext
-                                )
-                        )
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
                 );
+
+        RiskRemediationRecommendationContent content =
+                switch (requiredReportLanguage) {
+                    case ENGLISH ->
+                            new RiskRemediationRecommendationContent(
+                                    buildTitle(requiredContext),
+                                    buildSummary(requiredContext),
+                                    formatSteps(
+                                            buildRemediationSteps(
+                                                    requiredContext
+                                            )
+                                    ),
+                                    formatSteps(
+                                            buildVerificationSteps(
+                                                    requiredContext
+                                            )
+                                    )
+                            );
+
+                    case TURKISH ->
+                            buildTurkishContent(
+                                    requiredContext
+                            );
+                };
 
         return new RiskRemediationRuleBasedFallbackResult(
                 CURRENT_VERSION.getVersion(),
                 content
+        );
+    }
+
+    private RiskRemediationRecommendationContent
+    buildTurkishContent(
+            RiskRemediationRecommendationContext context
+    ) {
+        return new RiskRemediationRecommendationContent(
+                context.getRiskType()
+                        + " riskini inceleyin ve giderin",
+                buildTurkishSummary(
+                        context
+                ),
+                formatSteps(
+                        buildTurkishRemediationSteps(
+                                context
+                        )
+                ),
+                formatSteps(
+                        buildTurkishVerificationSteps(
+                                context
+                        )
+                )
+        );
+    }
+
+    private String buildTurkishSummary(
+            RiskRemediationRecommendationContext context
+    ) {
+        return """
+            Kalıcı kanıtlar, %s türünde %s önem seviyesine sahip bir riski doğrular. Bu değerlendirme %d bağlantılı bulgu ve %d normalize edilmiş kanıt öğesiyle desteklenmektedir. Koşul giderilmezse web sitesinin güvenlik, erişilebilirlik, içerik kalitesi veya güvenilirlik kontrollerini olumsuz etkileyebilir. Mevcut kanıtlar bir saldırının, sistem ele geçirilmesinin, veri ihlalinin, güvenlik olayının veya istismarın gerçekleştiğini doğrulamaz. Düzeltici değişiklik uygulanmadan önce etkilenen kontrolü ve temel nedeni doğrulayın. Bu tavsiye niteliğindeki açıklama yeni bir risk oluşturmaz ve mevcut risk, güven, önem seviyesi veya trust score değerlerini değiştirmez.
+            """.formatted(
+                context.getRiskType(),
+                context.getSeverity().name(),
+                context.getFindingCount(),
+                context.getEvidenceCount()
+        ).strip();
+    }
+
+    private List<String> buildTurkishRemediationSteps(
+            RiskRemediationRecommendationContext context
+    ) {
+        return List.of(
+                context.getRiskType()
+                        + " ile ilişkili kalıcı bulguları "
+                        + "ve kanıt bağlantılarını inceleyin.",
+                "Etkilenen yapılandırma veya içerik kontrolünün "
+                        + "temel nedenini doğrulayın.",
+                "Geri alma hazırlığını koruyarak kontrollü bir "
+                        + "değişiklik uygulayın.",
+                "Değişikliğin kapsamını ve uygulama sonucunu "
+                        + "operasyonel kayıtlarla belgeleyin."
+        );
+    }
+
+    private List<String> buildTurkishVerificationSteps(
+            RiskRemediationRecommendationContext context
+    ) {
+        return List.of(
+                "SiteSentinel monitoring kontrolünü yeniden çalıştırın.",
+                context.getRiskType()
+                        + " koşulunun artık üretilmediğini doğrulayın.",
+                "İlgili bulgu ve normalize edilmiş kanıt sonuçlarını "
+                        + "yeniden inceleyin.",
+                "Değişikliğin ilgisiz web sitesi davranışlarında "
+                        + "regresyon oluşturmadığını doğrulayın."
         );
     }
 

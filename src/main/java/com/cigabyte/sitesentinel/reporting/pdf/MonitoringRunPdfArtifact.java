@@ -15,6 +15,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "monitoring_run_pdf_artifacts")
@@ -47,6 +50,14 @@ public class MonitoringRunPdfArtifact {
             length = REPORT_VERSION_MAX_LENGTH
     )
     private String reportVersion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "report_language",
+            nullable = false,
+            length = 20
+    )
+    private SiteSentinelReportLanguage reportLanguage;
 
     @Column(
             name = "file_name",
@@ -87,6 +98,7 @@ public class MonitoringRunPdfArtifact {
     private MonitoringRunPdfArtifact(
             UUID monitoringRunId,
             MonitoringRunPdfVersion reportVersion,
+            SiteSentinelReportLanguage reportLanguage,
             String fileName,
             byte[] artifactBytes,
             String sha256Fingerprint,
@@ -108,6 +120,12 @@ public class MonitoringRunPdfArtifact {
                 "PDF report version",
                 REPORT_VERSION_MAX_LENGTH
         );
+
+        this.reportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "PDF report language is required."
+                );
 
         this.fileName = validateFileName(fileName);
         this.contentType = PDF_CONTENT_TYPE;
@@ -139,9 +157,30 @@ public class MonitoringRunPdfArtifact {
             String sha256Fingerprint,
             OffsetDateTime generatedAt
     ) {
+        return create(
+                monitoringRunId,
+                reportVersion,
+                SiteSentinelReportLanguage.ENGLISH,
+                fileName,
+                artifactBytes,
+                sha256Fingerprint,
+                generatedAt
+        );
+    }
+
+    public static MonitoringRunPdfArtifact create(
+            UUID monitoringRunId,
+            MonitoringRunPdfVersion reportVersion,
+            SiteSentinelReportLanguage reportLanguage,
+            String fileName,
+            byte[] artifactBytes,
+            String sha256Fingerprint,
+            OffsetDateTime generatedAt
+    ) {
         return new MonitoringRunPdfArtifact(
                 monitoringRunId,
                 reportVersion,
+                reportLanguage,
                 fileName,
                 artifactBytes,
                 sha256Fingerprint,
@@ -268,6 +307,10 @@ public class MonitoringRunPdfArtifact {
         if (this.createdAt == null) {
             this.createdAt = OffsetDateTime.now();
         }
+    }
+
+    public SiteSentinelReportLanguage getReportLanguage() {
+        return reportLanguage;
     }
 
     public UUID getId() {

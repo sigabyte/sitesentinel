@@ -15,6 +15,7 @@ import java.util.UUID;
 import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @Service
 public class MonitoringExecutionService {
@@ -138,20 +139,42 @@ public class MonitoringExecutionService {
     private boolean generateRecommendationsSafely(
             MonitoringRun monitoringRun
     ) {
+        boolean englishGenerationCompleted =
+                generateRecommendationsSafely(
+                        monitoringRun,
+                        SiteSentinelReportLanguage.ENGLISH
+                );
+
+        boolean turkishGenerationCompleted =
+                generateRecommendationsSafely(
+                        monitoringRun,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        return englishGenerationCompleted
+                && turkishGenerationCompleted;
+    }
+
+    private boolean generateRecommendationsSafely(
+            MonitoringRun monitoringRun,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         try {
             RiskRemediationRecommendationRunGenerationResult
                     result =
                     recommendationRunGenerationService
                             .generateForCompletedRun(
-                                    monitoringRun
+                                    monitoringRun,
+                                    reportLanguage
                             );
 
             log.info(
                     "Risk remediation recommendation generation "
                             + "completed for monitoringRunId={}, "
-                            + "riskCount={}, generatedCount={}, "
-                            + "failedCount={}",
+                            + "reportLanguage={}, riskCount={}, "
+                            + "generatedCount={}, failedCount={}",
                     result.monitoringRunId(),
+                    reportLanguage,
                     result.riskCount(),
                     result.generatedCount(),
                     result.failedCount()
@@ -163,8 +186,9 @@ public class MonitoringExecutionService {
             log.warn(
                     "Risk remediation recommendation run generation "
                             + "failed for monitoringRunId={}, "
-                            + "failureType={}",
+                            + "reportLanguage={}, failureType={}",
                     monitoringRun.getId(),
+                    reportLanguage,
                     exception.getClass().getSimpleName()
             );
 
@@ -175,18 +199,36 @@ public class MonitoringExecutionService {
     private void dispatchAutomaticReportSafely(
             MonitoringRun monitoringRun
     ) {
+        dispatchAutomaticReportSafely(
+                monitoringRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        dispatchAutomaticReportSafely(
+                monitoringRun,
+                SiteSentinelReportLanguage.TURKISH
+        );
+    }
+
+    private void dispatchAutomaticReportSafely(
+            MonitoringRun monitoringRun,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         try {
             TelegramDocumentDeliveryResult result =
                     automaticReportDispatchService
                             .dispatchCompletedRun(
-                                    monitoringRun
+                                    monitoringRun,
+                                    reportLanguage
                             );
 
             if (result == null) {
                 log.warn(
                         "Automatic Telegram PDF dispatch returned "
-                                + "no result for monitoringRunId={}",
-                        monitoringRun.getId()
+                                + "no result for monitoringRunId={}, "
+                                + "reportLanguage={}",
+                        monitoringRun.getId(),
+                        reportLanguage
                 );
 
                 return;
@@ -194,9 +236,11 @@ public class MonitoringExecutionService {
 
             log.info(
                     "Automatic Telegram PDF dispatch completed "
-                            + "for monitoringRunId={}, status={}, "
+                            + "for monitoringRunId={}, "
+                            + "reportLanguage={}, status={}, "
                             + "deliveryAttempted={}, successful={}",
                     monitoringRun.getId(),
+                    reportLanguage,
                     result.getStatus(),
                     result.isDeliveryAttempted(),
                     result.isSuccessful()
@@ -205,8 +249,10 @@ public class MonitoringExecutionService {
         } catch (RuntimeException exception) {
             log.warn(
                     "Automatic Telegram PDF dispatch failed "
-                            + "for monitoringRunId={}, failureType={}",
+                            + "for monitoringRunId={}, "
+                            + "reportLanguage={}, failureType={}",
                     monitoringRun.getId(),
+                    reportLanguage,
                     exception.getClass().getSimpleName()
             );
         }

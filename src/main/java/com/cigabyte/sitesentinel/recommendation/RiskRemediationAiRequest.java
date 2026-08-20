@@ -1,5 +1,8 @@
 package com.cigabyte.sitesentinel.recommendation;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
+
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record RiskRemediationAiRequest(
@@ -7,11 +10,29 @@ public record RiskRemediationAiRequest(
         String outputSchemaVersion,
         String systemInstruction,
         String userInstruction,
-        String contextFingerprint
+        String contextFingerprint,
+        SiteSentinelReportLanguage reportLanguage
 ) {
 
     private static final Pattern SHA_256_PATTERN =
             Pattern.compile("[0-9a-f]{64}");
+
+    public RiskRemediationAiRequest(
+            String promptVersion,
+            String outputSchemaVersion,
+            String systemInstruction,
+            String userInstruction,
+            String contextFingerprint
+    ) {
+        this(
+                promptVersion,
+                outputSchemaVersion,
+                systemInstruction,
+                userInstruction,
+                contextFingerprint,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
 
     public RiskRemediationAiRequest {
         promptVersion = requireText(
@@ -37,6 +58,12 @@ public record RiskRemediationAiRequest(
         contextFingerprint = requireFingerprint(
                 contextFingerprint
         );
+
+        reportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
+                );
     }
 
     private static String requireText(

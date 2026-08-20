@@ -1,6 +1,7 @@
 package com.cigabyte.sitesentinel.recommendation;
 
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.risk.Risk;
 import com.cigabyte.sitesentinel.risk.RiskRepository;
 import com.cigabyte.sitesentinel.risk.RiskSeverity;
@@ -66,9 +67,10 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
 
         when(
                 recommendationRepository
-                        .existsByRiskIdAndMonitoringRunId(
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                 persistedRisk.getId(),
-                                completedRun.getId()
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(true);
 
@@ -88,9 +90,10 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
 
         verify(
                 recommendationRepository
-        ).existsByRiskIdAndMonitoringRunId(
+        ).existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                 persistedRisk.getId(),
-                completedRun.getId()
+                completedRun.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -98,7 +101,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 never()
         ).generateAndPersist(
                 completedRun.getId(),
-                persistedRisk.getId()
+                persistedRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
     }
 
@@ -141,7 +145,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        firstRisk.getId()
+                        firstRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(
                 mock(
@@ -152,7 +157,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        secondRisk.getId()
+                        secondRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenThrow(
                 new IllegalStateException(
@@ -163,7 +169,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        thirdRisk.getId()
+                        thirdRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(
                 mock(
@@ -193,21 +200,24 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 generationService
         ).generateAndPersist(
                 completedRun.getId(),
-                firstRisk.getId()
+                firstRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
                 generationService
         ).generateAndPersist(
                 completedRun.getId(),
-                secondRisk.getId()
+                secondRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
                 generationService
         ).generateAndPersist(
                 completedRun.getId(),
-                thirdRisk.getId()
+                thirdRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
     }
 
@@ -241,6 +251,7 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 never()
         ).generateAndPersist(
                 org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any()
         );
     }
@@ -269,6 +280,7 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 generationService,
                 never()
         ).generateAndPersist(
+                org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any()
         );
@@ -312,32 +324,36 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
 
         when(
                 recommendationRepository
-                        .existsByRiskIdAndMonitoringRunId(
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                 existingRecommendationRisk.getId(),
-                                completedRun.getId()
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(true);
 
         when(
                 recommendationRepository
-                        .existsByRiskIdAndMonitoringRunId(
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                 newlyGeneratedRisk.getId(),
-                                completedRun.getId()
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(false);
 
         when(
                 recommendationRepository
-                        .existsByRiskIdAndMonitoringRunId(
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                 failedGenerationRisk.getId(),
-                                completedRun.getId()
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(false);
 
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        newlyGeneratedRisk.getId()
+                        newlyGeneratedRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(
                 mock(
@@ -348,7 +364,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        failedGenerationRisk.getId()
+                        failedGenerationRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenThrow(
                 new IllegalStateException(
@@ -380,21 +397,24 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 never()
         ).generateAndPersist(
                 completedRun.getId(),
-                existingRecommendationRisk.getId()
+                existingRecommendationRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
                 generationService
         ).generateAndPersist(
                 completedRun.getId(),
-                newlyGeneratedRisk.getId()
+                newlyGeneratedRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
                 generationService
         ).generateAndPersist(
                 completedRun.getId(),
-                failedGenerationRisk.getId()
+                failedGenerationRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
     }
 
@@ -420,9 +440,10 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
 
         when(
                 recommendationRepository
-                        .existsByRiskIdAndMonitoringRunId(
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                 persistedRisk.getId(),
-                                completedRun.getId()
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 false,
@@ -432,7 +453,8 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         when(
                 generationService.generateAndPersist(
                         completedRun.getId(),
-                        persistedRisk.getId()
+                        persistedRisk.getId(),
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(
                 mock(
@@ -468,9 +490,10 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
         verify(
                 recommendationRepository,
                 org.mockito.Mockito.times(2)
-        ).existsByRiskIdAndMonitoringRunId(
+        ).existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                 persistedRisk.getId(),
-                completedRun.getId()
+                completedRun.getId(),
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -478,7 +501,79 @@ class RiskRemediationRecommendationRunGenerationServiceTests {
                 org.mockito.Mockito.times(1)
         ).generateAndPersist(
                 completedRun.getId(),
-                persistedRisk.getId()
+                persistedRisk.getId(),
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    @Test
+    void generatesTurkishRecommendationIndependentlyWhenEnglishAlreadyExists() {
+        MonitoringRun completedRun =
+                completedRun();
+
+        Risk persistedRisk =
+                risk(
+                        completedRun,
+                        "TLS_CONFIGURATION"
+                );
+
+        when(
+                riskRepository
+                        .findByMonitoringRunIdOrderByRiskScoreDescCreatedAtAsc(
+                                completedRun.getId()
+                        )
+        ).thenReturn(
+                List.of(persistedRisk)
+        );
+
+        when(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
+                                persistedRisk.getId(),
+                                completedRun.getId(),
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(false);
+
+        when(
+                generationService.generateAndPersist(
+                        completedRun.getId(),
+                        persistedRisk.getId(),
+                        SiteSentinelReportLanguage.TURKISH
+                )
+        ).thenReturn(
+                mock(
+                        RiskRemediationRecommendation.class
+                )
+        );
+
+        RiskRemediationRecommendationRunGenerationResult result =
+                runGenerationService
+                        .generateForCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
+                        );
+
+        assertEquals(1, result.riskCount());
+        assertEquals(1, result.generatedCount());
+        assertEquals(0, result.skippedCount());
+        assertEquals(0, result.failedCount());
+        assertTrue(result.isFullySuccessful());
+
+        verify(
+                recommendationRepository
+        ).existsByRiskIdAndMonitoringRunIdAndReportLanguage(
+                persistedRisk.getId(),
+                completedRun.getId(),
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                generationService
+        ).generateAndPersist(
+                completedRun.getId(),
+                persistedRisk.getId(),
+                SiteSentinelReportLanguage.TURKISH
         );
     }
 

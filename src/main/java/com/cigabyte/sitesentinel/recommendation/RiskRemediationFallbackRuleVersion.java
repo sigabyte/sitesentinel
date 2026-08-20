@@ -8,6 +8,10 @@ public enum RiskRemediationFallbackRuleVersion {
 
     V2(
             "risk-remediation-fallback-v2"
+    ),
+
+    V3(
+            "risk-remediation-fallback-v3"
     );
 
     private final String version;

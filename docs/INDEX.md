@@ -2,15 +2,15 @@
 
 This index lists the active documentation set for the SiteSentinel project.
 
-Sprint 18 is complete.
+Sprint 20 is complete.
 
 ## Current Implementation Status
 
-Current implementation status: SPRINT 18
-Implemented baseline: UPDATED THROUGH SPRINT 18
-Latest completed sprint: SPRINT 18
-Latest migration: V18
-Final test baseline: 366
+Current implementation status: SPRINT 20
+Implemented baseline: UPDATED THROUGH SPRINT 20
+Latest completed sprint: SPRINT 20
+Latest migration: V19
+Final test baseline: 417
 
 The authoritative website assessment lifecycle remains:
 
@@ -212,6 +212,91 @@ Sprint 18 introduces no database migration.
 
 Latest migration remains V18.
 
+Sprint 19 added bilingual monitoring-run PDF reporting.
+
+Each eligible monitoring run can now produce separate:
+
+- English recommendations;
+- Turkish recommendations;
+- English PDF artifacts;
+- Turkish PDF artifacts;
+- English PDF filenames and downloads;
+- Turkish PDF filenames and downloads.
+
+Report language is explicit across recommendation generation, recommendation
+persistence, report construction, PDF artifact generation, artifact
+persistence, artifact resolution and automatic Telegram dispatch.
+
+English and Turkish artifacts have separate persistence identities and do not
+overwrite each other.
+
+Sprint 19 introduced:
+
+- `SiteSentinelReportLanguage.java`;
+- `MonitoringRunPdfTextLocalizer.java`;
+- `V19__add_report_language_support.sql`;
+- local Noto Sans regular and bold font resources;
+- verified Turkish Unicode PDF rendering;
+- language-aware artifact uniqueness;
+- separate English and Turkish download and generation controls;
+- automatic dispatch of both language-specific PDF artifacts.
+
+Complete Turkish localization of every persisted historical lifecycle prose
+value remains deferred.
+
+Latest migration is V19.
+
+Sprint 19 final verification:
+
+- tests run: 398;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS.
+
+Sprint 20 added the premium single-operator dashboard experience without
+changing backend data or behavior.
+
+The authenticated dashboard now provides:
+
+- premium SiteSentinel product identity;
+- a responsive maximum-width shell;
+- operational KPI cards;
+- an Attention Required region;
+- unread HIGH and CRITICAL notification previews;
+- readable monitoring-run and trust-assessment tables;
+- status and severity badges;
+- long UUID containment;
+- controlled desktop notification-table columns;
+- responsive mobile table behavior;
+- visible keyboard focus;
+- sufficient action-button contrast;
+- reduced-motion support.
+
+Sprint 20 preserves:
+
+- the existing dashboard controller and backend queries;
+- authenticated access;
+- POST logout;
+- framework-generated CSRF protection;
+- monitoring behavior;
+- recommendation behavior;
+- bilingual PDF behavior;
+- Telegram delivery behavior.
+
+Sprint 20 introduces no database migration.
+
+Latest migration remains V19.
+
+Sprint 20 final verification:
+
+- tests run: 417;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS;
+- runtime visual verification: PASSED.
+
 The existing provider-neutral recommendation architecture now includes:
 
 - default-disabled OpenAI configuration;
@@ -260,8 +345,30 @@ lifecycles.
 Telegram delivery failure does not change a completed monitoring run to
 FAILED.
 
-## Implemented Baseline Through Sprint 18
+## Implemented Baseline Through Sprint 20
 
+- Separate English and Turkish monitoring-run PDF reports
+- Explicit report-language model
+- Language-aware recommendation persistence and lookup
+- Language-aware PDF artifact persistence and resolution
+- Separate English and Turkish PDF artifact identities
+- Separate English and Turkish PDF filenames and downloads
+- Turkish Unicode PDF rendering with packaged local fonts
+- Automatic Telegram dispatch of both language-specific PDF artifacts
+- Premium authenticated dashboard product identity
+- Responsive maximum-width dashboard shell
+- Operational KPI cards
+- Attention Required notification region
+- Unread HIGH and CRITICAL notification previews
+- Monitoring-run status badges
+- Trust-assessment status badges
+- Notification severity and status badges
+- Long UUID layout containment
+- Responsive dashboard table wrappers
+- Controlled desktop notification-table layout
+- Visible keyboard focus
+- Accessible dashboard contrast
+- Reduced-motion support
 - Secure-by-default application authentication
 - Environment-controlled single-operator credentials
 - Credentials-required application startup
@@ -1043,7 +1150,6 @@ Telegram delivery currently provides:
 
 The current implementation does not include:
 
-- Concrete production AI provider communication.
 - Asynchronous report dispatch.
 - Durable report-dispatch queue.
 - Automatic report-delivery retry scheduling.
@@ -1056,53 +1162,60 @@ The current implementation does not include:
 - Additional document-delivery providers.
 - Dispatch operational metrics and alerting.
 - PDF artifact retention and cleanup automation.
-- Authentication and role-based authorization.
-- AI-generated unresolved-risk impact analysis.
 - Recommendation approval and supersession workflows.
 
 ## Current Repository State
 
 Latest completed sprint:
 
-Sprint 14 — Automatic Telegram PDF Dispatch and Audit
+Sprint 20 — Premium Single-Operator Dashboard Experience
 
 Repository baseline:
 
-Stable after Sprint 14 implementation, automated verification, controlled
-local Telegram integration, real Telegram PDF delivery verification, report
-dispatch persistence verification, UI verification and documentation
-closure.
+Stable after Sprint 19 bilingual PDF reporting and Sprint 20 premium dashboard
+implementation, targeted regression, full regression and controlled runtime
+visual verification.
 
 Final verified test baseline:
 
-- Tests run: 228
+- Tests run: 417
 - Failures: 0
 - Errors: 0
 - Skipped: 0
 - Maven test: BUILD SUCCESS
-- Maven compile: BUILD SUCCESS
+- Runtime dashboard verification: PASSED
 
 Latest Flyway migration:
 
-`V18__create_monitoring_run_report_dispatch_attempts_table.sql`
+`V19__add_report_language_support.sql`
 
-Controlled external verification:
+Current verified reporting baseline:
 
-- Telegram provider readiness: READY
-- Telegram health check: HEALTHY
-- Controlled monitoring run: COMPLETED
-- Recommendation-before-dispatch ordering: VERIFIED
-- Real PDF generation: VERIFIED
-- Real Telegram document delivery: VERIFIED
-- Telegram PDF received and opened: VERIFIED
-- Automatic dispatch attempt status: SENT
-- Telegram message ID persistence: VERIFIED
-- Dispatch history UI: VERIFIED
-- Secret values in source or logs: NOT DETECTED
+- English recommendations: PRESENT
+- Turkish recommendations: PRESENT
+- English PDF artifact: VERIFIED
+- Turkish PDF artifact: VERIFIED
+- Turkish Unicode rendering: VERIFIED
+- Separate artifact identities: VERIFIED
+- Language-specific downloads: VERIFIED
+
+Current verified dashboard baseline:
+
+- Premium header: VERIFIED
+- KPI cards: VERIFIED
+- Attention Required region: VERIFIED
+- Monitoring-run table readability: VERIFIED
+- Trust-assessment table readability: VERIFIED
+- Notification table desktop fit: VERIFIED
+- Long UUID containment: VERIFIED
+- Responsive behavior: VERIFIED
+- Keyboard focus visibility: VERIFIED
+- POST logout: PRESERVED
+- CSRF protection: PRESERVED
 
 ## Next Approved Work
 
-No additional sprint has been approved.
+No additional sprint after Sprint 20 has been approved.
 
 Future sprint planning may evaluate:
 
@@ -1130,7 +1243,7 @@ Future sprint planning may evaluate:
 * asynchronous report dispatch;
 * report-delivery retry and reconciliation;
 * recipient management and multi-recipient routing;
-* authentication and role-based authorization;
+* multi-user identity, role-based authorization and MFA;
 * artifact retention and cleanup.
 
 Future AI-provider work must build on the completed Sprint 15 baseline:
@@ -1325,7 +1438,8 @@ Sprint 17 final verification confirmed:
 - zero errors;
 - zero skipped tests.
 
-The next phase must be based on an explicitly approved Sprint 18 objective.
+The next phase must be based on an explicitly approved post-Sprint 20
+objective.
 
 Potential future directions include:
 
@@ -1338,7 +1452,7 @@ Potential future directions include:
 - operational metrics and alerting;
 - artifact retention and cleanup;
 - recipient management;
-- authentication and role-based authorization.
+- multi-user identity, role-based authorization and MFA.
 
 ---
 

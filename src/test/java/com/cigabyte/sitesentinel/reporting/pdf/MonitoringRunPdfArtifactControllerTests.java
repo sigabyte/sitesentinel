@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class MonitoringRunPdfArtifactControllerTests {
 
@@ -110,7 +111,8 @@ class MonitoringRunPdfArtifactControllerTests {
         when(
                 generationService.generate(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(artifact);
 
@@ -158,7 +160,8 @@ class MonitoringRunPdfArtifactControllerTests {
                 generationService
         ).generate(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verifyNoInteractions(
@@ -180,7 +183,8 @@ class MonitoringRunPdfArtifactControllerTests {
         when(
                 generationService.generate(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenThrow(
                 new IllegalStateException(
@@ -228,7 +232,8 @@ class MonitoringRunPdfArtifactControllerTests {
                 generationService
         ).generate(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verifyNoInteractions(

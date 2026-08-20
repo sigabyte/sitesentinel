@@ -1,5 +1,6 @@
 package com.cigabyte.sitesentinel.recommendation;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -26,9 +27,22 @@ public interface RiskRemediationRecommendationRepository
             UUID monitoringRunId
     );
 
+    Optional<RiskRemediationRecommendation>
+    findFirstByRiskIdAndMonitoringRunIdAndReportLanguageOrderByGeneratedAtDescCreatedAtDesc(
+            UUID riskId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
+    );
+
     boolean existsByRiskIdAndMonitoringRunId(
             UUID riskId,
             UUID monitoringRunId
+    );
+
+    boolean existsByRiskIdAndMonitoringRunIdAndReportLanguage(
+            UUID riskId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
     );
 
     long countByMonitoringRunId(UUID monitoringRunId);

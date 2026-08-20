@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @Service
 public class RiskRemediationRecommendationRunGenerationService {
@@ -45,10 +46,27 @@ public class RiskRemediationRecommendationRunGenerationService {
     generateForCompletedRun(
             MonitoringRun monitoringRun
     ) {
+        return generateForCompletedRun(
+                monitoringRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public RiskRemediationRecommendationRunGenerationResult
+    generateForCompletedRun(
+            MonitoringRun monitoringRun,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         MonitoringRun requiredMonitoringRun =
                 Objects.requireNonNull(
                         monitoringRun,
                         "Monitoring run is required."
+                );
+
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
                 );
 
         if (requiredMonitoringRun.getId() == null) {
@@ -80,9 +98,10 @@ public class RiskRemediationRecommendationRunGenerationService {
             try {
                 boolean recommendationAlreadyExists =
                         recommendationRepository
-                                .existsByRiskIdAndMonitoringRunId(
+                                .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
                                         risk.getId(),
-                                        requiredMonitoringRun.getId()
+                                        requiredMonitoringRun.getId(),
+                                        requiredReportLanguage
                                 );
 
                 if (recommendationAlreadyExists) {
@@ -93,7 +112,8 @@ public class RiskRemediationRecommendationRunGenerationService {
                 recommendationGenerationService
                         .generateAndPersist(
                                 requiredMonitoringRun.getId(),
-                                risk.getId()
+                                risk.getId(),
+                                requiredReportLanguage
                         );
 
                 generatedCount++;
@@ -103,9 +123,11 @@ public class RiskRemediationRecommendationRunGenerationService {
                 log.warn(
                         "Risk remediation recommendation generation "
                                 + "failed for monitoringRunId={}, "
-                                + "riskId={}, failureType={}",
+                                + "riskId={}, reportLanguage={}, "
+                                + "failureType={}",
                         requiredMonitoringRun.getId(),
                         risk.getId(),
+                        requiredReportLanguage,
                         exception.getClass().getSimpleName()
                 );
             }

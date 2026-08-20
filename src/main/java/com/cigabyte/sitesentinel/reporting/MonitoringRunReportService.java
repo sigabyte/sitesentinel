@@ -7,6 +7,8 @@ import com.cigabyte.sitesentinel.finding.Finding;
 import com.cigabyte.sitesentinel.finding.FindingService;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRunService;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationService;
 import com.cigabyte.sitesentinel.risk.Risk;
 import com.cigabyte.sitesentinel.risk.RiskService;
 import com.cigabyte.sitesentinel.trust.TrustAssessment;
@@ -15,13 +17,12 @@ import com.cigabyte.sitesentinel.website.Website;
 import com.cigabyte.sitesentinel.website.WebsiteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
-import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationService;
 
-import java.util.List;
-import java.util.UUID;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class MonitoringRunReportService {
@@ -31,10 +32,15 @@ public class MonitoringRunReportService {
     private final EvidenceService evidenceService;
     private final FindingService findingService;
     private final RiskService riskService;
+
     private final RiskRemediationRecommendationService
             recommendationService;
-    private final TrustAssessmentService trustAssessmentService;
-    private final AssessmentComparisonService assessmentComparisonService;
+
+    private final TrustAssessmentService
+            trustAssessmentService;
+
+    private final AssessmentComparisonService
+            assessmentComparisonService;
 
     public MonitoringRunReportService(
             WebsiteService websiteService,
@@ -45,7 +51,8 @@ public class MonitoringRunReportService {
             RiskRemediationRecommendationService
                     recommendationService,
             TrustAssessmentService trustAssessmentService,
-            AssessmentComparisonService assessmentComparisonService
+            AssessmentComparisonService
+                    assessmentComparisonService
     ) {
         this.websiteService = websiteService;
         this.monitoringRunService = monitoringRunService;
@@ -54,34 +61,89 @@ public class MonitoringRunReportService {
         this.riskService = riskService;
         this.recommendationService =
                 recommendationService;
-        this.trustAssessmentService = trustAssessmentService;
-        this.assessmentComparisonService = assessmentComparisonService;
+        this.trustAssessmentService =
+                trustAssessmentService;
+        this.assessmentComparisonService =
+                assessmentComparisonService;
     }
 
     @Transactional(readOnly = true)
-    public MonitoringRunReportView buildReport(UUID websiteId, UUID monitoringRunId) {
-        Website website = websiteService.findById(websiteId);
-
-        MonitoringRun monitoringRun = monitoringRunService.findByIdAndWebsiteId(
+    public MonitoringRunReportView buildReport(
+            UUID websiteId,
+            UUID monitoringRunId
+    ) {
+        return buildReport(
+                websiteId,
                 monitoringRunId,
-                websiteId
+                SiteSentinelReportLanguage.ENGLISH
         );
+    }
 
-        MonitoringRunReportCounts counts = buildCounts(monitoringRun.getId());
+    @Transactional(readOnly = true)
+    public MonitoringRunReportView buildReport(
+            UUID websiteId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Report language is required."
+                );
 
-        MonitoringRunReportTraceabilitySummary traceabilitySummary =
-                MonitoringRunReportTraceabilitySummary.fromCounts(counts);
+        Website website =
+                websiteService.findById(
+                        websiteId
+                );
 
-        TrustAssessment latestTrustAssessment = findLatestTrustAssessment(monitoringRun.getId());
+        MonitoringRun monitoringRun =
+                monitoringRunService
+                        .findByIdAndWebsiteId(
+                                monitoringRunId,
+                                websiteId
+                        );
 
-        List<Finding> findings = findingService.findByMonitoringRunId(monitoringRun.getId());
+        List<RiskRemediationRecommendation>
+                allRecommendations =
+                recommendationService
+                        .findByMonitoringRunId(
+                                monitoringRun.getId()
+                        );
 
-        List<Risk> risks = riskService.findByMonitoringRunId(monitoringRun.getId());
+        List<RiskRemediationRecommendation>
+                recommendations =
+                filterRecommendationsByLanguage(
+                        allRecommendations,
+                        requiredReportLanguage
+                );
 
-        List<RiskRemediationRecommendation> recommendations =
-                recommendationService.findByMonitoringRunId(
+        MonitoringRunReportCounts counts =
+                buildCounts(
+                        monitoringRun.getId(),
+                        recommendations.size()
+                );
+
+        MonitoringRunReportTraceabilitySummary
+                traceabilitySummary =
+                MonitoringRunReportTraceabilitySummary
+                        .fromCounts(counts);
+
+        TrustAssessment latestTrustAssessment =
+                findLatestTrustAssessment(
                         monitoringRun.getId()
                 );
+
+        List<Finding> findings =
+                findingService
+                        .findByMonitoringRunId(
+                                monitoringRun.getId()
+                        );
+
+        List<Risk> risks =
+                riskService
+                        .findByMonitoringRunId(
+                                monitoringRun.getId()
+                        );
 
         List<MonitoringRunReportRiskRecommendationView>
                 riskRecommendationViews =
@@ -90,10 +152,11 @@ public class MonitoringRunReportService {
                         recommendations
                 );
 
-        AssessmentComparisonSummary comparison = assessmentComparisonService.compare(
-                website.getId(),
-                monitoringRun.getId()
-        );
+        AssessmentComparisonSummary comparison =
+                assessmentComparisonService.compare(
+                        website.getId(),
+                        monitoringRun.getId()
+                );
 
         return new MonitoringRunReportView(
                 website,
@@ -105,8 +168,32 @@ public class MonitoringRunReportService {
                 risks,
                 recommendations,
                 riskRecommendationViews,
-                comparison
+                comparison,
+                requiredReportLanguage
         );
+    }
+
+    private List<RiskRemediationRecommendation>
+    filterRecommendationsByLanguage(
+            List<RiskRemediationRecommendation>
+                    recommendations,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
+        if (recommendations == null
+                || recommendations.isEmpty()) {
+
+            return List.of();
+        }
+
+        return recommendations.stream()
+                .filter(Objects::nonNull)
+                .filter(
+                        recommendation ->
+                                recommendation
+                                        .getReportLanguage()
+                                        == reportLanguage
+                )
+                .toList();
     }
 
     private List<MonitoringRunReportRiskRecommendationView>
@@ -124,9 +211,11 @@ public class MonitoringRunReportService {
                 new HashMap<>();
 
         if (recommendations != null) {
-            for (RiskRemediationRecommendation recommendation
-                    : recommendations) {
-
+            for (
+                    RiskRemediationRecommendation
+                            recommendation
+                    : recommendations
+            ) {
                 latestRecommendationByRiskId.put(
                         recommendation.getRiskId(),
                         recommendation
@@ -147,7 +236,8 @@ public class MonitoringRunReportService {
     }
 
     private MonitoringRunReportCounts buildCounts(
-            UUID monitoringRunId
+            UUID monitoringRunId,
+            long recommendationCount
     ) {
         return new MonitoringRunReportCounts(
                 evidenceService.countCollectedEvidence(
@@ -162,9 +252,7 @@ public class MonitoringRunReportService {
                 riskService.countByMonitoringRunId(
                         monitoringRunId
                 ),
-                recommendationService.countByMonitoringRunId(
-                        monitoringRunId
-                ),
+                recommendationCount,
                 trustAssessmentService
                         .countByMonitoringRunId(
                                 monitoringRunId
@@ -172,8 +260,13 @@ public class MonitoringRunReportService {
         );
     }
 
-    private TrustAssessment findLatestTrustAssessment(UUID monitoringRunId) {
-        return trustAssessmentService.findByMonitoringRunId(monitoringRunId)
+    private TrustAssessment findLatestTrustAssessment(
+            UUID monitoringRunId
+    ) {
+        return trustAssessmentService
+                .findByMonitoringRunId(
+                        monitoringRunId
+                )
                 .stream()
                 .findFirst()
                 .orElse(null);

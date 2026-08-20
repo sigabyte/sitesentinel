@@ -1,12 +1,12 @@
 package com.cigabyte.sitesentinel.reporting;
 
 import com.cigabyte.sitesentinel.notification.NotificationEventService;
-import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifact;
-import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifactService;
-import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfVersion;
 import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchAttempt;
 import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchAttemptService;
 import com.cigabyte.sitesentinel.reporting.dispatch.MonitoringRunReportDispatchStatus;
+import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifact;
+import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifactService;
+import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfVersion;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,17 +74,46 @@ public class MonitoringRunReportController {
                         runId
                 );
 
-        MonitoringRunPdfArtifact currentPdfArtifact =
+        MonitoringRunPdfArtifact englishPdfArtifact =
                 findCurrentPdfArtifact(
-                        pdfArtifacts
+                        pdfArtifacts,
+                        SiteSentinelReportLanguage.ENGLISH
                 );
 
+        MonitoringRunPdfArtifact turkishPdfArtifact =
+                findCurrentPdfArtifact(
+                        pdfArtifacts,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        boolean englishPdfArtifactAvailable =
+                englishPdfArtifact != null;
+
+        boolean turkishPdfArtifactAvailable =
+                turkishPdfArtifact != null;
+
+        boolean englishPdfArtifactGenerationAvailable =
+                report.isCompletedRun()
+                        && !englishPdfArtifactAvailable;
+
+        boolean turkishPdfArtifactGenerationAvailable =
+                report.isCompletedRun()
+                        && !turkishPdfArtifactAvailable;
+
+        /*
+         * Preserve the existing single-artifact model contract
+         * temporarily. Existing manual generation remains English by
+         * default, while the language-specific model attributes expose
+         * both persisted artifacts.
+         */
+        MonitoringRunPdfArtifact currentPdfArtifact =
+                englishPdfArtifact;
+
         boolean pdfArtifactAvailable =
-                currentPdfArtifact != null;
+                englishPdfArtifactAvailable;
 
         boolean pdfArtifactGenerationAvailable =
-                report.isCompletedRun()
-                        && !pdfArtifactAvailable;
+                englishPdfArtifactGenerationAvailable;
 
         List<MonitoringRunReportDispatchAttempt>
                 reportDispatchAttempts =
@@ -137,6 +166,40 @@ public class MonitoringRunReportController {
                 pdfArtifacts
         );
 
+        model.addAttribute(
+                "englishPdfArtifact",
+                englishPdfArtifact
+        );
+
+        model.addAttribute(
+                "turkishPdfArtifact",
+                turkishPdfArtifact
+        );
+
+        model.addAttribute(
+                "englishPdfArtifactAvailable",
+                englishPdfArtifactAvailable
+        );
+
+        model.addAttribute(
+                "turkishPdfArtifactAvailable",
+                turkishPdfArtifactAvailable
+        );
+
+        model.addAttribute(
+                "englishPdfArtifactGenerationAvailable",
+                englishPdfArtifactGenerationAvailable
+        );
+
+        model.addAttribute(
+                "turkishPdfArtifactGenerationAvailable",
+                turkishPdfArtifactGenerationAvailable
+        );
+
+        /*
+         * Existing attributes are retained to prevent a template
+         * regression before the bilingual template block is applied.
+         */
         model.addAttribute(
                 "pdfArtifact",
                 currentPdfArtifact
@@ -202,8 +265,15 @@ public class MonitoringRunReportController {
 
     private MonitoringRunPdfArtifact
     findCurrentPdfArtifact(
-            List<MonitoringRunPdfArtifact> pdfArtifacts
+            List<MonitoringRunPdfArtifact> pdfArtifacts,
+            SiteSentinelReportLanguage reportLanguage
     ) {
+        if (pdfArtifacts == null
+                || pdfArtifacts.isEmpty()) {
+
+            return null;
+        }
+
         String currentReportVersion =
                 MonitoringRunPdfVersion.V1
                         .getValue();
@@ -211,9 +281,12 @@ public class MonitoringRunReportController {
         return pdfArtifacts.stream()
                 .filter(
                         artifact ->
-                                currentReportVersion.equals(
+                                artifact != null
+                                        && currentReportVersion.equals(
                                         artifact.getReportVersion()
                                 )
+                                        && artifact.getReportLanguage()
+                                        == reportLanguage
                 )
                 .findFirst()
                 .orElse(null);

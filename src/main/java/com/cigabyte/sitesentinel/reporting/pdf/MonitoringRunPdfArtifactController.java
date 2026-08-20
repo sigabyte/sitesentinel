@@ -1,6 +1,7 @@
 package com.cigabyte.sitesentinel.reporting.pdf;
 
 import com.cigabyte.sitesentinel.monitoring.MonitoringRunService;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -37,22 +39,32 @@ public class MonitoringRunPdfArtifactController {
             MonitoringRunPdfArtifactService artifactService,
             MonitoringRunService monitoringRunService
     ) {
-        this.generationService = generationService;
-        this.artifactService = artifactService;
-        this.monitoringRunService = monitoringRunService;
+        this.generationService =
+                generationService;
+
+        this.artifactService =
+                artifactService;
+
+        this.monitoringRunService =
+                monitoringRunService;
     }
 
     @PostMapping
     public String generate(
             @PathVariable UUID websiteId,
             @PathVariable UUID runId,
+            @RequestParam(
+                    defaultValue = "ENGLISH"
+            )
+            SiteSentinelReportLanguage reportLanguage,
             RedirectAttributes redirectAttributes
     ) {
         try {
             MonitoringRunPdfArtifact artifact =
                     generationService.generate(
                             websiteId,
-                            runId
+                            runId,
+                            reportLanguage
                     );
 
             redirectAttributes.addFlashAttribute(

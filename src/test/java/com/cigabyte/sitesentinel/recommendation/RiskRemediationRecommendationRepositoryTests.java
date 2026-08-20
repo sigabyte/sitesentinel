@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @SpringBootTest
 @Transactional
@@ -694,6 +695,98 @@ class RiskRemediationRecommendationRepositoryTests {
                                 firstRunRisk.getId(),
                                 secondRun.getId()
                         )
+        );
+    }
+
+    @Test
+    void existenceQueryRequiresMatchingReportLanguage() {
+        Website website =
+                persistWebsite();
+
+        MonitoringRun monitoringRun =
+                persistCompletedRun(
+                        website
+                );
+
+        Risk risk =
+                persistRisk(
+                        website,
+                        monitoringRun,
+                        "TLS_CONFIGURATION"
+                );
+
+        recommendationRepository.saveAndFlush(
+                aiRecommendation(
+                        monitoringRun,
+                        risk,
+                        "existing-english-recommendation",
+                        FUTURE_BASE_TIME
+                )
+        );
+
+        assertTrue(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+        );
+
+        assertFalse(
+                recommendationRepository
+                        .existsByRiskIdAndMonitoringRunIdAndReportLanguage(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        );
+        RiskRemediationRecommendation latestEnglishRecommendation =
+                recommendationRepository
+                        .findFirstByRiskIdAndMonitoringRunIdAndReportLanguageOrderByGeneratedAtDescCreatedAtDesc(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+                        .orElseThrow();
+
+        assertEquals(
+                "existing-english-recommendation",
+                latestEnglishRecommendation.getTitle()
+        );
+
+        assertTrue(
+                recommendationRepository
+                        .findFirstByRiskIdAndMonitoringRunIdAndReportLanguageOrderByGeneratedAtDescCreatedAtDesc(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+                        .isEmpty()
+        );
+
+        RiskRemediationRecommendation serviceResolvedEnglish =
+                recommendationService
+                        .findLatestByRiskIdAndMonitoringRunId(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+                        .orElseThrow();
+
+        assertEquals(
+                latestEnglishRecommendation.getId(),
+                serviceResolvedEnglish.getId()
+        );
+
+        assertTrue(
+                recommendationService
+                        .findLatestByRiskIdAndMonitoringRunId(
+                                risk.getId(),
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+                        .isEmpty()
         );
     }
 

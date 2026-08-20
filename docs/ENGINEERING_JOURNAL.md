@@ -5702,3 +5702,515 @@ provides controlled login and logout behavior.
 
 The existing monitoring, recommendation, PDF and Telegram delivery lifecycle
 remains behavior-compatible.
+
+---
+
+# Sprint 19 — Bilingual PDF Reporting
+
+Date: 2026-08-19
+
+## Objective
+
+Sprint 19 extended the completed monitoring-run reporting and delivery chain
+so that each eligible monitoring run can produce separate English and Turkish
+PDF reports.
+
+The implementation preserves the existing recommendation, PDF artifact,
+Telegram dispatch, integrity-validation and audit boundaries.
+
+## Report Language Model
+
+Sprint 19 introduced the explicit report-language model:
+
+- `SiteSentinelReportLanguage.ENGLISH`
+- `SiteSentinelReportLanguage.TURKISH`
+
+The language value is used across:
+
+- recommendation generation;
+- recommendation persistence;
+- recommendation lookup;
+- report read-model construction;
+- PDF artifact generation;
+- PDF artifact persistence;
+- PDF artifact resolution;
+- PDF filenames;
+- PDF download;
+- automatic Telegram dispatch.
+
+Report language is no longer inferred from filenames or presentation text.
+
+## Recommendation Language Identity
+
+Persisted recommendations now include their report language.
+
+Recommendation identity and lookup include:
+
+- monitoring run ID;
+- risk ID;
+- report language.
+
+This permits separate English and Turkish recommendation lifecycles for the
+same monitoring run and risk while preserving the existing automatic
+recommendation idempotency boundary.
+
+Existing recommendation history remains append-only.
+
+The English and Turkish recommendation paths do not overwrite each other.
+
+## PDF Artifact Language Identity
+
+Persisted PDF artifacts now include their report language.
+
+The previous monitoring-run and report-version uniqueness boundary was
+expanded to include:
+
+- monitoring run ID;
+- report version;
+- report language.
+
+This permits separate English and Turkish PDF artifacts for the same
+monitoring run and report version.
+
+English and Turkish artifacts have:
+
+- separate persistence identities;
+- separate filenames;
+- separate SHA-256 integrity values;
+- separate download paths;
+- independent artifact resolution.
+
+## Database
+
+Sprint 19 introduced:
+
+- `V19__add_report_language_support.sql`
+
+The migration:
+
+- adds `report_language` to
+  `risk_remediation_recommendations`;
+- backfills existing recommendations as `ENGLISH`;
+- requires non-null recommendation language;
+- restricts recommendation language to `ENGLISH` or `TURKISH`;
+- adds a monitoring-run, risk and language lookup index;
+- adds `report_language` to
+  `monitoring_run_pdf_artifacts`;
+- backfills existing PDF artifacts as `ENGLISH`;
+- requires non-null PDF artifact language;
+- restricts PDF artifact language to `ENGLISH` or `TURKISH`;
+- replaces the previous PDF artifact uniqueness constraint with a
+  monitoring-run, report-version and language constraint;
+- adds a language-aware PDF artifact resolution index.
+
+Latest migration:
+
+- V19
+
+## English and Turkish PDF Generation
+
+Each eligible monitoring run can produce:
+
+- one English PDF report;
+- one Turkish PDF report.
+
+The two reports use language-specific:
+
+- titles;
+- headings;
+- labels;
+- recommendation content;
+- filenames;
+- persisted artifact identities.
+
+The monitoring-run report page exposes separate:
+
+- English artifact status;
+- Turkish artifact status;
+- English download action;
+- Turkish download action;
+- English manual generation action;
+- Turkish manual generation action.
+
+## Turkish Unicode Rendering
+
+Sprint 19 added embedded Noto Sans font resources:
+
+- `NotoSans-Regular.ttf`
+- `NotoSans-Bold.ttf`
+
+The fonts are packaged locally.
+
+No external font or CDN dependency was introduced.
+
+Controlled PDF verification confirmed correct rendering of Turkish characters,
+including:
+
+- ç
+- ğ
+- ı
+- İ
+- ö
+- ş
+- ü
+
+## Turkish Text Localization
+
+`MonitoringRunPdfTextLocalizer.java` provides deterministic language-aware
+translation for canonical PDF labels and lifecycle text covered by the current
+report contract.
+
+The completed baseline provides a separate Turkish report with verified
+Turkish titles, headings, labels and recommendation content.
+
+Complete Turkish localization of every persisted historical lifecycle prose
+value remains deferred.
+
+Persisted English source prose may still appear when no safe deterministic
+Turkish localization exists.
+
+This limitation does not affect:
+
+- artifact separation;
+- Unicode rendering;
+- filename identity;
+- download behavior;
+- PDF integrity;
+- dispatch behavior.
+
+## Automatic Telegram Dispatch
+
+The automatic report-dispatch path now resolves and dispatches both:
+
+- English PDF artifact;
+- Turkish PDF artifact.
+
+Each document remains subject to:
+
+- existing-or-generate artifact resolution;
+- SHA-256 integrity revalidation;
+- Telegram provider readiness;
+- persistent dispatch audit;
+- existing dispatch safety behavior.
+
+Sprint 19 does not change Telegram credentials, recipient configuration,
+provider selection or retry policy.
+
+## Preserved Boundaries
+
+Sprint 19 does not change:
+
+- website monitoring;
+- HTTP evidence collection;
+- findings;
+- risks;
+- trust assessment;
+- assessment comparison;
+- notification generation;
+- authentication;
+- authorization;
+- CSRF protection;
+- AI provider selection;
+- rule-based fallback safety;
+- monitoring completion semantics.
+
+## Automated Verification
+
+Final result:
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 398
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+- Latest migration: V19
+
+## Runtime Verification
+
+Controlled runtime verification confirmed:
+
+- monitoring run: COMPLETED;
+- English recommendations: PRESENT;
+- Turkish recommendations: PRESENT;
+- English PDF generation: SUCCESS;
+- Turkish PDF generation: SUCCESS;
+- English filename: VERIFIED;
+- Turkish filename: VERIFIED;
+- English PDF title: VERIFIED;
+- Turkish PDF title: VERIFIED;
+- Turkish Unicode rendering: VERIFIED;
+- separate artifact IDs: VERIFIED;
+- downloads: SUCCESS;
+- Telegram call: NOT PERFORMED;
+- OpenAI call: NOT PERFORMED.
+
+## Result
+
+Sprint 19 completes the bilingual PDF reporting baseline.
+
+SiteSentinel can now generate, persist, resolve and download separate English
+and Turkish monitoring-run PDF artifacts and can include both artifacts in the
+existing automatic Telegram report-delivery lifecycle.
+
+---
+
+# Sprint 20 — Premium Single-Operator Dashboard Experience
+
+Date: 2026-08-20
+
+## Objective
+
+Sprint 20 redesigned the existing authenticated dashboard without adding new
+backend data, queries, entities or application features.
+
+The objective was to make the single-operator workspace:
+
+- more premium;
+- more readable;
+- responsive;
+- operationally focused;
+- keyboard accessible;
+- resistant to long identifier overflow.
+
+## Scope Boundary
+
+Sprint 20 changed only the presentation layer.
+
+Production changes are limited to:
+
+- `src/main/resources/templates/dashboard/index.html`
+- `src/main/resources/static/css/app.css`
+
+No changes were made to:
+
+- `DashboardController.java`;
+- backend repositories;
+- backend queries;
+- entities;
+- database migrations;
+- authentication configuration;
+- monitoring;
+- recommendation generation;
+- PDF generation;
+- Telegram delivery.
+
+## Premium Header and Product Identity
+
+The dashboard now provides:
+
+- a SiteSentinel brand mark;
+- a stronger product title;
+- a Website Trust Operations identity;
+- concise operational positioning;
+- direct website-management actions;
+- a visible sign-out action;
+- a premium navy-to-blue header treatment.
+
+The implementation uses no external:
+
+- CDN;
+- font;
+- icon dependency;
+- JavaScript framework;
+- chart library.
+
+## Responsive Dashboard Shell
+
+The dashboard now uses:
+
+- a bounded maximum-width shell;
+- responsive page padding;
+- consistent panel spacing;
+- responsive header actions;
+- mobile layout breakpoints;
+- reduced-motion support.
+
+Desktop and mobile layouts preserve readable content without introducing
+page-level horizontal overflow.
+
+## Operational KPI Cards
+
+Existing controller values are presented through four KPI cards:
+
+- active websites;
+- monitoring runs in progress;
+- failed monitoring runs;
+- unread notification events.
+
+No new KPI data or backend aggregation was introduced.
+
+## Attention Required
+
+The dashboard now provides an Attention Required region when unread
+notification events exist.
+
+The region:
+
+- displays the unread count;
+- prioritizes unread HIGH and CRITICAL events;
+- presents compact event previews;
+- exposes severity and unread badges;
+- links directly to notification detail;
+- uses an accessible labelled live region.
+
+The implementation uses the existing:
+
+- `latestNotificationEvents`;
+- `unreadNotificationEventCount`.
+
+No new notification query or lifecycle behavior was added.
+
+## Monitoring and Trust Tables
+
+The latest monitoring-run and trust-assessment tables now provide:
+
+- premium panel treatment;
+- consistent table headers;
+- clearer row separation;
+- status badges;
+- trust-status badges;
+- controlled identifier display;
+- responsive table wrappers;
+- readable empty states.
+
+Long UUID values use constrained monospace previews and ellipsis so that they
+cannot break the dashboard layout.
+
+## Notification Table Refinement
+
+The latest notification table now provides:
+
+- controlled desktop column widths;
+- visible severity and status badges;
+- compact notification summaries;
+- controlled event-type wrapping;
+- constrained website and monitoring-run identifiers;
+- visible detail actions;
+- mobile horizontal scrolling when required.
+
+Desktop rendering no longer requires horizontal scrolling to reach the
+notification detail action.
+
+## Accessibility
+
+Sprint 20 added:
+
+- responsive viewport metadata;
+- semantic main, section, article, header, footer and navigation structure;
+- scoped heading relationships;
+- table header scopes;
+- accessible empty states;
+- visually hidden action labelling;
+- visible `:focus-visible` outlines;
+- sufficient action-button foreground contrast;
+- reduced-motion handling.
+
+Keyboard navigation was verified across dashboard actions.
+
+## Authentication and CSRF Safety
+
+The existing dashboard sign-out operation remains:
+
+- a POST form;
+- protected by the framework-generated CSRF token;
+- visible only within the authenticated dashboard.
+
+Sprint 20 does not weaken or bypass Spring Security CSRF protection.
+
+Existing anonymous-access, authenticated-access and logout security contracts
+remain passing.
+
+## Files Added
+
+Tests:
+
+- `DashboardPremiumStructureTemplateTests.java`
+- `DashboardPremiumStylesheetTests.java`
+- `DashboardAttentionRequiredTemplateTests.java`
+- `DashboardVisualRefinementStylesheetTests.java`
+
+## Files Updated
+
+Production:
+
+- `dashboard/index.html`
+- `app.css`
+
+## Automated Verification
+
+Controlled development included:
+
+- premium structure RED/GREEN verification;
+- premium stylesheet RED/GREEN verification;
+- Attention Required RED/GREEN verification;
+- visual-refinement RED/GREEN verification;
+- stylesheet selector-helper correction;
+- combined dashboard and security regression;
+- full project regression.
+
+Final result:
+
+- Compile: SUCCESS
+- Test: SUCCESS
+- Tests run: 417
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Build: SUCCESS
+- Database migration added: NO
+- Latest migration: V19
+
+## Runtime Verification
+
+Controlled runtime and visual verification confirmed:
+
+- application startup: SUCCESS;
+- premium header: VERIFIED;
+- KPI cards: VERIFIED;
+- Attention Required region: VERIFIED;
+- monitoring-run table readability: VERIFIED;
+- trust-assessment table readability: VERIFIED;
+- notification table desktop fit: VERIFIED;
+- status and severity badges: VERIFIED;
+- long UUID containment: VERIFIED;
+- button contrast: VERIFIED;
+- notification detail actions: VISIBLE;
+- responsive behavior: VERIFIED;
+- keyboard focus visibility: VERIFIED;
+- POST logout: PRESERVED;
+- CSRF protection: PRESERVED;
+- external Telegram call: NOT PERFORMED;
+- external OpenAI call: NOT PERFORMED.
+
+## Out of Scope
+
+Sprint 20 does not introduce:
+
+- new dashboard backend data;
+- new dashboard queries;
+- new entities;
+- new database migrations;
+- charts;
+- chart libraries;
+- a JavaScript framework;
+- external fonts;
+- external icons;
+- external CDNs;
+- dark mode;
+- user-specific dashboard settings;
+- authentication changes;
+- role-based access control;
+- monitoring changes;
+- recommendation changes;
+- PDF changes;
+- Telegram changes.
+
+## Result
+
+Sprint 20 completes the premium single-operator dashboard baseline.
+
+The authenticated operator now has a responsive, readable and
+operations-focused workspace while the existing monitoring, recommendation,
+reporting, delivery, authentication and CSRF boundaries remain unchanged.

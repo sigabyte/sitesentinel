@@ -1,5 +1,6 @@
 package com.cigabyte.sitesentinel.recommendation;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.risk.RiskSeverity;
 import org.junit.jupiter.api.Test;
 
@@ -84,12 +85,12 @@ class RiskRemediationPromptAndContextTests {
                 );
 
         assertEquals(
-                "risk-remediation-v2",
+                "risk-remediation-v3",
                 request.promptVersion()
         );
 
         assertEquals(
-                "risk-remediation-output-v2",
+                "risk-remediation-output-v3",
                 request.outputSchemaVersion()
         );
 
@@ -101,7 +102,7 @@ class RiskRemediationPromptAndContextTests {
         assertTrue(
                 request.userInstruction().contains(
                         "\"schemaVersion\": "
-                                + "\"risk-remediation-output-v2\""
+                                + "\"risk-remediation-output-v3\""
                 )
         );
 
@@ -121,6 +122,44 @@ class RiskRemediationPromptAndContextTests {
                 request.systemInstruction().contains(
                         "Do not change risk severity, risk score, "
                                 + "confidence score, or trust score."
+                )
+        );
+    }
+
+    @Test
+    void turkishPromptRequestCarriesExplicitLanguageContract() {
+        ContextFixture fixture =
+                fixture(
+                        "strict-transport-security-missing"
+                );
+
+        RiskRemediationAiRequest request =
+                promptFactory.create(
+                        fixture.context(),
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertEquals(
+                SiteSentinelReportLanguage.TURKISH,
+                request.reportLanguage()
+        );
+
+        assertTrue(
+                request.systemInstruction().contains(
+                        "Turkish"
+                )
+        );
+
+        assertTrue(
+                request.userInstruction().contains(
+                        "Turkish"
+                )
+        );
+
+        assertTrue(
+                request.userInstruction().contains(
+                        "Return every human-readable recommendation "
+                                + "field in Turkish."
                 )
         );
     }

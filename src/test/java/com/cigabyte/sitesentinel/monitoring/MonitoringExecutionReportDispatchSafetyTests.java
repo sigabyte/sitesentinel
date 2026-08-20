@@ -8,6 +8,7 @@ import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService
 import com.cigabyte.sitesentinel.notification.delivery.TelegramDocumentDeliveryResult;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationResult;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationService;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.reporting.dispatch.AutomaticMonitoringRunReportDispatchService;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -87,7 +88,7 @@ class MonitoringExecutionReportDispatchSafetyTests {
             );
 
     @Test
-    void completedRunDispatchesReportAfterRecommendationsAndBeforeNotifications() {
+    void completedRunDispatchesEnglishAndTurkishReportsAfterRecommendationsAndBeforeNotifications() {
         UUID websiteId =
                 UUID.randomUUID();
 
@@ -102,47 +103,34 @@ class MonitoringExecutionReportDispatchSafetyTests {
                         pendingRun.getId()
                 );
 
-        when(
-                monitoringRunService.createPendingRun(
-                        websiteId
-                )
-        ).thenReturn(
-                pendingRun
-        );
-
-        when(
-                monitoringRunService.markCompleted(
-                        pendingRun.getId()
-                )
-        ).thenReturn(
+        prepareCompletedExecution(
+                websiteId,
+                pendingRun,
                 completedRun
         );
 
         when(
-                recommendationRunGenerationService
-                        .generateForCompletedRun(
-                                completedRun
+                automaticReportDispatchService
+                        .dispatchCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
-                successfulRecommendationResult(
-                        completedRun.getId()
+                successfulDeliveryResult(
+                        2468L
                 )
         );
-
-        TelegramDocumentDeliveryResult deliveryResult =
-                TelegramDocumentDeliveryResult.success(
-                        2468L,
-                        "Telegram document was sent successfully.",
-                        "Telegram Bot API accepted the document."
-                );
 
         when(
                 automaticReportDispatchService
                         .dispatchCompletedRun(
-                                completedRun
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
                         )
         ).thenReturn(
-                deliveryResult
+                successfulDeliveryResult(
+                        2469L
+                )
         );
 
         MonitoringRun result =
@@ -165,13 +153,29 @@ class MonitoringExecutionReportDispatchSafetyTests {
         completionOrder.verify(
                 recommendationRunGenerationService
         ).generateForCompletedRun(
-                completedRun
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        completionOrder.verify(
+                recommendationRunGenerationService
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
         );
 
         completionOrder.verify(
                 automaticReportDispatchService
         ).dispatchCompletedRun(
-                completedRun
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        completionOrder.verify(
+                automaticReportDispatchService
+        ).dispatchCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
         );
 
         completionOrder.verify(
@@ -190,7 +194,7 @@ class MonitoringExecutionReportDispatchSafetyTests {
     }
 
     @Test
-    void failedDeliveryResultDoesNotChangeCompletedRunLifecycle() {
+    void failedEnglishDeliveryResultDoesNotPreventTurkishDeliveryOrChangeCompletedRunLifecycle() {
         UUID websiteId =
                 UUID.randomUUID();
 
@@ -214,12 +218,25 @@ class MonitoringExecutionReportDispatchSafetyTests {
         when(
                 automaticReportDispatchService
                         .dispatchCompletedRun(
-                                completedRun
+                                completedRun,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 TelegramDocumentDeliveryResult.failure(
                         "Telegram document delivery failed.",
                         "Telegram Bot API returned HTTP status=429."
+                )
+        );
+
+        when(
+                automaticReportDispatchService
+                        .dispatchCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(
+                successfulDeliveryResult(
+                        2470L
                 )
         );
 
@@ -236,7 +253,15 @@ class MonitoringExecutionReportDispatchSafetyTests {
         verify(
                 automaticReportDispatchService
         ).dispatchCompletedRun(
-                completedRun
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        verify(
+                automaticReportDispatchService
+        ).dispatchCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
         );
 
         verify(
@@ -255,7 +280,7 @@ class MonitoringExecutionReportDispatchSafetyTests {
     }
 
     @Test
-    void dispatchExceptionDoesNotChangeCompletedRunLifecycle() {
+    void englishDispatchExceptionDoesNotPreventTurkishDeliveryOrChangeCompletedRunLifecycle() {
         UUID websiteId =
                 UUID.randomUUID();
 
@@ -278,12 +303,25 @@ class MonitoringExecutionReportDispatchSafetyTests {
 
         doThrow(
                 new IllegalStateException(
-                        "controlled-dispatch-subsystem-failure"
+                        "controlled-english-dispatch-subsystem-failure"
                 )
         ).when(
                 automaticReportDispatchService
         ).dispatchCompletedRun(
-                completedRun
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        when(
+                automaticReportDispatchService
+                        .dispatchCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(
+                successfulDeliveryResult(
+                        2471L
+                )
         );
 
         MonitoringRun result =
@@ -299,7 +337,15 @@ class MonitoringExecutionReportDispatchSafetyTests {
         verify(
                 automaticReportDispatchService
         ).dispatchCompletedRun(
-                completedRun
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        verify(
+                automaticReportDispatchService
+        ).dispatchCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
         );
 
         verify(
@@ -341,7 +387,20 @@ class MonitoringExecutionReportDispatchSafetyTests {
         when(
                 recommendationRunGenerationService
                         .generateForCompletedRun(
-                                completedRun
+                                completedRun,
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+        ).thenReturn(
+                successfulRecommendationResult(
+                        completedRun.getId()
+                )
+        );
+
+        when(
+                recommendationRunGenerationService
+                        .generateForCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
                         )
         ).thenReturn(
                 successfulRecommendationResult(
@@ -358,7 +417,19 @@ class MonitoringExecutionReportDispatchSafetyTests {
                 monitoringRunId,
                 0,
                 0,
+                0,
                 0
+        );
+    }
+
+    private TelegramDocumentDeliveryResult
+    successfulDeliveryResult(
+            long telegramMessageId
+    ) {
+        return TelegramDocumentDeliveryResult.success(
+                telegramMessageId,
+                "Telegram document was sent successfully.",
+                "Telegram Bot API accepted the document."
         );
     }
 

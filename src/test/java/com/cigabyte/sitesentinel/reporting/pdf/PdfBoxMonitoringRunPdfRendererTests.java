@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class PdfBoxMonitoringRunPdfRendererTests {
 
@@ -455,6 +456,144 @@ class PdfBoxMonitoringRunPdfRendererTests {
                 IllegalArgumentException.class,
                 () -> renderer.render(
                         reportView
+                )
+        );
+    }
+
+    @Test
+    void turkishReportTitleIsRenderedWithTurkishCharacters()
+            throws IOException {
+
+        MonitoringRunReportView englishReportView =
+                createMinimalCompletedReportView(
+                        "Turkish Renderer Test Website"
+                );
+
+        MonitoringRunReportView turkishReportView =
+                new MonitoringRunReportView(
+                        englishReportView.getWebsite(),
+                        englishReportView.getMonitoringRun(),
+                        englishReportView.getCounts(),
+                        englishReportView.getTraceabilitySummary(),
+                        englishReportView.getLatestTrustAssessment(),
+                        englishReportView.getFindings(),
+                        englishReportView.getRisks(),
+                        englishReportView.getRecommendations(),
+                        englishReportView
+                                .getRiskRecommendationViews(),
+                        englishReportView.getComparison(),
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        byte[] renderedBytes =
+                renderer.render(
+                        turkishReportView
+                );
+
+        String extractedText =
+                extractText(
+                        renderedBytes
+                );
+
+        assertTrue(
+                extractedText.contains(
+                        "SiteSentinel \u0130zleme Raporu"
+                )
+        );
+        assertTrue(
+                extractedText.contains(
+                        "Rapor Temeli"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Web Sitesi"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "\u0130zleme \u00C7al\u0131\u015Ft\u0131rmas\u0131"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Ya\u015Fam D\u00F6ng\u00FCs\u00FC "
+                                + "\u00C7\u0131kt\u0131 Say\u0131lar\u0131"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "\u0130zlenebilirlik \u00D6zeti"
+                )
+        );
+        assertTrue(
+                extractedText.contains(
+                        "G\u00FCven De\u011Ferlendirmesi"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "De\u011Ferlendirme Kar\u015F\u0131la\u015Ft\u0131rmas\u0131"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Bulgular"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Riskler"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Dan\u0131\u015Fmanl\u0131k Ama\u00E7l\u0131 "
+                                + "\u0130yile\u015Ftirme \u00D6nerileri"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Rapor S\u0131n\u0131r\u0131"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "PDF Rapor S\u00FCr\u00FCm\u00FC"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Rapor Durumu"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "\u00C7al\u0131\u015Ft\u0131rma Durumu"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Tetikleme T\u00FCr\u00FC"
+                )
+        );
+
+        assertTrue(
+                extractedText.contains(
+                        "Kar\u015F\u0131la\u015Ft\u0131rma"
                 )
         );
     }

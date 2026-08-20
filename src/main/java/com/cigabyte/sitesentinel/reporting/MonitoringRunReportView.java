@@ -4,28 +4,35 @@ import com.cigabyte.sitesentinel.comparison.AssessmentComparisonSummary;
 import com.cigabyte.sitesentinel.finding.Finding;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRunStatus;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
 import com.cigabyte.sitesentinel.risk.Risk;
 import com.cigabyte.sitesentinel.trust.TrustAssessment;
 import com.cigabyte.sitesentinel.website.Website;
-import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendation;
 
 import java.util.List;
+import java.util.Objects;
 
 public class MonitoringRunReportView {
 
     private final Website website;
     private final MonitoringRun monitoringRun;
+    private final SiteSentinelReportLanguage reportLanguage;
     private final MonitoringRunReportStatus reportStatus;
     private final MonitoringRunReportCounts counts;
-    private final MonitoringRunReportTraceabilitySummary traceabilitySummary;
+
+    private final MonitoringRunReportTraceabilitySummary
+            traceabilitySummary;
+
     private final TrustAssessment latestTrustAssessment;
     private final List<Finding> findings;
     private final List<Risk> risks;
+
     private final List<RiskRemediationRecommendation>
             recommendations;
 
     private final List<MonitoringRunReportRiskRecommendationView>
             riskRecommendationViews;
+
     private final AssessmentComparisonSummary comparison;
 
     public MonitoringRunReportView(
@@ -41,29 +48,86 @@ public class MonitoringRunReportView {
                     riskRecommendationViews,
             AssessmentComparisonSummary comparison
     ) {
+        this(
+                website,
+                monitoringRun,
+                counts,
+                traceabilitySummary,
+                latestTrustAssessment,
+                findings,
+                risks,
+                recommendations,
+                riskRecommendationViews,
+                comparison,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public MonitoringRunReportView(
+            Website website,
+            MonitoringRun monitoringRun,
+            MonitoringRunReportCounts counts,
+            MonitoringRunReportTraceabilitySummary traceabilitySummary,
+            TrustAssessment latestTrustAssessment,
+            List<Finding> findings,
+            List<Risk> risks,
+            List<RiskRemediationRecommendation> recommendations,
+            List<MonitoringRunReportRiskRecommendationView>
+                    riskRecommendationViews,
+            AssessmentComparisonSummary comparison,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         this.website = website;
         this.monitoringRun = monitoringRun;
-        this.reportStatus = MonitoringRunReportStatus.from(
-                monitoringRun == null ? null : monitoringRun.getStatus()
-        );
-        this.counts = counts == null
-                ? new MonitoringRunReportCounts(0, 0, 0, 0, 0,0)
-                : counts;
-        this.traceabilitySummary = traceabilitySummary == null
-                ? MonitoringRunReportTraceabilitySummary.fromCounts(this.counts)
-                : traceabilitySummary;
-        this.latestTrustAssessment = latestTrustAssessment;
-        this.findings = findings == null
-                ? List.of()
-                : List.copyOf(findings);
 
-        this.risks = risks == null
-                ? List.of()
-                : List.copyOf(risks);
+        this.reportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Report language is required."
+                );
 
-        this.recommendations = recommendations == null
-                ? List.of()
-                : List.copyOf(recommendations);
+        this.reportStatus =
+                MonitoringRunReportStatus.from(
+                        monitoringRun == null
+                                ? null
+                                : monitoringRun.getStatus()
+                );
+
+        this.counts =
+                counts == null
+                        ? new MonitoringRunReportCounts(
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                )
+                        : counts;
+
+        this.traceabilitySummary =
+                traceabilitySummary == null
+                        ? MonitoringRunReportTraceabilitySummary
+                        .fromCounts(this.counts)
+                        : traceabilitySummary;
+
+        this.latestTrustAssessment =
+                latestTrustAssessment;
+
+        this.findings =
+                findings == null
+                        ? List.of()
+                        : List.copyOf(findings);
+
+        this.risks =
+                risks == null
+                        ? List.of()
+                        : List.copyOf(risks);
+
+        this.recommendations =
+                recommendations == null
+                        ? List.of()
+                        : List.copyOf(recommendations);
 
         this.riskRecommendationViews =
                 riskRecommendationViews == null
@@ -83,6 +147,10 @@ public class MonitoringRunReportView {
         return monitoringRun;
     }
 
+    public SiteSentinelReportLanguage getReportLanguage() {
+        return reportLanguage;
+    }
+
     public MonitoringRunReportStatus getReportStatus() {
         return reportStatus;
     }
@@ -91,7 +159,8 @@ public class MonitoringRunReportView {
         return counts;
     }
 
-    public MonitoringRunReportTraceabilitySummary getTraceabilitySummary() {
+    public MonitoringRunReportTraceabilitySummary
+    getTraceabilitySummary() {
         return traceabilitySummary;
     }
 
@@ -131,28 +200,34 @@ public class MonitoringRunReportView {
 
     public boolean isCompletedRun() {
         return monitoringRun != null
-                && monitoringRun.getStatus() == MonitoringRunStatus.COMPLETED;
+                && monitoringRun.getStatus()
+                == MonitoringRunStatus.COMPLETED;
     }
 
     public boolean isFailedRun() {
         return monitoringRun != null
-                && monitoringRun.getStatus() == MonitoringRunStatus.FAILED;
+                && monitoringRun.getStatus()
+                == MonitoringRunStatus.FAILED;
     }
 
     public boolean isRunningRun() {
         return monitoringRun != null
-                && monitoringRun.getStatus() == MonitoringRunStatus.RUNNING;
+                && monitoringRun.getStatus()
+                == MonitoringRunStatus.RUNNING;
     }
 
     public boolean isPendingRun() {
         return monitoringRun != null
-                && monitoringRun.getStatus() == MonitoringRunStatus.PENDING;
+                && monitoringRun.getStatus()
+                == MonitoringRunStatus.PENDING;
     }
 
     public boolean hasFailureReason() {
         return monitoringRun != null
                 && monitoringRun.getFailureReason() != null
-                && !monitoringRun.getFailureReason().isBlank();
+                && !monitoringRun
+                .getFailureReason()
+                .isBlank();
     }
 
     public boolean hasTrustAssessment() {
@@ -172,14 +247,33 @@ public class MonitoringRunReportView {
     }
 
     public boolean hasComparison() {
-        return comparison != null && comparison.isAvailable();
+        return comparison != null
+                && comparison.isAvailable();
     }
 
     public String getReportTitle() {
-        if (website == null || website.getName() == null || website.getName().isBlank()) {
+        if (reportLanguage
+                == SiteSentinelReportLanguage.TURKISH) {
+
+            if (website == null
+                    || website.getName() == null
+                    || website.getName().isBlank()) {
+
+                return "SiteSentinel \u0130zleme Raporu";
+            }
+
+            return "SiteSentinel \u0130zleme Raporu — "
+                    + website.getName();
+        }
+
+        if (website == null
+                || website.getName() == null
+                || website.getName().isBlank()) {
+
             return "Monitoring Run Report";
         }
 
-        return "Monitoring Run Report — " + website.getName();
+        return "Monitoring Run Report — "
+                + website.getName();
     }
 }

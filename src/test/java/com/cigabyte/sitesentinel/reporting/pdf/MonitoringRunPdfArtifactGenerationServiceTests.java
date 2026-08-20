@@ -27,6 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class MonitoringRunPdfArtifactGenerationServiceTests {
 
@@ -80,7 +81,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         when(
                 reportService.buildReport(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(reportView);
 
@@ -94,7 +96,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(Optional.empty());
 
@@ -130,7 +133,7 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         assertEquals(
                 "sitesentinel-monitoring-run-"
                         + monitoringRunId
-                        + "-v1.pdf",
+                        + "-en-v1.pdf",
                 generatedArtifact.getFileName()
         );
 
@@ -167,11 +170,17 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
                         .getOffset()
         );
 
+        assertEquals(
+                SiteSentinelReportLanguage.ENGLISH,
+                generatedArtifact.getReportLanguage()
+        );
+
         verify(
                 reportService
         ).buildReport(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -182,7 +191,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
                 artifactService
         ).findByMonitoringRunIdAndReportVersion(
                 monitoringRunId,
-                MonitoringRunPdfVersion.V1
+                MonitoringRunPdfVersion.V1,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -238,7 +248,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         when(
                 reportService.buildReport(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(null);
 
@@ -276,7 +287,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         when(
                 reportService.buildReport(
                         websiteId,
-                        requestedMonitoringRunId
+                        requestedMonitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(mismatchedReport);
 
@@ -311,7 +323,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         when(
                 reportService.buildReport(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(reportView);
 
@@ -325,7 +338,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 Optional.of(
@@ -510,6 +524,127 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         );
     }
 
+    @Test
+    void generatesTurkishArtifactWithLanguageSpecificIdentityAndFileName() {
+        UUID websiteId =
+                UUID.randomUUID();
+
+        UUID monitoringRunId =
+                UUID.randomUUID();
+
+        MonitoringRunReportView englishReportView =
+                completedReportView(
+                        websiteId,
+                        monitoringRunId
+                );
+
+        MonitoringRunReportView turkishReportView =
+                new MonitoringRunReportView(
+                        englishReportView.getWebsite(),
+                        englishReportView.getMonitoringRun(),
+                        englishReportView.getCounts(),
+                        englishReportView.getTraceabilitySummary(),
+                        englishReportView
+                                .getLatestTrustAssessment(),
+                        englishReportView.getFindings(),
+                        englishReportView.getRisks(),
+                        englishReportView.getRecommendations(),
+                        englishReportView
+                                .getRiskRecommendationViews(),
+                        englishReportView.getComparison(),
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        byte[] renderedBytes =
+                pdfBytes(
+                        "generated Turkish monitoring report"
+                );
+
+        when(
+                reportService.buildReport(
+                        websiteId,
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.TURKISH
+                )
+        ).thenReturn(turkishReportView);
+
+        when(
+                pdfRenderer.getReportVersion()
+        ).thenReturn(
+                MonitoringRunPdfVersion.V1
+        );
+
+        when(
+                artifactService
+                        .findByMonitoringRunIdAndReportVersion(
+                                monitoringRunId,
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(Optional.empty());
+
+        when(
+                pdfRenderer.render(
+                        turkishReportView
+                )
+        ).thenReturn(renderedBytes);
+
+        when(
+                artifactService.saveValidated(
+                        any(MonitoringRunPdfArtifact.class)
+                )
+        ).thenAnswer(
+                invocation ->
+                        invocation.getArgument(0)
+        );
+
+        MonitoringRunPdfArtifact generatedArtifact =
+                generationService.generate(
+                        websiteId,
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertEquals(
+                SiteSentinelReportLanguage.TURKISH,
+                generatedArtifact.getReportLanguage()
+        );
+
+        assertEquals(
+                "sitesentinel-monitoring-run-"
+                        + monitoringRunId
+                        + "-tr-v1.pdf",
+                generatedArtifact.getFileName()
+        );
+
+        assertArrayEquals(
+                renderedBytes,
+                generatedArtifact.getArtifactBytes()
+        );
+
+        verify(
+                reportService
+        ).buildReport(
+                websiteId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                artifactService
+        ).findByMonitoringRunIdAndReportVersion(
+                monitoringRunId,
+                MonitoringRunPdfVersion.V1,
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                pdfRenderer
+        ).render(
+                turkishReportView
+        );
+    }
+
     private void prepareGenerationUntilRendering(
             UUID websiteId,
             UUID monitoringRunId,
@@ -518,7 +653,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
         when(
                 reportService.buildReport(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(reportView);
 
@@ -532,7 +668,8 @@ class MonitoringRunPdfArtifactGenerationServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(Optional.empty());
     }

@@ -6043,3 +6043,427 @@ protection and provides controlled login and logout behavior.
 
 The implementation remains separate from the authoritative assessment,
 recommendation, reporting and delivery domains.
+
+---
+
+# Sprint 19 Architecture Review
+
+## Sprint 19 Closure
+
+Sprint 19 title:
+
+Bilingual PDF Reporting
+
+Final verification:
+
+- tests run: 398;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS;
+- latest migration: V19.
+
+## Architecture Objective
+
+Sprint 19 extends the existing monitoring-run recommendation, PDF artifact and
+Telegram delivery chain with an explicit report-language dimension.
+
+The implementation does not create a second reporting architecture.
+
+English and Turkish reports use the same:
+
+- monitoring-run ownership boundary;
+- recommendation validation boundary;
+- PDF rendering boundary;
+- immutable artifact model;
+- SHA-256 integrity validation;
+- artifact download authorization;
+- Telegram document-delivery boundary;
+- dispatch audit model.
+
+## Explicit Language Boundary
+
+`SiteSentinelReportLanguage.java` is the canonical language model.
+
+Supported values are:
+
+- `ENGLISH`;
+- `TURKISH`.
+
+Report language participates explicitly in:
+
+- recommendation requests;
+- recommendation persistence;
+- recommendation lookup;
+- recommendation idempotency;
+- report read models;
+- PDF artifact generation;
+- PDF artifact persistence;
+- PDF artifact resolution;
+- PDF filenames;
+- automatic Telegram dispatch.
+
+Language is not inferred from presentation text or filenames.
+
+## Recommendation Identity Decision
+
+Recommendation history remains append-only.
+
+The effective automatic-generation lookup boundary is now:
+
+- monitoring run ID;
+- risk ID;
+- report language.
+
+This permits English and Turkish recommendation records for the same risk
+without weakening Sprint 17 idempotency.
+
+A persisted English recommendation does not prevent required Turkish
+recommendation generation.
+
+A persisted Turkish recommendation does not overwrite English recommendation
+history.
+
+## PDF Artifact Identity Decision
+
+PDF artifact uniqueness now includes:
+
+- monitoring run ID;
+- report version;
+- report language.
+
+Separate English and Turkish artifacts therefore have:
+
+- independent persistence IDs;
+- independent filenames;
+- independent integrity hashes;
+- independent resolution results;
+- independent download identities.
+
+The language dimension is part of artifact identity rather than mutable
+presentation metadata.
+
+## Persistence Decision
+
+Sprint 19 introduces:
+
+- `V19__add_report_language_support.sql`
+
+The migration adds and constrains `report_language` for:
+
+- `risk_remediation_recommendations`;
+- `monitoring_run_pdf_artifacts`.
+
+Existing records are conservatively backfilled as `ENGLISH`.
+
+The previous PDF artifact uniqueness boundary is replaced by a
+language-aware uniqueness constraint.
+
+Latest migration:
+
+- V19
+
+## Unicode and Font Decision
+
+Turkish PDF output requires deterministic Unicode glyph support.
+
+Sprint 19 packages local Noto Sans regular and bold font resources.
+
+This decision:
+
+- avoids platform-font differences;
+- avoids external font retrieval;
+- avoids CDN dependencies;
+- preserves offline PDF rendering;
+- enables verified Turkish characters.
+
+The packaged fonts are presentation resources and do not affect monitoring or
+recommendation semantics.
+
+## Localization Boundary
+
+`MonitoringRunPdfTextLocalizer.java` provides deterministic localization of
+canonical report labels and supported lifecycle text.
+
+Complete translation of all persisted historical prose is not attempted when
+a safe deterministic translation is unavailable.
+
+This preserves an important integrity rule:
+
+Localization must not invent or reinterpret evidence, findings, risks,
+provider output or historical persisted statements.
+
+Complete Turkish localization of all persisted lifecycle prose remains a
+future follow-up.
+
+## Delivery Decision
+
+The automatic Telegram report-dispatch path resolves both language-specific
+artifacts.
+
+The existing safety boundaries remain:
+
+- existing-or-generate resolution;
+- integrity verification before dispatch;
+- provider readiness;
+- append-only dispatch audit;
+- delivery failure isolation from monitoring completion.
+
+No new provider, recipient or retry architecture is introduced.
+
+## Preserved Domains
+
+Sprint 19 does not change:
+
+- evidence collection;
+- finding generation;
+- risk evaluation;
+- trust assessment;
+- assessment comparison;
+- notification generation;
+- authentication;
+- CSRF protection;
+- OpenAI provider selection;
+- fallback safety;
+- completed monitoring-run status.
+
+## Accepted Limitations
+
+Sprint 19 accepts:
+
+- two explicitly supported report languages;
+- no runtime language administration;
+- no operator language preference;
+- no generalized translation service;
+- possible English persisted lifecycle prose in Turkish reports when no safe
+  deterministic translation exists;
+- no additional delivery destinations;
+- no translation-quality workflow.
+
+## Architecture Decision
+
+Sprint 19 is architecturally approved.
+
+The bilingual implementation extends the existing reporting and delivery
+architecture through an explicit language identity while preserving
+recommendation validation, artifact immutability, integrity validation,
+ownership safety and dispatch auditing.
+
+---
+
+# Sprint 20 Architecture Review
+
+## Sprint 20 Closure
+
+Sprint 20 title:
+
+Premium Single-Operator Dashboard Experience
+
+Final verification:
+
+- tests run: 417;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS;
+- runtime visual verification: PASSED;
+- latest migration: V19.
+
+## Architecture Objective
+
+Sprint 20 improves the authenticated dashboard presentation without changing
+application-domain behavior.
+
+The implementation remains server-rendered through Thymeleaf and uses the
+existing controller model.
+
+No client-side application architecture is introduced.
+
+## Presentation-Only Decision
+
+Sprint 20 production changes are limited to:
+
+- `dashboard/index.html`;
+- `app.css`.
+
+`DashboardController.java` remains unchanged.
+
+The dashboard continues to consume the existing:
+
+- website counts;
+- monitoring-run counts;
+- latest monitoring runs;
+- latest trust assessments;
+- latest notification events;
+- unread notification count.
+
+No new repository query, entity, projection, persistence model or backend
+service was introduced.
+
+## Operational Information Hierarchy
+
+The dashboard is organized through the following hierarchy:
+
+1. Product identity and primary operator actions.
+2. Current operational KPI summary.
+3. Attention Required notification region.
+4. Latest monitoring-run execution.
+5. Latest trust posture.
+6. Latest notification events.
+7. Secondary navigation.
+
+This hierarchy prioritizes operator action without changing the underlying
+data model.
+
+## Attention Required Decision
+
+The Attention Required region uses existing notification data.
+
+It displays unread HIGH and CRITICAL event previews from the existing latest
+notification collection.
+
+The dashboard does not create:
+
+- a new notification classification;
+- a new notification query;
+- a new persisted priority;
+- a new read/unread lifecycle;
+- a new alerting channel.
+
+The region is a presentation of existing operational state.
+
+## Responsive Design Decision
+
+The dashboard uses:
+
+- a bounded maximum-width shell;
+- responsive grid layout;
+- responsive header actions;
+- mobile breakpoints;
+- table overflow containment;
+- mobile-only horizontal table scrolling when necessary.
+
+Long UUID values use constrained monospace previews and ellipsis.
+
+The complete value remains present in the rendered content and is not
+truncated in persistence.
+
+## Desktop Notification Table Decision
+
+The notification table uses controlled desktop column allocation so that the
+detail action remains visible without desktop horizontal scrolling.
+
+On smaller viewports, the table retains a controlled minimum width and scrolls
+inside its panel rather than expanding the complete page viewport.
+
+This behavior is presentation-only.
+
+## Accessibility Decision
+
+Sprint 20 adds:
+
+- responsive viewport metadata;
+- semantic landmarks;
+- scoped heading relationships;
+- table header scopes;
+- visible keyboard focus;
+- sufficient button foreground contrast;
+- readable status and severity badges;
+- accessible notification-region labelling;
+- reduced-motion handling.
+
+Status and severity are never communicated by color alone; their textual
+values remain visible.
+
+## Security Preservation
+
+The dashboard sign-out control remains:
+
+- a form;
+- POST-based;
+- protected by the framework-generated CSRF token.
+
+Sprint 20 does not alter:
+
+- security configuration;
+- authentication rules;
+- operator credentials;
+- session handling;
+- endpoint authorization;
+- CSRF enforcement.
+
+The existing security contract remains passing.
+
+## Dependency Decision
+
+Sprint 20 introduces no:
+
+- JavaScript framework;
+- chart library;
+- external font;
+- external icon;
+- CDN resource;
+- frontend build pipeline.
+
+The dashboard remains compatible with the existing Spring Boot static-resource
+and Thymeleaf deployment model.
+
+## Test Architecture
+
+Sprint 20 adds focused regression contracts through:
+
+- `DashboardPremiumStructureTemplateTests.java`;
+- `DashboardPremiumStylesheetTests.java`;
+- `DashboardAttentionRequiredTemplateTests.java`;
+- `DashboardVisualRefinementStylesheetTests.java`.
+
+The stylesheet test helper requires selectors to start at a CSS rule boundary,
+preventing a specific descendant selector from being mistaken for a base
+selector.
+
+Existing security integration tests continue to verify rendered dashboard
+access, static CSS access, POST logout and CSRF behavior.
+
+## Preserved Domains
+
+Sprint 20 does not change:
+
+- website registration;
+- monitoring execution;
+- evidence collection;
+- findings;
+- risks;
+- trust assessments;
+- comparisons;
+- notifications;
+- recommendations;
+- bilingual PDF generation;
+- PDF artifacts;
+- Telegram dispatch;
+- authentication.
+
+## Accepted Limitations
+
+Sprint 20 accepts:
+
+- one server-rendered dashboard;
+- one shared operator layout;
+- no customizable widgets;
+- no charts;
+- no historical trend visualization;
+- no dark mode;
+- no user-specific preferences;
+- no client-side sorting or filtering;
+- raw lifecycle timestamps;
+- compact UUID previews.
+
+## Architecture Decision
+
+Sprint 20 is architecturally approved.
+
+The dashboard now provides a premium, responsive and operations-focused
+single-operator workspace while remaining a presentation-only consumer of
+existing application data.
+
+The monitoring, recommendation, bilingual reporting, delivery, authentication
+and CSRF boundaries remain unchanged.

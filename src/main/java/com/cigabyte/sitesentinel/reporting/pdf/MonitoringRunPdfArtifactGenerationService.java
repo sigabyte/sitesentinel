@@ -2,6 +2,7 @@ package com.cigabyte.sitesentinel.reporting.pdf;
 
 import com.cigabyte.sitesentinel.reporting.MonitoringRunReportService;
 import com.cigabyte.sitesentinel.reporting.MonitoringRunReportView;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -54,6 +55,18 @@ public class MonitoringRunPdfArtifactGenerationService {
             UUID websiteId,
             UUID monitoringRunId
     ) {
+        return generate(
+                websiteId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public MonitoringRunPdfArtifact generate(
+            UUID websiteId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         UUID requiredWebsiteId =
                 requireId(
                         websiteId,
@@ -66,10 +79,18 @@ public class MonitoringRunPdfArtifactGenerationService {
                         "Monitoring run ID"
                 );
 
+        SiteSentinelReportLanguage
+                requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "PDF report language is required."
+                );
+
         MonitoringRunReportView reportView =
                 monitoringRunReportService.buildReport(
                         requiredWebsiteId,
-                        requiredMonitoringRunId
+                        requiredMonitoringRunId,
+                        requiredReportLanguage
                 );
 
         UUID persistedMonitoringRunId =
@@ -77,6 +98,11 @@ public class MonitoringRunPdfArtifactGenerationService {
                         reportView,
                         requiredMonitoringRunId
                 );
+
+        validateReportLanguage(
+                reportView,
+                requiredReportLanguage
+        );
 
         MonitoringRunPdfVersion reportVersion =
                 Objects.requireNonNull(
@@ -86,7 +112,8 @@ public class MonitoringRunPdfArtifactGenerationService {
 
         rejectExistingArtifact(
                 persistedMonitoringRunId,
-                reportVersion
+                reportVersion,
+                requiredReportLanguage
         );
 
         byte[] artifactBytes =
@@ -101,7 +128,8 @@ public class MonitoringRunPdfArtifactGenerationService {
         String fileName =
                 fileNameFactory.create(
                         persistedMonitoringRunId,
-                        reportVersion
+                        reportVersion,
+                        requiredReportLanguage
                 );
 
         String sha256Fingerprint =
@@ -113,6 +141,7 @@ public class MonitoringRunPdfArtifactGenerationService {
                 MonitoringRunPdfArtifact.create(
                         persistedMonitoringRunId,
                         reportVersion,
+                        requiredReportLanguage,
                         fileName,
                         artifactBytes,
                         sha256Fingerprint,
@@ -169,15 +198,31 @@ public class MonitoringRunPdfArtifactGenerationService {
         return persistedMonitoringRunId;
     }
 
+    private void validateReportLanguage(
+            MonitoringRunReportView reportView,
+            SiteSentinelReportLanguage requestedReportLanguage
+    ) {
+        if (reportView.getReportLanguage()
+                != requestedReportLanguage) {
+
+            throw new IllegalStateException(
+                    "Monitoring run report language does not "
+                            + "match the requested PDF language."
+            );
+        }
+    }
+
     private void rejectExistingArtifact(
             UUID monitoringRunId,
-            MonitoringRunPdfVersion reportVersion
+            MonitoringRunPdfVersion reportVersion,
+            SiteSentinelReportLanguage reportLanguage
     ) {
         boolean artifactAlreadyExists =
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                reportVersion
+                                reportVersion,
+                                reportLanguage
                         )
                         .isPresent();
 
@@ -186,8 +231,10 @@ public class MonitoringRunPdfArtifactGenerationService {
                     "A PDF artifact already exists for "
                             + "monitoringRunId="
                             + monitoringRunId
-                            + " and reportVersion="
+                            + ", reportVersion="
                             + reportVersion.getValue()
+                            + " and reportLanguage="
+                            + reportLanguage.getPersistenceValue()
                             + "."
             );
         }

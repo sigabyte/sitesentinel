@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @Service
 public class RiskRemediationRecommendationGenerationService {
@@ -64,6 +65,18 @@ public class RiskRemediationRecommendationGenerationService {
             UUID monitoringRunId,
             UUID riskId
     ) {
+        return generateAndPersist(
+                monitoringRunId,
+                riskId,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public RiskRemediationRecommendation generateAndPersist(
+            UUID monitoringRunId,
+            UUID riskId,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         UUID requiredMonitoringRunId =
                 requireId(
                         monitoringRunId,
@@ -82,8 +95,17 @@ public class RiskRemediationRecommendationGenerationService {
                         requiredRiskId
                 );
 
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
+                );
+
         RiskRemediationAiRequest request =
-                promptFactory.create(context);
+                promptFactory.create(
+                        context,
+                        requiredReportLanguage
+                );
 
         ProviderSelection providerSelection =
                 selectProvider();
@@ -233,6 +255,7 @@ public class RiskRemediationRecommendationGenerationService {
                 RiskRemediationRecommendation.aiGenerated(
                         context.getMonitoringRunId(),
                         context.getRiskId(),
+                        request.reportLanguage(),
                         content,
                         providerMetadata.providerName(),
                         providerMetadata.modelName(),
@@ -257,7 +280,10 @@ public class RiskRemediationRecommendationGenerationService {
     ) {
         RiskRemediationRuleBasedFallbackResult
                 fallbackResult =
-                fallbackGenerator.generate(context);
+                fallbackGenerator.generate(
+                        context,
+                        request.reportLanguage()
+                );
 
         String attemptedProviderName =
                 attemptedProviderMetadata == null
@@ -274,6 +300,7 @@ public class RiskRemediationRecommendationGenerationService {
                         .ruleBasedFallback(
                                 context.getMonitoringRunId(),
                                 context.getRiskId(),
+                                request.reportLanguage(),
                                 fallbackResult.content(),
                                 fallbackReason,
                                 attemptedProviderName,

@@ -618,3 +618,119 @@ Future implementations must not:
 - merge report-dispatch persistence into the notification-event attempt
   model;
 - persist provider credentials or raw secret-bearing responses.
+
+---
+
+## Bilingual Reporting Follow-Up
+
+Sprint 19 completed the bilingual monitoring-run PDF reporting baseline.
+
+Completed behavior includes:
+
+- explicit English and Turkish report languages;
+- language-aware recommendation generation;
+- language-aware recommendation persistence and lookup;
+- preservation of recommendation idempotency per report language;
+- separate English and Turkish PDF artifact identities;
+- language-aware PDF artifact persistence and resolution;
+- separate English and Turkish filenames;
+- separate English and Turkish download controls;
+- local Unicode-capable PDF fonts;
+- verified Turkish character rendering;
+- automatic Telegram dispatch of both language-specific PDF artifacts;
+- migration V19 language constraints and indexes.
+
+The following bilingual-reporting work remains deferred:
+
+- complete deterministic Turkish localization of all persisted historical
+  lifecycle prose;
+- additional language support beyond English and Turkish;
+- operator-selectable report-language preferences;
+- per-website language configuration;
+- language administration;
+- generalized translation-service integration;
+- translation quality review and approval;
+- persisted translation provenance;
+- translation versioning;
+- localized date and number formatting;
+- locale-specific terminology administration;
+- multilingual notification-message templates;
+- multilingual Telegram captions;
+- automated bilingual report comparison;
+- broader Turkish localization regression fixtures.
+
+Future localization must not:
+
+- invent evidence;
+- reinterpret findings or risks;
+- alter severity or trust assessments;
+- translate unsupported provider claims into authoritative statements;
+- change persisted source records;
+- weaken recommendation validation;
+- make translation failure fail a completed monitoring run;
+- merge or overwrite language-specific artifact identities.
+
+---
+
+## Dashboard Experience Follow-Up
+
+Sprint 20 completed the premium single-operator dashboard baseline.
+
+Completed behavior includes:
+
+- premium SiteSentinel product identity;
+- responsive maximum-width dashboard shell;
+- operational KPI cards based on existing controller data;
+- Attention Required notification region;
+- unread HIGH and CRITICAL event previews;
+- readable monitoring-run tables;
+- readable trust-assessment tables;
+- notification severity and status badges;
+- monitoring and trust status badges;
+- long UUID layout containment;
+- controlled desktop notification-table layout;
+- responsive table scrolling;
+- visible keyboard focus;
+- accessible action-button contrast;
+- reduced-motion support;
+- preserved POST logout and CSRF protection.
+
+The following dashboard work remains deferred:
+
+- charts and historical trend visualization;
+- operator-configurable widgets;
+- dashboard sorting and filtering;
+- server-side pagination;
+- dashboard search;
+- customizable dashboard layouts;
+- dark mode;
+- user-specific display preferences;
+- persisted dashboard preferences;
+- localized dashboard interface;
+- relative or localized timestamp presentation;
+- dashboard operational metrics;
+- dashboard performance instrumentation;
+- notification acknowledgement directly from the dashboard;
+- bulk notification actions;
+- richer monitoring-run detail previews;
+- client-side live updates;
+- WebSocket or server-sent event updates;
+- multi-user dashboard experiences;
+- role-specific dashboards;
+- organization or tenant-specific dashboards.
+
+Future dashboard work must preserve:
+
+- the server-authoritative monitoring lifecycle;
+- existing notification status semantics;
+- authenticated access;
+- POST and CSRF requirements for state-changing actions;
+- backend ownership boundaries;
+- long-identifier containment;
+- keyboard accessibility;
+- sufficient contrast;
+- responsive behavior;
+- the no-external-dependency decision unless separately approved.
+
+Charts, live updates, new backend data and user-specific configuration require
+separate future sprint approval.

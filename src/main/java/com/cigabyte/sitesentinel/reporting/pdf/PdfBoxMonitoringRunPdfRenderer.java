@@ -64,7 +64,8 @@ public class PdfBoxMonitoringRunPdfRenderer
             try (
                     MonitoringRunPdfDocumentLayout layout =
                             new MonitoringRunPdfDocumentLayout(
-                                    document
+                                    document,
+                                    requiredReportView.getReportLanguage()
                             )
             ) {
                 writeReport(

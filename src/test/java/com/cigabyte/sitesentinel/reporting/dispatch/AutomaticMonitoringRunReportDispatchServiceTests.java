@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class AutomaticMonitoringRunReportDispatchServiceTests {
 
@@ -230,7 +231,8 @@ class AutomaticMonitoringRunReportDispatchServiceTests {
                 artifactResolutionService
                         .resolveCurrentVersion(
                                 websiteId,
-                                monitoringRunId
+                                monitoringRunId,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 artifact
@@ -344,7 +346,8 @@ class AutomaticMonitoringRunReportDispatchServiceTests {
                 artifactResolutionService
                         .resolveCurrentVersion(
                                 websiteId,
-                                monitoringRunId
+                                monitoringRunId,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 artifact
@@ -453,7 +456,8 @@ class AutomaticMonitoringRunReportDispatchServiceTests {
                 artifactResolutionService
                         .resolveCurrentVersion(
                                 websiteId,
-                                monitoringRunId
+                                monitoringRunId,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 artifact
@@ -552,7 +556,8 @@ class AutomaticMonitoringRunReportDispatchServiceTests {
                 artifactResolutionService
                         .resolveCurrentVersion(
                                 websiteId,
-                                monitoringRunId
+                                monitoringRunId,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 artifact
@@ -608,6 +613,157 @@ class AutomaticMonitoringRunReportDispatchServiceTests {
         return completedMonitoringRun(
                 UUID.randomUUID(),
                 UUID.randomUUID()
+        );
+    }
+
+    @Test
+    void dispatchCompletedRunSendsTurkishArtifactWithTurkishCaption() {
+        configureReadyProperties();
+
+        UUID websiteId =
+                UUID.randomUUID();
+
+        UUID monitoringRunId =
+                UUID.randomUUID();
+
+        UUID artifactId =
+                UUID.randomUUID();
+
+        UUID attemptId =
+                UUID.randomUUID();
+
+        byte[] artifactBytes =
+                "%PDF-controlled-Turkish-dispatch-test"
+                        .getBytes(
+                                StandardCharsets.US_ASCII
+                        );
+
+        MonitoringRun monitoringRun =
+                completedMonitoringRun(
+                        websiteId,
+                        monitoringRunId
+                );
+
+        MonitoringRunPdfArtifact artifact =
+                artifact(
+                        artifactId,
+                        monitoringRunId,
+                        artifactBytes
+                );
+
+        when(
+                artifact.getReportLanguage()
+        ).thenReturn(
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        MonitoringRunReportDispatchAttempt pendingAttempt =
+                pendingAttempt(
+                        attemptId
+                );
+
+        TelegramDocumentDeliveryResult deliveryResult =
+                TelegramDocumentDeliveryResult.success(
+                        9753L,
+                        "Turkish Telegram document "
+                                + "was sent successfully.",
+                        "Telegram Bot API accepted the "
+                                + "Turkish sendDocument request."
+                );
+
+        when(
+                artifactResolutionService
+                        .resolveCurrentVersion(
+                                websiteId,
+                                monitoringRunId,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(
+                artifact
+        );
+
+        when(
+                dispatchAttemptService
+                        .startAutomaticAttempt(
+                                monitoringRunId,
+                                artifactId
+                        )
+        ).thenReturn(
+                pendingAttempt
+        );
+
+        String expectedTurkishCaption =
+                "SiteSentinel izleme "
+                        + "\u00E7al\u0131\u015Ft\u0131rmas\u0131 "
+                        + "raporu"
+                        + "\n\u0130zleme "
+                        + "\u00E7al\u0131\u015Ft\u0131rmas\u0131 "
+                        + "kimli\u011Fi: "
+                        + monitoringRunId
+                        + "\nRapor s\u00FCr\u00FCm\u00FC: v1"
+                        + "\nRapor dili: T\u00FCrk\u00E7e";
+
+        when(
+                documentDeliveryService.deliver(
+                        "monitoring-report.pdf",
+                        "application/pdf",
+                        artifactBytes,
+                        expectedTurkishCaption
+                )
+        ).thenReturn(
+                deliveryResult
+        );
+
+        TelegramDocumentDeliveryResult actualResult =
+                dispatchService.dispatchCompletedRun(
+                        monitoringRun,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertSame(
+                deliveryResult,
+                actualResult
+        );
+
+        assertTrue(
+                actualResult.isSuccessful()
+        );
+
+        verify(
+                artifactResolutionService
+        ).resolveCurrentVersion(
+                websiteId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                documentDeliveryService
+        ).deliver(
+                "monitoring-report.pdf",
+                "application/pdf",
+                artifactBytes,
+                expectedTurkishCaption
+        );
+
+        verify(
+                dispatchAttemptService
+        ).markSent(
+                attemptId,
+                monitoringRunId,
+                9753L,
+                deliveryResult.getResultMessage(),
+                deliveryResult.getTechnicalDetail()
+        );
+
+        verify(
+                dispatchAttemptService,
+                never()
+        ).markFailed(
+                attemptId,
+                monitoringRunId,
+                deliveryResult.getResultMessage(),
+                deliveryResult.getTechnicalDetail()
         );
     }
 

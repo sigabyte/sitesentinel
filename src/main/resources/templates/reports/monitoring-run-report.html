@@ -60,12 +60,12 @@
 </section>
 
 <section class="output-section">
-  <h2>Full monitoring run PDF</h2>
+  <h2>Full monitoring run PDFs</h2>
 
   <p class="output-note">
-    The PDF artifact is generated manually from the existing persisted
-    monitoring run report. PDF generation does not rerun monitoring,
-    regenerate recommendations or dispatch the report.
+    SiteSentinel preserves separate English and Turkish PDF artifacts for
+    each completed monitoring run. Each artifact has its own immutable
+    identity, file name and integrity fingerprint.
   </p>
 
   <div class="assessment-summary"
@@ -80,7 +80,7 @@
     <p th:if="${generatedPdfArtifactId != null}">
       Generated artifact ID:
       <strong th:text="${generatedPdfArtifactId}">
-        Artifact ID
+        Generated artifact ID
       </strong>
     </p>
   </div>
@@ -98,11 +98,24 @@
   <div class="summary-grid">
     <div class="summary-card">
       <span class="summary-card-label">
-        PDF Artifact
+        English PDF
       </span>
 
       <span class="summary-card-value"
-            th:text="${pdfArtifactAvailable
+            th:text="${englishPdfArtifactAvailable
+                    ? 'AVAILABLE'
+                    : 'NOT GENERATED'}">
+        NOT GENERATED
+      </span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-card-label">
+        Turkish PDF
+      </span>
+
+      <span class="summary-card-value"
+            th:text="${turkishPdfArtifactAvailable
                     ? 'AVAILABLE'
                     : 'NOT GENERATED'}">
         NOT GENERATED
@@ -130,57 +143,51 @@
         0
       </span>
     </div>
-
-    <div class="summary-card">
-      <span class="summary-card-label">
-        Manual Generation
-      </span>
-
-      <span class="summary-card-value"
-            th:text="${pdfArtifactGenerationAvailable
-                    ? 'AVAILABLE'
-                    : 'UNAVAILABLE'}">
-        AVAILABLE
-      </span>
-    </div>
   </div>
 
   <div class="assessment-summary"
-       th:if="${pdfArtifactAvailable}">
+       th:if="${englishPdfArtifactAvailable}">
 
-    <h3>Persisted PDF artifact</h3>
+    <h3>English PDF report</h3>
 
     <p>
       Artifact ID:
-      <strong th:text="${pdfArtifact.id}">
-        Artifact ID
+      <strong th:text="${englishPdfArtifact.id}">
+        English artifact ID
       </strong>
     </p>
 
     <p>
       File name:
-      <strong th:text="${pdfArtifact.fileName}">
-        monitoring-run-report.pdf
+      <strong th:text="${englishPdfArtifact.fileName}">
+        monitoring-run-report-en-v1.pdf
+      </strong>
+    </p>
+
+    <p>
+      Language:
+      <strong th:text="${englishPdfArtifact.reportLanguage}">
+        ENGLISH
       </strong>
     </p>
 
     <p>
       Content type:
-      <strong th:text="${pdfArtifact.contentType}">
+      <strong th:text="${englishPdfArtifact.contentType}">
         application/pdf
       </strong>
     </p>
 
     <p>
       Report version:
-      <strong th:text="${pdfArtifact.reportVersion}">
+      <strong th:text="${englishPdfArtifact.reportVersion}">
         monitoring-run-pdf-v1
       </strong>
     </p>
 
     <p>
       Size:
-      <strong th:text="${pdfArtifact.sizeBytes}">
+      <strong th:text="${englishPdfArtifact.sizeBytes}">
         0
       </strong>
       bytes
@@ -188,14 +195,14 @@
 
     <p>
       Generated at:
-      <strong th:text="${pdfArtifact.generatedAt}">
+      <strong th:text="${englishPdfArtifact.generatedAt}">
         Generated at
       </strong>
     </p>
 
     <p>
       Persisted at:
-      <strong th:text="${pdfArtifact.createdAt}">
+      <strong th:text="${englishPdfArtifact.createdAt}">
         Persisted at
       </strong>
     </p>
@@ -204,58 +211,193 @@
       <h3>SHA-256 fingerprint</h3>
 
       <div class="traceability-description"
-           th:text="${pdfArtifact.sha256Fingerprint}">
+           th:text="${englishPdfArtifact.sha256Fingerprint}">
         SHA-256 fingerprint
       </div>
     </div>
 
     <p class="traceability-actions">
-      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts/{artifactId}/download(websiteId=${website.id}, runId=${monitoringRun.id}, artifactId=${pdfArtifact.id})}">
-        Download PDF artifact
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts/{artifactId}/download(websiteId=${website.id}, runId=${monitoringRun.id}, artifactId=${englishPdfArtifact.id})}">
+        Download English PDF
       </a>
     </p>
 
     <p class="output-note">
-      The artifact is immutable. This report version cannot be generated
-      again for the same monitoring run.
+      This English PDF artifact is immutable for the current monitoring run
+      and report version.
     </p>
   </div>
 
   <div class="assessment-summary"
-       th:if="${pdfArtifactGenerationAvailable}">
+       th:if="${!englishPdfArtifactAvailable}">
 
-    <h3>Generate PDF artifact</h3>
+    <h3>English PDF report</h3>
 
     <p>
-      Generate and persist the full monitoring run PDF artifact for this
-      completed monitoring run.
+      The English PDF artifact has not been generated.
     </p>
 
-    <form method="post"
-          th:action="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts(websiteId=${website.id}, runId=${monitoringRun.id})}">
+    <div th:if="${englishPdfArtifactGenerationAvailable}">
+      <p>
+        Generate and persist the English PDF artifact for this completed
+        monitoring run.
+      </p>
 
-      <button type="submit">
-        Generate PDF artifact
-      </button>
-    </form>
+      <form method="post"
+            th:action="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts(websiteId=${website.id}, runId=${monitoringRun.id})}">
 
-    <p class="output-note">
-      Generation is manual and may be performed only once for the current
-      PDF report version.
+        <input type="hidden" name="reportLanguage" value="ENGLISH">
+
+        <button type="submit">
+          Generate English PDF
+        </button>
+      </form>
+
+      <p class="output-note">
+        English generation uses the persisted English recommendations and does
+        not rerun the monitoring pipeline.
+      </p>
+    </div>
+
+    <p class="output-note"
+       th:if="${!englishPdfArtifactGenerationAvailable}">
+      English PDF generation is unavailable for this monitoring run.
     </p>
   </div>
 
   <div class="assessment-summary"
-       th:if="${!pdfArtifactAvailable
-               && !pdfArtifactGenerationAvailable}">
+       th:if="${turkishPdfArtifactAvailable}">
+
+    <h3>Turkish PDF report</h3>
+
+    <p>
+      Artifact ID:
+      <strong th:text="${turkishPdfArtifact.id}">
+        Turkish artifact ID
+      </strong>
+    </p>
+
+    <p>
+      File name:
+      <strong th:text="${turkishPdfArtifact.fileName}">
+        monitoring-run-report-tr-v1.pdf
+      </strong>
+    </p>
+
+    <p>
+      Language:
+      <strong th:text="${turkishPdfArtifact.reportLanguage}">
+        TURKISH
+      </strong>
+    </p>
+
+    <p>
+      Content type:
+      <strong th:text="${turkishPdfArtifact.contentType}">
+        application/pdf
+      </strong>
+    </p>
+
+    <p>
+      Report version:
+      <strong th:text="${turkishPdfArtifact.reportVersion}">
+        monitoring-run-pdf-v1
+      </strong>
+    </p>
+
+    <p>
+      Size:
+      <strong th:text="${turkishPdfArtifact.sizeBytes}">
+        0
+      </strong>
+      bytes
+    </p>
+
+    <p>
+      Generated at:
+      <strong th:text="${turkishPdfArtifact.generatedAt}">
+        Generated at
+      </strong>
+    </p>
+
+    <p>
+      Persisted at:
+      <strong th:text="${turkishPdfArtifact.createdAt}">
+        Persisted at
+      </strong>
+    </p>
+
+    <div class="output-subsection">
+      <h3>SHA-256 fingerprint</h3>
+
+      <div class="traceability-description"
+           th:text="${turkishPdfArtifact.sha256Fingerprint}">
+        SHA-256 fingerprint
+      </div>
+    </div>
+
+    <p class="traceability-actions">
+      <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts/{artifactId}/download(websiteId=${website.id}, runId=${monitoringRun.id}, artifactId=${turkishPdfArtifact.id})}">
+        Download Turkish PDF
+      </a>
+    </p>
+
+    <p class="output-note">
+      This Turkish PDF artifact is immutable for the current monitoring run
+      and report version.
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${!turkishPdfArtifactAvailable}">
+
+    <h3>Turkish PDF report</h3>
+
+    <p>
+      The Turkish PDF artifact has not been generated.
+    </p>
+
+    <div th:if="${turkishPdfArtifactGenerationAvailable}">
+      <p>
+        Generate and persist the Turkish PDF artifact for this completed
+        monitoring run.
+      </p>
+
+      <form method="post"
+            th:action="@{/websites/{websiteId}/monitoring-runs/{runId}/report/pdf-artifacts(websiteId=${website.id}, runId=${monitoringRun.id})}">
+
+        <input type="hidden" name="reportLanguage" value="TURKISH">
+
+        <button type="submit">
+          Generate Turkish PDF
+        </button>
+      </form>
+
+      <p class="output-note">
+        Turkish generation uses the persisted Turkish recommendations and does
+        not rerun the monitoring pipeline.
+      </p>
+    </div>
+
+    <p class="output-note"
+       th:if="${!turkishPdfArtifactGenerationAvailable}">
+      Turkish PDF generation is unavailable for this monitoring run.
+    </p>
+  </div>
+
+  <div class="assessment-summary"
+       th:if="${!englishPdfArtifactAvailable
+               && !turkishPdfArtifactAvailable
+               && !englishPdfArtifactGenerationAvailable
+               && !turkishPdfArtifactGenerationAvailable}">
 
     <p>
       PDF artifact generation is unavailable for this monitoring run.
     </p>
 
     <p class="output-note">
-      A full PDF artifact may only be generated for a completed monitoring
-      run.
+      Full English and Turkish PDF artifacts may only be produced for a
+      completed monitoring run.
     </p>
   </div>
 </section>

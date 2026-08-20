@@ -5,10 +5,11 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,8 +17,17 @@ import java.util.Objects;
 final class MonitoringRunPdfDocumentLayout
         implements AutoCloseable {
 
+    private static final String REGULAR_FONT_RESOURCE =
+            "/fonts/NotoSans-Regular.ttf";
+
+    private static final String BOLD_FONT_RESOURCE =
+            "/fonts/NotoSans-Bold.ttf";
+
     private static final PDRectangle PAGE_SIZE =
             PDRectangle.A4;
+
+    private final MonitoringRunPdfTextLocalizer
+            textLocalizer;
 
     private static final float LEFT_MARGIN = 54.0f;
     private static final float RIGHT_MARGIN = 54.0f;
@@ -62,20 +72,66 @@ final class MonitoringRunPdfDocumentLayout
     MonitoringRunPdfDocumentLayout(
             PDDocument document
     ) throws IOException {
-        this.document = Objects.requireNonNull(
+        this(
                 document,
-                "PDF document is required."
+                SiteSentinelReportLanguage.ENGLISH
         );
+    }
 
-        this.regularFont = new PDType1Font(
-                Standard14Fonts.FontName.HELVETICA
-        );
+    MonitoringRunPdfDocumentLayout(
+            PDDocument document,
+            SiteSentinelReportLanguage reportLanguage
+    ) throws IOException {
+        this.document =
+                Objects.requireNonNull(
+                        document,
+                        "PDF document is required."
+                );
 
-        this.boldFont = new PDType1Font(
-                Standard14Fonts.FontName.HELVETICA_BOLD
-        );
+        this.textLocalizer =
+                new MonitoringRunPdfTextLocalizer(
+                        reportLanguage
+                );
+
+        this.regularFont =
+                loadFont(
+                        this.document,
+                        REGULAR_FONT_RESOURCE
+                );
+
+        this.boldFont =
+                loadFont(
+                        this.document,
+                        BOLD_FONT_RESOURCE
+                );
 
         startNewPage();
+    }
+
+    private PDFont loadFont(
+            PDDocument document,
+            String resourcePath
+    ) throws IOException {
+        try (
+                InputStream fontInputStream =
+                        MonitoringRunPdfDocumentLayout.class
+                                .getResourceAsStream(
+                                        resourcePath
+                                )
+        ) {
+            if (fontInputStream == null) {
+                throw new IllegalStateException(
+                        "PDF font resource was not found: "
+                                + resourcePath
+                );
+            }
+
+            return PDType0Font.load(
+                    document,
+                    fontInputStream,
+                    true
+            );
+        }
     }
 
     void writeDocumentTitle(
@@ -88,7 +144,7 @@ final class MonitoringRunPdfDocumentLayout
         );
 
         writeWrappedText(
-                value,
+                textLocalizer.localize(value),
                 boldFont,
                 TITLE_FONT_SIZE,
                 TITLE_LINE_HEIGHT
@@ -113,7 +169,7 @@ final class MonitoringRunPdfDocumentLayout
         }
 
         writeWrappedText(
-                value,
+                textLocalizer.localize(value),
                 boldFont,
                 SECTION_FONT_SIZE,
                 SECTION_LINE_HEIGHT
@@ -134,7 +190,7 @@ final class MonitoringRunPdfDocumentLayout
         );
 
         writeWrappedText(
-                value,
+                textLocalizer.localize(value),
                 boldFont,
                 SUBSECTION_FONT_SIZE,
                 SUBSECTION_LINE_HEIGHT
@@ -149,7 +205,7 @@ final class MonitoringRunPdfDocumentLayout
         ensureOpen();
 
         writeWrappedText(
-                value,
+                textLocalizer.localize(value),
                 regularFont,
                 BODY_FONT_SIZE,
                 BODY_LINE_HEIGHT
@@ -165,7 +221,9 @@ final class MonitoringRunPdfDocumentLayout
         ensureOpen();
 
         String requiredLabel =
-                normalizeRequiredLabel(label);
+                normalizeRequiredLabel(
+                        textLocalizer.localize(label)
+                );
 
         String displayValue =
                 value == null

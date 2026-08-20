@@ -5,6 +5,7 @@ import com.cigabyte.sitesentinel.engine.collection.EvidenceCollectionEngine;
 import com.cigabyte.sitesentinel.engine.risk.RiskEvaluationEngine;
 import com.cigabyte.sitesentinel.engine.trust.TrustEvaluationEngine;
 import com.cigabyte.sitesentinel.notification.NotificationEventGenerationService;
+import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationResult;
 import com.cigabyte.sitesentinel.recommendation.RiskRemediationRecommendationRunGenerationService;
 import com.cigabyte.sitesentinel.reporting.dispatch.AutomaticMonitoringRunReportDispatchService;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class MonitoringExecutionRecommendationSafetyTests {
 
@@ -101,7 +103,25 @@ class MonitoringExecutionRecommendationSafetyTests {
                 )
         ).when(
                 recommendationRunGenerationService
-        ).generateForCompletedRun(completedRun);
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+        when(
+                recommendationRunGenerationService
+                        .generateForCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(
+                new RiskRemediationRecommendationRunGenerationResult(
+                        completedRun.getId(),
+                        0,
+                        0,
+                        0,
+                        0
+                )
+        );
 
         MonitoringRun result =
                 monitoringExecutionService.execute(
@@ -126,7 +146,17 @@ class MonitoringExecutionRecommendationSafetyTests {
 
         completionOrder.verify(
                 recommendationRunGenerationService
-        ).generateForCompletedRun(completedRun);
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        completionOrder.verify(
+                recommendationRunGenerationService
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
+        );
 
         completionOrder.verify(
                 notificationEventGenerationService
@@ -136,6 +166,7 @@ class MonitoringExecutionRecommendationSafetyTests {
                 automaticReportDispatchService,
                 never()
         ).dispatchCompletedRun(
+                org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any()
         );
     }
@@ -185,6 +216,7 @@ class MonitoringExecutionRecommendationSafetyTests {
                 recommendationRunGenerationService,
                 never()
         ).generateForCompletedRun(
+                org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.any()
         );
 
@@ -225,6 +257,103 @@ class MonitoringExecutionRecommendationSafetyTests {
                 never()
         ).dispatchCompletedRun(
                 org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
+    void completedRunGeneratesEnglishAndTurkishRecommendations() {
+        UUID websiteId = UUID.randomUUID();
+
+        MonitoringRun pendingRun =
+                persistedPendingRun(websiteId);
+
+        MonitoringRun completedRun =
+                persistedCompletedRun(
+                        websiteId,
+                        pendingRun.getId()
+                );
+
+        when(
+                monitoringRunService.createPendingRun(
+                        websiteId
+                )
+        ).thenReturn(pendingRun);
+
+        when(
+                monitoringRunService.markCompleted(
+                        pendingRun.getId()
+                )
+        ).thenReturn(completedRun);
+
+        RiskRemediationRecommendationRunGenerationResult
+                englishResult =
+                new RiskRemediationRecommendationRunGenerationResult(
+                        completedRun.getId(),
+                        0,
+                        0,
+                        0,
+                        0
+                );
+
+        RiskRemediationRecommendationRunGenerationResult
+                turkishResult =
+                new RiskRemediationRecommendationRunGenerationResult(
+                        completedRun.getId(),
+                        0,
+                        0,
+                        0,
+                        0
+                );
+
+        when(
+                recommendationRunGenerationService
+                        .generateForCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+        ).thenReturn(englishResult);
+
+        when(
+                recommendationRunGenerationService
+                        .generateForCompletedRun(
+                                completedRun,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(turkishResult);
+
+        MonitoringRun result =
+                monitoringExecutionService.execute(
+                        websiteId
+                );
+
+        assertSame(completedRun, result);
+
+        verify(
+                recommendationRunGenerationService
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        verify(
+                recommendationRunGenerationService
+        ).generateForCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                automaticReportDispatchService
+        ).dispatchCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+
+        verify(
+                automaticReportDispatchService
+        ).dispatchCompletedRun(
+                completedRun,
+                SiteSentinelReportLanguage.TURKISH
         );
     }
 

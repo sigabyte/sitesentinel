@@ -9,6 +9,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class RiskRemediationRuleBasedFallbackGeneratorTests {
 
@@ -32,13 +33,73 @@ class RiskRemediationRuleBasedFallbackGeneratorTests {
         assertEquals(first, second);
 
         assertEquals(
-                "risk-remediation-fallback-v2",
+                "risk-remediation-fallback-v3",
                 first.ruleVersion()
         );
 
         assertEquals(
                 "Review and remediate TLS_CONFIGURATION",
                 first.content().title()
+        );
+    }
+
+    @Test
+    void generatesVersionedTurkishFallbackContent() {
+        RiskRemediationRecommendationContext context =
+                context(
+                        "TLS_CONFIGURATION",
+                        RiskSeverity.HIGH
+                );
+
+        RiskRemediationRuleBasedFallbackResult result =
+                generator.generate(
+                        context,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertEquals(
+                "risk-remediation-fallback-v3",
+                result.ruleVersion()
+        );
+
+        assertTrue(
+                result.content()
+                        .title()
+                        .contains(
+                                "riskini inceleyin ve giderin"
+                        )
+        );
+
+        assertTrue(
+                result.content()
+                        .summary()
+                        .contains(
+                                "Kalıcı kanıtlar"
+                        )
+        );
+
+        assertTrue(
+                result.content()
+                        .summary()
+                        .contains(
+                                "doğrulamaz"
+                        )
+        );
+
+        assertTrue(
+                result.content()
+                        .remediationSteps()
+                        .contains(
+                                "değişiklik"
+                        )
+        );
+
+        assertTrue(
+                result.content()
+                        .verificationSteps()
+                        .contains(
+                                "doğrulayın"
+                        )
         );
     }
 

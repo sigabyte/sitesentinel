@@ -6,15 +6,13 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 class RiskRemediationRecommendationGenerationServiceTests {
 
@@ -113,6 +111,111 @@ class RiskRemediationRecommendationGenerationServiceTests {
                 recommendationValidator,
                 never()
         ).validate(any(), any());
+    }
+
+    @Test
+    void noProviderPersistsTurkishFallbackForTurkishRequest() {
+        GenerationFixture fixture =
+                prepareFixture();
+
+        RiskRemediationAiRequest turkishRequest =
+                new RiskRemediationAiRequest(
+                        "risk-remediation-v3",
+                        "risk-remediation-output-v3",
+                        "Turkish system instruction.",
+                        "Turkish user instruction.",
+                        fixture.context().getFingerprint(),
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        RiskRemediationRuleBasedFallbackResult
+                turkishFallbackResult =
+                new RiskRemediationRuleBasedFallbackResult(
+                        "risk-remediation-fallback-v3",
+                        new RiskRemediationRecommendationContent(
+                                "TLS_CONFIGURATION riskini inceleyin ve giderin",
+                                "Kalıcı kanıtlar kontrollü bir riski doğrular.",
+                                "1. Kontrollü değişiklik uygulayın.",
+                                "1. Sonucu yeniden doğrulayın."
+                        )
+                );
+
+        when(
+                promptFactory.create(
+                        fixture.context(),
+                        SiteSentinelReportLanguage.TURKISH
+                )
+        ).thenReturn(
+                turkishRequest
+        );
+
+        when(
+                fallbackGenerator.generate(
+                        fixture.context(),
+                        SiteSentinelReportLanguage.TURKISH
+                )
+        ).thenReturn(
+                turkishFallbackResult
+        );
+
+        RiskRemediationRecommendationGenerationService service =
+                createService(
+                        List.of()
+                );
+
+        RiskRemediationRecommendation result =
+                service.generateAndPersist(
+                        fixture.monitoringRunId(),
+                        fixture.riskId(),
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertEquals(
+                SiteSentinelReportLanguage.TURKISH,
+                result.getReportLanguage()
+        );
+
+        assertEquals(
+                RiskRemediationRecommendationSource
+                        .RULE_BASED_FALLBACK,
+                result.getSource()
+        );
+
+        assertEquals(
+                RiskRemediationFallbackReason
+                        .PROVIDER_UNAVAILABLE,
+                result.getFallbackReason()
+        );
+
+        assertEquals(
+                "risk-remediation-v3",
+                result.getPromptVersion()
+        );
+
+        assertEquals(
+                "risk-remediation-fallback-v3",
+                result.getFallbackRuleVersion()
+        );
+
+        verify(
+                promptFactory
+        ).create(
+                fixture.context(),
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                fallbackGenerator
+        ).generate(
+                fixture.context(),
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                recommendationService
+        ).saveValidated(
+                result
+        );
     }
 
     @Test
@@ -373,7 +476,10 @@ class RiskRemediationRecommendationGenerationServiceTests {
         verify(
                 fallbackGenerator,
                 never()
-        ).generate(any());
+        ).generate(
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -544,7 +650,10 @@ class RiskRemediationRecommendationGenerationServiceTests {
         ).thenReturn(context);
 
         when(
-                promptFactory.create(context)
+                promptFactory.create(
+                        context,
+                        SiteSentinelReportLanguage.ENGLISH
+                )
         ).thenReturn(request);
 
         when(
@@ -554,7 +663,10 @@ class RiskRemediationRecommendationGenerationServiceTests {
         );
 
         when(
-                fallbackGenerator.generate(context)
+                fallbackGenerator.generate(
+                        context,
+                        SiteSentinelReportLanguage.ENGLISH
+                )
         ).thenReturn(fallbackResult);
 
         when(

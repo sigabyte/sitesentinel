@@ -2,181 +2,555 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
   <title>SiteSentinel Dashboard</title>
-  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <link rel="stylesheet"
+        th:href="@{/css/app.css}">
 </head>
-<body>
-<header class="dashboard-header">
-  <div>
-    <h1>SiteSentinel</h1>
 
-    <p>
-      Core platform foundation for website trust monitoring.
-    </p>
-  </div>
+<body class="dashboard-page">
+<main class="dashboard-shell">
 
-  <form th:action="@{/logout}"
-        method="post"
-        class="logout-form">
-    <button type="submit"
-            class="logout-button">
-      Sign out
-    </button>
-  </form>
-</header>
+  <header class="dashboard-header">
+    <div class="dashboard-brand">
+      <div class="dashboard-brand-mark"
+           aria-hidden="true">
+        SS
+      </div>
 
-<section>
-  <h2>Websites</h2>
+      <div class="dashboard-brand-content">
+        <p class="dashboard-eyebrow">
+          Website Trust Operations
+        </p>
 
-  <p>Total websites: <strong th:text="${totalWebsites}">0</strong></p>
-  <p>Active websites: <strong th:text="${activeWebsites}">0</strong></p>
-</section>
+        <h1>SiteSentinel</h1>
 
-<section>
-  <h2>Monitoring runs</h2>
+        <p class="dashboard-header-description">
+          Monitor website integrity, review trust outcomes,
+          and act on operational risks from one secure workspace.
+        </p>
+      </div>
+    </div>
 
-  <p>Total runs: <strong th:text="${totalMonitoringRuns}">0</strong></p>
-  <p>Pending: <strong th:text="${pendingMonitoringRuns}">0</strong></p>
-  <p>Running: <strong th:text="${runningMonitoringRuns}">0</strong></p>
-  <p>Completed: <strong th:text="${completedMonitoringRuns}">0</strong></p>
-  <p>Failed: <strong th:text="${failedMonitoringRuns}">0</strong></p>
-</section>
-<section>
-  <h2>Latest notification events</h2>
+    <div class="dashboard-header-actions">
+      <a href="/websites"
+         th:href="@{/websites}"
+         class="dashboard-button dashboard-button--secondary">
+        View websites
+      </a>
 
-  <p>
-    Unread notification events:
-    <strong th:text="${unreadNotificationEventCount}">0</strong>
-  </p>
+      <a href="/websites/new"
+         th:href="@{/websites/new}"
+         class="dashboard-button dashboard-button--primary">
+        Add website
+      </a>
 
-  <p>
-    <a href="/notifications">Open notification management</a>
-  </p>
+      <form th:action="@{/logout}"
+            method="post"
+            class="logout-form">
+        <button type="submit"
+                class="logout-button">
+          Sign out
+        </button>
+      </form>
+    </div>
+  </header>
 
-  <div th:if="${#lists.isEmpty(latestNotificationEvents)}">
-    <p>No notification events recorded yet.</p>
-    <p class="output-note">
-      Notification events are created after important monitoring outcomes such as failed runs,
-      high-risk trust assessments, trust status changes, trust score declines, or new risk types.
-    </p>
-  </div>
+  <section class="dashboard-intro"
+           aria-labelledby="dashboard-overview-heading">
+    <div>
+      <p class="dashboard-section-eyebrow">
+        Operational overview
+      </p>
 
-  <table th:if="${!#lists.isEmpty(latestNotificationEvents)}" class="notification-table">
-    <thead>
-    <tr>
-      <th>Severity</th>
-      <th>Status</th>
-      <th>Type</th>
-      <th>Title</th>
-      <th>Website ID</th>
-      <th>Monitoring Run ID</th>
-      <th>Created At</th>
-      <th>Open</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="event : ${latestNotificationEvents}">
-      <td>
+      <h2 id="dashboard-overview-heading">
+        Current platform status
+      </h2>
+
+      <p class="dashboard-section-description">
+        A concise view of monitored websites, active execution,
+        failed runs, and unread operational notifications.
+      </p>
+    </div>
+  </section>
+
+  <section class="dashboard-kpi-grid"
+           aria-label="Operational key performance indicators">
+
+    <article class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card-header">
+        <span class="dashboard-kpi-label">
+          Active websites
+        </span>
+
+        <span class="dashboard-kpi-indicator
+                     dashboard-kpi-indicator--healthy"
+              aria-hidden="true"></span>
+      </div>
+
+      <strong class="dashboard-kpi-value" th:text="${activeWebsites}">
+        0
+      </strong>
+
+      <p class="dashboard-kpi-detail">
+        <span th:text="${totalWebsites}">0</span>
+        total websites registered
+      </p>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card-header">
+        <span class="dashboard-kpi-label">
+          Runs in progress
+        </span>
+
+        <span class="dashboard-kpi-indicator
+                     dashboard-kpi-indicator--active"
+              aria-hidden="true"></span>
+      </div>
+
+      <strong class="dashboard-kpi-value" th:text="${runningMonitoringRuns}">
+        0
+      </strong>
+
+      <p class="dashboard-kpi-detail">
+        <span th:text="${pendingMonitoringRuns}">0</span>
+        pending execution
+      </p>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card-header">
+        <span class="dashboard-kpi-label">
+          Failed runs
+        </span>
+
+        <span class="dashboard-kpi-indicator
+                     dashboard-kpi-indicator--danger"
+              aria-hidden="true"></span>
+      </div>
+
+      <strong class="dashboard-kpi-value" th:text="${failedMonitoringRuns}">
+        0
+      </strong>
+
+      <p class="dashboard-kpi-detail">
+        <span th:text="${completedMonitoringRuns}">0</span>
+        successfully completed
+      </p>
+    </article>
+
+    <article class="dashboard-kpi-card">
+      <div class="dashboard-kpi-card-header">
+        <span class="dashboard-kpi-label">
+          Unread notifications
+        </span>
+
+        <span class="dashboard-kpi-indicator
+                     dashboard-kpi-indicator--warning"
+              aria-hidden="true"></span>
+      </div>
+
+      <strong class="dashboard-kpi-value" th:text="${unreadNotificationEventCount}">
+        0
+      </strong>
+
+      <p class="dashboard-kpi-detail">
+        Operational events awaiting review
+      </p>
+    </article>
+
+  </section>
+
+  <section class="dashboard-attention"
+           th:if="${unreadNotificationEventCount > 0}"
+           aria-labelledby="attention-required-heading"
+           aria-live="polite">
+
+    <div class="dashboard-attention-summary">
+      <div class="dashboard-attention-icon"
+           aria-hidden="true">
+        !
+      </div>
+
+      <div class="dashboard-attention-content">
+        <p class="dashboard-section-eyebrow">
+          Operator action
+        </p>
+
+        <h2 id="attention-required-heading">
+          Attention Required
+        </h2>
+
+        <p>
+          <strong th:text="${unreadNotificationEventCount}">
+            0
+          </strong>
+          unread notification events require operational review.
+          Prioritize critical and high-severity events.
+        </p>
+      </div>
+
+      <a href="/notifications"
+         th:href="@{/notifications}"
+         class="dashboard-button dashboard-button--attention">
+        Review notifications
+      </a>
+    </div>
+
+    <div class="dashboard-attention-list"
+         aria-label="Unread high and critical notification events">
+
+      <article class="dashboard-attention-event"
+               th:each="event : ${latestNotificationEvents}"
+               th:if="${event.status.name() == 'UNREAD' and (event.severity.name() == 'CRITICAL' or event.severity.name() == 'HIGH')}">
+
+        <div class="dashboard-attention-event-heading">
         <span class="notification-severity"
               th:classappend="|notification-severity--${#strings.toLowerCase(event.severity)}|"
               th:text="${event.severity}">
-          HIGH
+          CRITICAL
         </span>
-      </td>
-      <td th:text="${event.status}">UNREAD</td>
-      <td th:text="${event.eventType}">EVENT_TYPE</td>
-      <td>
-        <strong th:text="${event.title}">Notification title</strong>
-        <p class="output-note" th:text="${event.message}">Notification message</p>
-      </td>
-      <td th:text="${event.websiteId}">Website ID</td>
-      <td>
-        <a th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${event.websiteId}, runId=${event.monitoringRunId})}"
-           th:text="${event.monitoringRunId}">
-          Monitoring Run ID
-        </a>
-      </td>
-      <td th:text="${event.createdAt}">Created</td>
-      <td>
-        <a th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
-          Detail
-        </a>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-</section>
 
-<section>
-  <h2>Latest monitoring runs</h2>
+          <span class="status-badge status-badge--unread">
+          Unread
+        </span>
+        </div>
 
-  <div th:if="${#lists.isEmpty(latestMonitoringRuns)}">
-    <p>No monitoring runs created yet.</p>
+        <div class="dashboard-attention-event-content">
+          <strong th:text="${event.title}">
+            Notification title
+          </strong>
+
+          <p th:text="${event.message}">
+            Notification message
+          </p>
+        </div>
+
+        <a class="dashboard-attention-event-link"
+           th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
+          Review event
+        </a>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="dashboard-content-grid">
+
+    <section class="dashboard-panel"
+             aria-labelledby="monitoring-runs-heading">
+
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="dashboard-section-eyebrow">
+            Execution
+          </p>
+
+          <h2 id="monitoring-runs-heading">
+            Latest monitoring runs
+          </h2>
+
+          <p class="dashboard-section-description">
+            Most recent monitoring activity and execution outcomes.
+          </p>
+        </div>
+
+        <div class="dashboard-panel-summary">
+          <span th:text="${totalMonitoringRuns}">0</span>
+          total runs
+        </div>
+      </div>
+
+      <div class="dashboard-empty-state"
+           th:if="${#lists.isEmpty(latestMonitoringRuns)}">
+        <strong>No monitoring runs yet</strong>
+
+        <p>
+          Monitoring activity will appear here after a website
+          monitoring run is created.
+        </p>
+      </div>
+
+      <div class="dashboard-table-wrapper"
+           th:if="${!#lists.isEmpty(latestMonitoringRuns)}">
+        <table class="dashboard-table">
+          <thead>
+          <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Website ID</th>
+            <th scope="col">Started</th>
+            <th scope="col">Completed</th>
+            <th scope="col">Created</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:each="run : ${latestMonitoringRuns}">
+            <td>
+              <span class="status-badge"
+                    th:classappend="|status-badge--${#strings.toLowerCase(run.status)}|"
+                    th:text="${run.status}">
+                COMPLETED
+              </span>
+            </td>
+
+            <td>
+              <code class="dashboard-identifier"
+                    th:text="${run.websiteId}">
+                Website ID
+              </code>
+            </td>
+
+            <td th:text="${run.startedAt}">
+              Started
+            </td>
+
+            <td th:text="${run.completedAt}">
+              Completed
+            </td>
+
+            <td th:text="${run.createdAt}">
+              Created
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-panel"
+             aria-labelledby="trust-assessments-heading">
+
+      <div class="dashboard-panel-header">
+        <div>
+          <p class="dashboard-section-eyebrow">
+            Trust posture
+          </p>
+
+          <h2 id="trust-assessments-heading">
+            Latest trust assessments
+          </h2>
+
+          <p class="dashboard-section-description">
+            Recent trust scores, confidence levels, and assessment status.
+          </p>
+        </div>
+      </div>
+
+      <div class="dashboard-empty-state"
+           th:if="${#lists.isEmpty(latestTrustAssessments)}">
+        <strong>No trust assessments yet</strong>
+
+        <p>
+          Trust assessment results will appear after monitoring
+          evidence has been evaluated.
+        </p>
+      </div>
+
+      <div class="dashboard-table-wrapper"
+           th:if="${!#lists.isEmpty(latestTrustAssessments)}">
+        <table class="dashboard-table">
+          <thead>
+          <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Trust score</th>
+            <th scope="col">Confidence</th>
+            <th scope="col">Website ID</th>
+            <th scope="col">Monitoring Run ID</th>
+            <th scope="col">Created</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:each="assessment : ${latestTrustAssessments}">
+            <td>
+              <span class="status-badge"
+                    th:classappend="|status-badge--${#strings.toLowerCase(assessment.trustStatus)}|"
+                    th:text="${assessment.trustStatus}">
+                UNKNOWN
+              </span>
+            </td>
+
+            <td>
+              <strong class="dashboard-score"
+                      th:text="${assessment.trustScore}">
+                0
+              </strong>
+            </td>
+
+            <td th:text="${assessment.confidenceScore}">
+              0
+            </td>
+
+            <td>
+              <code class="dashboard-identifier"
+                    th:text="${assessment.websiteId}">
+                Website ID
+              </code>
+            </td>
+
+            <td>
+              <code class="dashboard-identifier"
+                    th:text="${assessment.monitoringRunId}">
+                Monitoring Run ID
+              </code>
+            </td>
+
+            <td th:text="${assessment.createdAt}">
+              Created
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </div>
 
-  <table th:if="${!#lists.isEmpty(latestMonitoringRuns)}" border="1" cellpadding="8">
-    <thead>
-    <tr>
-      <th>Status</th>
-      <th>Website ID</th>
-      <th>Started At</th>
-      <th>Completed At</th>
-      <th>Created At</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="run : ${latestMonitoringRuns}">
-      <td th:text="${run.status}">COMPLETED</td>
-      <td th:text="${run.websiteId}">Website ID</td>
-      <td th:text="${run.startedAt}">Started</td>
-      <td th:text="${run.completedAt}">Completed</td>
-      <td th:text="${run.createdAt}">Created</td>
-    </tr>
-    </tbody>
-  </table>
-</section>
+  <section class="dashboard-panel"
+           aria-labelledby="notification-events-heading">
 
-<section>
-  <h2>Latest trust assessments</h2>
+    <div class="dashboard-panel-header">
+      <div>
+        <p class="dashboard-section-eyebrow">
+          Notifications
+        </p>
 
-  <div th:if="${#lists.isEmpty(latestTrustAssessments)}">
-    <p>No trust assessments recorded yet.</p>
-  </div>
+        <h2 id="notification-events-heading">
+          Latest notification events
+        </h2>
 
-  <table th:if="${!#lists.isEmpty(latestTrustAssessments)}" border="1" cellpadding="8">
-    <thead>
-    <tr>
-      <th>Status</th>
-      <th>Trust Score</th>
-      <th>Confidence</th>
-      <th>Website ID</th>
-      <th>Monitoring Run ID</th>
-      <th>Created At</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="assessment : ${latestTrustAssessments}">
-      <td th:text="${assessment.trustStatus}">UNKNOWN</td>
-      <td th:text="${assessment.trustScore}">0</td>
-      <td th:text="${assessment.confidenceScore}">0</td>
-      <td th:text="${assessment.websiteId}">Website ID</td>
-      <td th:text="${assessment.monitoringRunId}">Run ID</td>
-      <td th:text="${assessment.createdAt}">Created</td>
-    </tr>
-    </tbody>
-  </table>
-</section>
+        <p class="dashboard-section-description">
+          Important monitoring outcomes and changes requiring awareness.
+        </p>
+      </div>
 
-<section>
-  <h2>Next action</h2>
+      <a href="/notifications"
+         th:href="@{/notifications}"
+         class="dashboard-text-link">
+        Open notification management
+      </a>
+    </div>
 
-  <p>
-    <a href="/websites">View monitored websites</a>
-  </p>
+    <div class="dashboard-empty-state"
+         th:if="${#lists.isEmpty(latestNotificationEvents)}">
+      <strong>No notification events yet</strong>
 
-  <p>
-    <a href="/websites/new">Add website</a>
-  </p>
-</section>
+      <p>
+        Notification events are created after important monitoring
+        outcomes such as failed runs, high-risk trust assessments,
+        trust status changes, trust score declines, or new risk types.
+      </p>
+    </div>
+
+    <div class="dashboard-table-wrapper"
+         th:if="${!#lists.isEmpty(latestNotificationEvents)}">
+      <table class="dashboard-table notification-table">
+        <thead>
+        <tr>
+          <th scope="col">Severity</th>
+          <th scope="col">Status</th>
+          <th scope="col">Event</th>
+          <th scope="col">Notification</th>
+          <th scope="col">Website ID</th>
+          <th scope="col">Monitoring Run ID</th>
+          <th scope="col">Created</th>
+          <th scope="col">
+            <span class="visually-hidden">Action</span>
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="event : ${latestNotificationEvents}">
+          <td>
+            <span class="notification-severity"
+                  th:classappend="|notification-severity--${#strings.toLowerCase(event.severity)}|"
+                  th:text="${event.severity}">
+              HIGH
+            </span>
+          </td>
+
+          <td>
+            <span class="status-badge"
+                  th:classappend="|status-badge--${#strings.toLowerCase(event.status)}|"
+                  th:text="${event.status}">
+              UNREAD
+            </span>
+          </td>
+
+          <td th:text="${event.eventType}">
+            EVENT_TYPE
+          </td>
+
+          <td class="dashboard-notification-content">
+            <strong th:text="${event.title}">
+              Notification title
+            </strong>
+
+            <p th:text="${event.message}">
+              Notification message
+            </p>
+          </td>
+
+          <td>
+            <code class="dashboard-identifier"
+                  th:text="${event.websiteId}">
+              Website ID
+            </code>
+          </td>
+
+          <td>
+            <a class="dashboard-identifier-link"
+               th:href="@{/websites/{websiteId}/monitoring-runs/{runId}(websiteId=${event.websiteId}, runId=${event.monitoringRunId})}">
+              <code class="dashboard-identifier"
+                    th:text="${event.monitoringRunId}">
+                Monitoring Run ID
+              </code>
+            </a>
+          </td>
+
+          <td th:text="${event.createdAt}">
+            Created
+          </td>
+
+          <td>
+            <a class="dashboard-row-action"
+               th:href="@{/notifications/{notificationEventId}(notificationEventId=${event.id})}">
+              Detail
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="dashboard-footer">
+    <p>
+      SiteSentinel single-operator trust monitoring workspace
+    </p>
+
+    <nav aria-label="Dashboard quick actions">
+      <a href="/websites"
+         th:href="@{/websites}">
+        Monitored websites
+      </a>
+
+      <a href="/websites/new"
+         th:href="@{/websites/new}">
+        Add website
+      </a>
+
+      <a href="/notifications"
+         th:href="@{/notifications}">
+        Notifications
+      </a>
+    </nav>
+  </footer>
+
+</main>
 </body>
 </html>

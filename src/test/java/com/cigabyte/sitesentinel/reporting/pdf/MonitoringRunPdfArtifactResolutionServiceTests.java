@@ -1,7 +1,7 @@
 package com.cigabyte.sitesentinel.reporting.pdf;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.doThrow;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +9,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -51,7 +52,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 Optional.of(
@@ -74,7 +76,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
         ).findByMonitoringRunIdAndReportVersion(
                 monitoringRunId,
-                MonitoringRunPdfVersion.V1
+                MonitoringRunPdfVersion.V1,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -88,7 +91,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 never()
         ).generate(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
     }
 
@@ -109,7 +113,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 Optional.empty()
@@ -118,7 +123,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
         when(
                 generationService.generate(
                         websiteId,
-                        monitoringRunId
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.ENGLISH
                 )
         ).thenReturn(
                 generatedArtifact
@@ -139,14 +145,16 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
         ).findByMonitoringRunIdAndReportVersion(
                 monitoringRunId,
-                MonitoringRunPdfVersion.V1
+                MonitoringRunPdfVersion.V1,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
                 generationService
         ).generate(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -166,18 +174,20 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> resolutionService.resolveCurrentVersion(
-                        null,
-                        monitoringRunId
-                )
+                () -> resolutionService
+                        .resolveCurrentVersion(
+                                null,
+                                monitoringRunId
+                        )
         );
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> resolutionService.resolveCurrentVersion(
-                        websiteId,
-                        null
-                )
+                () -> resolutionService
+                        .resolveCurrentVersion(
+                                websiteId,
+                                null
+                        )
         );
 
         verifyNoInteractions(
@@ -206,7 +216,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 requestedMonitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 Optional.of(
@@ -216,10 +227,11 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
 
         assertThrows(
                 IllegalStateException.class,
-                () -> resolutionService.resolveCurrentVersion(
-                        websiteId,
-                        requestedMonitoringRunId
-                )
+                () -> resolutionService
+                        .resolveCurrentVersion(
+                                websiteId,
+                                requestedMonitoringRunId
+                        )
         );
 
         verify(
@@ -227,7 +239,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 never()
         ).generate(
                 websiteId,
-                requestedMonitoringRunId
+                requestedMonitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         verify(
@@ -255,7 +268,8 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
         ).thenReturn(
                 Optional.of(
@@ -275,10 +289,11 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> resolutionService.resolveCurrentVersion(
-                        websiteId,
-                        monitoringRunId
-                )
+                () -> resolutionService
+                        .resolveCurrentVersion(
+                                websiteId,
+                                monitoringRunId
+                        )
         );
 
         verify(
@@ -292,7 +307,81 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 never()
         ).generate(
                 websiteId,
-                monitoringRunId
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    @Test
+    void resolveCurrentVersionReusesExistingTurkishArtifact() {
+        UUID websiteId =
+                UUID.randomUUID();
+
+        UUID monitoringRunId =
+                UUID.randomUUID();
+
+        MonitoringRunPdfArtifact existingArtifact =
+                persistedArtifact(
+                        monitoringRunId
+                );
+
+        when(
+                existingArtifact.getReportLanguage()
+        ).thenReturn(
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        when(
+                artifactService
+                        .findByMonitoringRunIdAndReportVersion(
+                                monitoringRunId,
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+        ).thenReturn(
+                Optional.of(
+                        existingArtifact
+                )
+        );
+
+        MonitoringRunPdfArtifact resolvedArtifact =
+                resolutionService.resolveCurrentVersion(
+                        websiteId,
+                        monitoringRunId,
+                        SiteSentinelReportLanguage.TURKISH
+                );
+
+        assertSame(
+                existingArtifact,
+                resolvedArtifact
+        );
+
+        assertEquals(
+                SiteSentinelReportLanguage.TURKISH,
+                resolvedArtifact.getReportLanguage()
+        );
+
+        verify(
+                artifactService
+        ).findByMonitoringRunIdAndReportVersion(
+                monitoringRunId,
+                MonitoringRunPdfVersion.V1,
+                SiteSentinelReportLanguage.TURKISH
+        );
+
+        verify(
+                artifactService
+        ).validateIntegrity(
+                existingArtifact
+        );
+
+        verify(
+                generationService,
+                never()
+        ).generate(
+                websiteId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.TURKISH
         );
     }
 
@@ -320,6 +409,12 @@ class MonitoringRunPdfArtifactResolutionServiceTests {
                 artifact.getReportVersion()
         ).thenReturn(
                 MonitoringRunPdfVersion.V1.getValue()
+        );
+
+        when(
+                artifact.getReportLanguage()
+        ).thenReturn(
+                SiteSentinelReportLanguage.ENGLISH
         );
 
         return artifact;

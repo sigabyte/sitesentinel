@@ -5,10 +5,12 @@ import com.cigabyte.sitesentinel.monitoring.MonitoringRunStatus;
 import com.cigabyte.sitesentinel.notification.delivery.TelegramDeliveryProperties;
 import com.cigabyte.sitesentinel.notification.delivery.TelegramDocumentDeliveryResult;
 import com.cigabyte.sitesentinel.notification.delivery.TelegramDocumentDeliveryService;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifact;
 import com.cigabyte.sitesentinel.reporting.pdf.MonitoringRunPdfArtifactResolutionService;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -50,9 +52,26 @@ public class AutomaticMonitoringRunReportDispatchService {
     public TelegramDocumentDeliveryResult dispatchCompletedRun(
             MonitoringRun monitoringRun
     ) {
+        return dispatchCompletedRun(
+                monitoringRun,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public TelegramDocumentDeliveryResult dispatchCompletedRun(
+            MonitoringRun monitoringRun,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         MonitoringRun requiredMonitoringRun =
                 requireCompletedRun(
                         monitoringRun
+                );
+
+        SiteSentinelReportLanguage
+                requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "PDF report language is required."
                 );
 
         if (!telegramDeliveryProperties
@@ -82,9 +101,10 @@ public class AutomaticMonitoringRunReportDispatchService {
                     .configurationMissing(
                             "Telegram document delivery "
                                     + "configuration is missing.",
-                            "PDF artifact resolution and dispatch-attempt "
-                                    + "persistence were not performed "
-                                    + "because Telegram configuration "
+                            "PDF artifact resolution and "
+                                    + "dispatch-attempt persistence "
+                                    + "were not performed because "
+                                    + "Telegram configuration "
                                     + "is incomplete."
                     );
         }
@@ -95,8 +115,10 @@ public class AutomaticMonitoringRunReportDispatchService {
         MonitoringRunPdfArtifact artifact =
                 artifactResolutionService
                         .resolveCurrentVersion(
-                                requiredMonitoringRun.getWebsiteId(),
-                                monitoringRunId
+                                requiredMonitoringRun
+                                        .getWebsiteId(),
+                                monitoringRunId,
+                                requiredReportLanguage
                         );
 
         MonitoringRunReportDispatchAttempt pendingAttempt =
@@ -109,7 +131,8 @@ public class AutomaticMonitoringRunReportDispatchService {
         TelegramDocumentDeliveryResult deliveryResult =
                 deliverSafely(
                         artifact,
-                        monitoringRunId
+                        monitoringRunId,
+                        requiredReportLanguage
                 );
 
         if (deliveryResult.isSuccessful()) {
@@ -136,7 +159,8 @@ public class AutomaticMonitoringRunReportDispatchService {
 
     private TelegramDocumentDeliveryResult deliverSafely(
             MonitoringRunPdfArtifact artifact,
-            UUID monitoringRunId
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
     ) {
         try {
             TelegramDocumentDeliveryResult result =
@@ -146,7 +170,8 @@ public class AutomaticMonitoringRunReportDispatchService {
                             artifact.getArtifactBytes(),
                             buildCaption(
                                     monitoringRunId,
-                                    artifact
+                                    artifact,
+                                    reportLanguage
                             )
                     );
 
@@ -166,7 +191,8 @@ public class AutomaticMonitoringRunReportDispatchService {
                     "Telegram document delivery service failed "
                             + "before returning a result. "
                             + "Failure type="
-                            + exception.getClass().getSimpleName()
+                            + exception.getClass()
+                            .getSimpleName()
                             + "."
             );
         }
@@ -174,8 +200,24 @@ public class AutomaticMonitoringRunReportDispatchService {
 
     private String buildCaption(
             UUID monitoringRunId,
-            MonitoringRunPdfArtifact artifact
+            MonitoringRunPdfArtifact artifact,
+            SiteSentinelReportLanguage reportLanguage
     ) {
+        if (reportLanguage
+                == SiteSentinelReportLanguage.TURKISH) {
+
+            return "SiteSentinel izleme "
+                    + "\u00E7al\u0131\u015Ft\u0131rmas\u0131 "
+                    + "raporu"
+                    + "\n\u0130zleme "
+                    + "\u00E7al\u0131\u015Ft\u0131rmas\u0131 "
+                    + "kimli\u011Fi: "
+                    + monitoringRunId
+                    + "\nRapor s\u00FCr\u00FCm\u00FC: "
+                    + artifact.getReportVersion()
+                    + "\nRapor dili: T\u00FCrk\u00E7e";
+        }
+
         return "SiteSentinel monitoring run report"
                 + "\nMonitoring run ID: "
                 + monitoringRunId

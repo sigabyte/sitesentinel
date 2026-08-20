@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @SpringBootTest
 @Transactional
@@ -101,6 +102,11 @@ class MonitoringRunPdfArtifactRepositoryTests {
         );
 
         assertEquals(
+                SiteSentinelReportLanguage.ENGLISH,
+                saved.getReportLanguage()
+        );
+
+        assertEquals(
                 expectedFileName(monitoringRun.getId()),
                 saved.getFileName()
         );
@@ -136,13 +142,60 @@ class MonitoringRunPdfArtifactRepositoryTests {
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 monitoringRun.getId(),
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                SiteSentinelReportLanguage.ENGLISH
                         )
                         .orElseThrow();
 
         assertEquals(
                 saved.getId(),
                 found.getId()
+        );
+    }
+
+    @Test
+    void repositoryVersionLookupRequiresMatchingReportLanguage() {
+        Website website =
+                persistWebsite();
+
+        MonitoringRun monitoringRun =
+                persistCompletedRun(
+                        website
+                );
+
+        MonitoringRunPdfArtifact englishArtifact =
+                artifactService.saveValidated(
+                        createArtifact(
+                                monitoringRun.getId(),
+                                pdfBytes(
+                                        "language-aware-artifact"
+                                ),
+                                FUTURE_BASE_TIME
+                        )
+                );
+
+        MonitoringRunPdfArtifact foundEnglishArtifact =
+                artifactRepository
+                        .findByMonitoringRunIdAndReportVersionAndReportLanguage(
+                                monitoringRun.getId(),
+                                MonitoringRunPdfVersion.V1.getValue(),
+                                SiteSentinelReportLanguage.ENGLISH
+                        )
+                        .orElseThrow();
+
+        assertEquals(
+                englishArtifact.getId(),
+                foundEnglishArtifact.getId()
+        );
+
+        assertTrue(
+                artifactRepository
+                        .findByMonitoringRunIdAndReportVersionAndReportLanguage(
+                                monitoringRun.getId(),
+                                MonitoringRunPdfVersion.V1.getValue(),
+                                SiteSentinelReportLanguage.TURKISH
+                        )
+                        .isEmpty()
         );
     }
 
@@ -359,6 +412,58 @@ class MonitoringRunPdfArtifactRepositoryTests {
     }
 
     @Test
+    void persistenceServiceAllowsSameRunVersionForDifferentLanguages() {
+        Website website =
+                persistWebsite();
+
+        MonitoringRun monitoringRun =
+                persistCompletedRun(
+                        website
+                );
+
+        MonitoringRunPdfArtifact englishArtifact =
+                artifactService.saveValidated(
+                        createArtifact(
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.ENGLISH,
+                                pdfBytes(
+                                        "english-language-artifact"
+                                ),
+                                FUTURE_BASE_TIME
+                        )
+                );
+
+        MonitoringRunPdfArtifact turkishArtifact =
+                artifactService.saveValidated(
+                        createArtifact(
+                                monitoringRun.getId(),
+                                SiteSentinelReportLanguage.TURKISH,
+                                pdfBytes(
+                                        "turkish-language-artifact"
+                                ),
+                                FUTURE_BASE_TIME.plusMinutes(1)
+                        )
+                );
+
+        assertEquals(
+                SiteSentinelReportLanguage.ENGLISH,
+                englishArtifact.getReportLanguage()
+        );
+
+        assertEquals(
+                SiteSentinelReportLanguage.TURKISH,
+                turkishArtifact.getReportLanguage()
+        );
+
+        assertEquals(
+                2,
+                artifactRepository.countByMonitoringRunId(
+                        monitoringRun.getId()
+                )
+        );
+    }
+
+    @Test
     void ownershipSafeRetrievalRejectsArtifactFromDifferentMonitoringRun() {
         Website website = persistWebsite();
 
@@ -490,6 +595,29 @@ class MonitoringRunPdfArtifactRepositoryTests {
                 monitoringRunId,
                 MonitoringRunPdfVersion.V1,
                 expectedFileName(monitoringRunId),
+                artifactBytes,
+                calculateSha256Fingerprint(
+                        artifactBytes
+                ),
+                generatedAt
+        );
+    }
+
+    private MonitoringRunPdfArtifact createArtifact(
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage,
+            byte[] artifactBytes,
+            OffsetDateTime generatedAt
+    ) {
+        return MonitoringRunPdfArtifact.create(
+                monitoringRunId,
+                MonitoringRunPdfVersion.V1,
+                reportLanguage,
+                "monitoring-run-"
+                        + monitoringRunId
+                        + "-"
+                        + reportLanguage.getFileToken()
+                        + ".pdf",
                 artifactBytes,
                 calculateSha256Fingerprint(
                         artifactBytes

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 
 @Service
 public class MonitoringRunPdfArtifactService {
@@ -93,6 +94,39 @@ public class MonitoringRunPdfArtifactService {
                 .findByMonitoringRunIdAndReportVersion(
                         requiredMonitoringRunId,
                         requiredReportVersion.getValue()
+                );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MonitoringRunPdfArtifact>
+    findByMonitoringRunIdAndReportVersion(
+            UUID monitoringRunId,
+            MonitoringRunPdfVersion reportVersion,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
+        UUID requiredMonitoringRunId =
+                requireId(
+                        monitoringRunId,
+                        "Monitoring run ID"
+                );
+
+        MonitoringRunPdfVersion requiredReportVersion =
+                Objects.requireNonNull(
+                        reportVersion,
+                        "PDF report version is required."
+                );
+
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "PDF report language is required."
+                );
+
+        return artifactRepository
+                .findByMonitoringRunIdAndReportVersionAndReportLanguage(
+                        requiredMonitoringRunId,
+                        requiredReportVersion.getValue(),
+                        requiredReportLanguage
                 );
     }
 
@@ -178,17 +212,21 @@ public class MonitoringRunPdfArtifactService {
         validateArtifactIntegrity(artifact);
 
         if (artifactRepository
-                .existsByMonitoringRunIdAndReportVersion(
+                .findByMonitoringRunIdAndReportVersionAndReportLanguage(
                         monitoringRunId,
-                        artifact.getReportVersion()
-                )) {
+                        artifact.getReportVersion(),
+                        artifact.getReportLanguage()
+                )
+                .isPresent()) {
 
             throw new IllegalStateException(
                     "A PDF artifact already exists for "
                             + "monitoringRunId="
                             + monitoringRunId
-                            + " and reportVersion="
+                            + ", reportVersion="
                             + artifact.getReportVersion()
+                            + ", and reportLanguage="
+                            + artifact.getReportLanguage()
                             + "."
             );
         }

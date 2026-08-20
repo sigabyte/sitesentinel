@@ -2,6 +2,7 @@ package com.cigabyte.sitesentinel.reporting.pdf;
 
 import com.cigabyte.sitesentinel.monitoring.MonitoringRun;
 import com.cigabyte.sitesentinel.monitoring.MonitoringRunRepository;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.website.Website;
 import com.cigabyte.sitesentinel.website.WebsiteRepository;
 import org.apache.pdfbox.Loader;
@@ -92,9 +93,14 @@ class MonitoringRunPdfArtifactGenerationIntegrationTests {
         );
 
         assertEquals(
+                SiteSentinelReportLanguage.ENGLISH,
+                artifact.getReportLanguage()
+        );
+
+        assertEquals(
                 "sitesentinel-monitoring-run-"
                         + monitoringRun.getId()
-                        + "-v1.pdf",
+                        + "-en-v1.pdf",
                 artifact.getFileName()
         );
 

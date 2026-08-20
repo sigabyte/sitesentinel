@@ -1,5 +1,6 @@
 package com.cigabyte.sitesentinel.reporting.pdf;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -16,7 +17,8 @@ public class MonitoringRunPdfArtifactResolutionService {
 
     public MonitoringRunPdfArtifactResolutionService(
             MonitoringRunPdfArtifactService artifactService,
-            MonitoringRunPdfArtifactGenerationService generationService
+            MonitoringRunPdfArtifactGenerationService
+                    generationService
     ) {
         this.artifactService =
                 artifactService;
@@ -28,6 +30,18 @@ public class MonitoringRunPdfArtifactResolutionService {
     public MonitoringRunPdfArtifact resolveCurrentVersion(
             UUID websiteId,
             UUID monitoringRunId
+    ) {
+        return resolveCurrentVersion(
+                websiteId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    public MonitoringRunPdfArtifact resolveCurrentVersion(
+            UUID websiteId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
     ) {
         UUID requiredWebsiteId =
                 requireId(
@@ -41,29 +55,41 @@ public class MonitoringRunPdfArtifactResolutionService {
                         "Monitoring run ID"
                 );
 
+        SiteSentinelReportLanguage
+                requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "PDF report language is required."
+                );
+
         MonitoringRunPdfArtifact artifact =
                 artifactService
                         .findByMonitoringRunIdAndReportVersion(
                                 requiredMonitoringRunId,
-                                MonitoringRunPdfVersion.V1
+                                MonitoringRunPdfVersion.V1,
+                                requiredReportLanguage
                         )
                         .orElseGet(
-                                () -> generationService.generate(
-                                        requiredWebsiteId,
-                                        requiredMonitoringRunId
-                                )
+                                () ->
+                                        generationService.generate(
+                                                requiredWebsiteId,
+                                                requiredMonitoringRunId,
+                                                requiredReportLanguage
+                                        )
                         );
 
         return validateResolvedArtifact(
                 artifact,
-                requiredMonitoringRunId
+                requiredMonitoringRunId,
+                requiredReportLanguage
         );
     }
 
     private MonitoringRunPdfArtifact
     validateResolvedArtifact(
             MonitoringRunPdfArtifact artifact,
-            UUID expectedMonitoringRunId
+            UUID expectedMonitoringRunId,
+            SiteSentinelReportLanguage expectedReportLanguage
     ) {
         MonitoringRunPdfArtifact requiredArtifact =
                 Objects.requireNonNull(
@@ -98,6 +124,16 @@ public class MonitoringRunPdfArtifactResolutionService {
                     "Resolved monitoring run PDF artifact "
                             + "does not use the current "
                             + "report version."
+            );
+        }
+
+        if (requiredArtifact.getReportLanguage()
+                != expectedReportLanguage) {
+
+            throw new IllegalStateException(
+                    "Resolved monitoring run PDF artifact "
+                            + "does not use the requested "
+                            + "report language."
             );
         }
 

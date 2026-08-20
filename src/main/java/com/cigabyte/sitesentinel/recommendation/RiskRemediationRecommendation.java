@@ -1,5 +1,6 @@
 package com.cigabyte.sitesentinel.recommendation;
 
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +33,14 @@ public class RiskRemediationRecommendation {
 
     @Column(name = "risk_id", nullable = false)
     private UUID riskId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "report_language",
+            nullable = false,
+            length = 20
+    )
+    private SiteSentinelReportLanguage reportLanguage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
@@ -106,6 +115,7 @@ public class RiskRemediationRecommendation {
     private RiskRemediationRecommendation(
             UUID monitoringRunId,
             UUID riskId,
+            SiteSentinelReportLanguage reportLanguage,
             RiskRemediationRecommendationSource source,
             RiskRemediationFallbackReason fallbackReason,
             RiskRemediationRecommendationContent content,
@@ -127,6 +137,12 @@ public class RiskRemediationRecommendation {
                 riskId,
                 "Risk ID is required."
         );
+
+        this.reportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
+                );
 
         this.source = Objects.requireNonNull(
                 source,
@@ -217,9 +233,38 @@ public class RiskRemediationRecommendation {
             Integer contextEvidenceCount,
             OffsetDateTime generatedAt
     ) {
+        return aiGenerated(
+                monitoringRunId,
+                riskId,
+                SiteSentinelReportLanguage.ENGLISH,
+                content,
+                providerName,
+                modelName,
+                promptVersion,
+                contextFingerprint,
+                contextFindingCount,
+                contextEvidenceCount,
+                generatedAt
+        );
+    }
+
+    public static RiskRemediationRecommendation aiGenerated(
+            UUID monitoringRunId,
+            UUID riskId,
+            SiteSentinelReportLanguage reportLanguage,
+            RiskRemediationRecommendationContent content,
+            String providerName,
+            String modelName,
+            String promptVersion,
+            String contextFingerprint,
+            Integer contextFindingCount,
+            Integer contextEvidenceCount,
+            OffsetDateTime generatedAt
+    ) {
         return new RiskRemediationRecommendation(
                 monitoringRunId,
                 riskId,
+                reportLanguage,
                 RiskRemediationRecommendationSource.AI,
                 RiskRemediationFallbackReason.NONE,
                 content,
@@ -248,10 +293,44 @@ public class RiskRemediationRecommendation {
             Integer contextEvidenceCount,
             OffsetDateTime generatedAt
     ) {
+        return ruleBasedFallback(
+                monitoringRunId,
+                riskId,
+                SiteSentinelReportLanguage.ENGLISH,
+                content,
+                fallbackReason,
+                attemptedProviderName,
+                attemptedModelName,
+                promptVersion,
+                fallbackRuleVersion,
+                contextFingerprint,
+                contextFindingCount,
+                contextEvidenceCount,
+                generatedAt
+        );
+    }
+
+    public static RiskRemediationRecommendation ruleBasedFallback(
+            UUID monitoringRunId,
+            UUID riskId,
+            SiteSentinelReportLanguage reportLanguage,
+            RiskRemediationRecommendationContent content,
+            RiskRemediationFallbackReason fallbackReason,
+            String attemptedProviderName,
+            String attemptedModelName,
+            String promptVersion,
+            String fallbackRuleVersion,
+            String contextFingerprint,
+            Integer contextFindingCount,
+            Integer contextEvidenceCount,
+            OffsetDateTime generatedAt
+    ) {
         return new RiskRemediationRecommendation(
                 monitoringRunId,
                 riskId,
-                RiskRemediationRecommendationSource.RULE_BASED_FALLBACK,
+                reportLanguage,
+                RiskRemediationRecommendationSource
+                        .RULE_BASED_FALLBACK,
                 fallbackReason,
                 content,
                 attemptedProviderName,
@@ -446,6 +525,10 @@ public class RiskRemediationRecommendation {
 
     public UUID getRiskId() {
         return riskId;
+    }
+
+    public SiteSentinelReportLanguage getReportLanguage() {
+        return reportLanguage;
     }
 
     public RiskRemediationRecommendationSource getSource() {

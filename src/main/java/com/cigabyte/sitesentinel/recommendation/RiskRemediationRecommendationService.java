@@ -1,6 +1,7 @@
 package com.cigabyte.sitesentinel.recommendation;
 
 import com.cigabyte.sitesentinel.monitoring.MonitoringRunRepository;
+import com.cigabyte.sitesentinel.reporting.SiteSentinelReportLanguage;
 import com.cigabyte.sitesentinel.risk.Risk;
 import com.cigabyte.sitesentinel.risk.RiskRepository;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,20 @@ public class RiskRemediationRecommendationService {
             UUID riskId,
             UUID monitoringRunId
     ) {
+        return findLatestByRiskIdAndMonitoringRunId(
+                riskId,
+                monitoringRunId,
+                SiteSentinelReportLanguage.ENGLISH
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<RiskRemediationRecommendation>
+    findLatestByRiskIdAndMonitoringRunId(
+            UUID riskId,
+            UUID monitoringRunId,
+            SiteSentinelReportLanguage reportLanguage
+    ) {
         UUID requiredRiskId =
                 requireId(
                         riskId,
@@ -111,10 +126,17 @@ public class RiskRemediationRecommendationService {
                         "Monitoring run ID"
                 );
 
+        SiteSentinelReportLanguage requiredReportLanguage =
+                Objects.requireNonNull(
+                        reportLanguage,
+                        "Recommendation report language is required."
+                );
+
         return recommendationRepository
-                .findFirstByRiskIdAndMonitoringRunIdOrderByGeneratedAtDescCreatedAtDesc(
+                .findFirstByRiskIdAndMonitoringRunIdAndReportLanguageOrderByGeneratedAtDescCreatedAtDesc(
                         requiredRiskId,
-                        requiredMonitoringRunId
+                        requiredMonitoringRunId,
+                        requiredReportLanguage
                 );
     }
 
