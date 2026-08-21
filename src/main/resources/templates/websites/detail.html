@@ -1,29 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${website.name}">Website Detail</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title th:text="${website.name}">
+        Website Detail
+    </title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
 </head>
-<body>
-<h1 th:text="${website.name}">Website Name</h1>
 
-<p>
-    <a href="/">Dashboard</a> |
-    <a href="/websites">Back to websites</a> |
-    <a th:href="@{/notifications(websiteId=${website.id})}">
-        Website notifications
-    </a>
-</p>
+<body class="application-page">
+<main class="application-shell">
 
-<section>
-    <h2>Website baseline</h2>
+    <div th:replace="~{fragments/application-header
+            :: applicationHeader('websites')}">
+        Application header
+    </div>
 
-    <p>Domain: <strong th:text="${website.domain}">example.com</strong></p>
-    <p>Status: <strong th:text="${website.status}">ACTIVE</strong></p>
-    <p>Created at: <strong th:text="${website.createdAt}">Created</strong></p>
-    <p>Updated at: <strong th:text="${website.updatedAt}">Updated</strong></p>
-</section>
+    <section class="page-heading"
+             aria-labelledby="website-detail-heading">
+
+        <div class="page-heading__content">
+            <p class="page-heading__eyebrow">
+                Website Monitoring
+            </p>
+
+            <h1 id="website-detail-heading"
+                th:text="${website.name}">
+                Website Name
+            </h1>
+
+            <p class="page-heading__description technical-value"
+               th:text="${website.domain}">
+                example.com
+            </p>
+        </div>
+
+        <div class="page-actions">
+            <a class="application-button application-button--secondary"
+               href="/websites"
+               th:href="@{/websites}">
+                Back to websites
+            </a>
+
+            <a class="application-button application-button--primary"
+               th:href="@{/notifications(websiteId=${website.id})}">
+                Website notifications
+            </a>
+        </div>
+    </section>
+
+    <div class="section-stack">
+
+        <section class="application-panel website-baseline-panel"
+                 aria-labelledby="website-baseline-heading">
+
+            <header class="application-panel__header">
+                <div>
+                    <p class="application-panel__eyebrow">
+                        Website Identity
+                    </p>
+
+                    <h2 id="website-baseline-heading">
+                        Website baseline
+                    </h2>
+
+                    <p class="application-panel__description">
+                        Primary website identity and lifecycle metadata
+                        used across monitoring and assessment operations.
+                    </p>
+                </div>
+            </header>
+
+            <div class="application-panel__body">
+                <div class="detail-grid">
+
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            Domain
+                        </span>
+
+                        <span class="detail-value detail-value--technical"
+                              th:text="${website.domain}">
+                            example.com
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            Status
+                        </span>
+
+                        <span class="detail-value">
+                            <span class="status-badge"
+                                  th:classappend="|status-badge--${#strings.toLowerCase(website.status)}|"
+                                  th:text="${website.status}">
+                                ACTIVE
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            Created at
+                        </span>
+
+                        <span class="detail-value detail-value--muted"
+                              th:text="${website.createdAt}">
+                            Created
+                        </span>
+                    </div>
+
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            Updated at
+                        </span>
+
+                        <span class="detail-value detail-value--muted"
+                              th:text="${website.updatedAt}">
+                            Updated
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
 <section>
     <h2>Scheduled monitoring</h2>
 
@@ -353,5 +459,8 @@
         </tbody>
     </table>
 </section>
+
+    </div>
+</main>
 </body>
 </html>

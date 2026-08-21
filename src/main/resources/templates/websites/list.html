@@ -1,44 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Monitored Websites</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Monitored Websites | SiteSentinel</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
 </head>
-<body>
-<h1>Monitored Websites</h1>
 
-<p>
-    <a href="/">Dashboard</a> |
-    <a href="/websites/new">Add website</a>
-</p>
+<body class="application-page">
+<main class="application-shell">
 
-<section th:if="${#lists.isEmpty(websites)}">
-    <p>No websites added yet.</p>
-    <p>Add your first website to start building the monitoring baseline.</p>
-</section>
+    <div th:replace="~{fragments/application-header
+            :: applicationHeader('websites')}">
+        Application header
+    </div>
 
-<table th:if="${!#lists.isEmpty(websites)}" border="1" cellpadding="8">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Domain</th>
-        <th>Status</th>
-        <th>Created At</th>
-        <th>Open</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="website : ${websites}">
-        <td th:text="${website.name}">Website Name</td>
-        <td th:text="${website.domain}">example.com</td>
-        <td th:text="${website.status}">ACTIVE</td>
-        <td th:text="${website.createdAt}">Created</td>
-        <td>
-            <a th:href="@{/websites/{id}(id=${website.id})}">Open</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+    <section class="page-heading"
+             aria-labelledby="website-list-heading">
+
+        <div class="page-heading__content">
+            <p class="page-heading__eyebrow">
+                Monitoring Inventory
+            </p>
+
+            <h1 id="website-list-heading">
+                Monitored Websites
+            </h1>
+
+            <p class="page-heading__description">
+                Review the websites included in SiteSentinel monitoring
+                and open their latest operational history.
+            </p>
+        </div>
+
+        <div class="page-actions">
+            <a class="application-button application-button--primary"
+               href="/websites/new"
+               th:href="@{/websites/new}">
+                Add website
+            </a>
+        </div>
+    </section>
+
+    <section class="application-panel website-list-panel"
+             aria-labelledby="website-inventory-heading">
+
+        <header class="application-panel__header">
+            <div>
+                <p class="application-panel__eyebrow">
+                    Website Inventory
+                </p>
+
+                <h2 id="website-inventory-heading">
+                    Monitoring targets
+                </h2>
+
+                <p class="application-panel__description">
+                    Websites currently available for monitoring,
+                    assessment and report review.
+                </p>
+            </div>
+
+            <span class="application-panel__count"
+                  th:text="${#lists.size(websites)}">
+                0
+            </span>
+        </header>
+
+        <div class="application-panel__body">
+
+            <div class="state-message state-message--empty"
+                 th:if="${#lists.isEmpty(websites)}">
+
+                <div class="state-message__icon"
+                     aria-hidden="true">
+                    +
+                </div>
+
+                <div class="state-message__content">
+                    <h3>No websites added yet</h3>
+
+                    <p>
+                        Add your first website to start building
+                        a monitoring and trust assessment baseline.
+                    </p>
+
+                    <a class="application-button application-button--primary"
+                       href="/websites/new"
+                       th:href="@{/websites/new}">
+                        Add your first website
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-container"
+                 th:if="${!#lists.isEmpty(websites)}"
+                 tabindex="0"
+                 role="region"
+                 aria-label="Monitored websites table">
+
+                <table class="data-table website-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">
+                            Name
+                        </th>
+
+                        <th scope="col">
+                            Domain
+                        </th>
+
+                        <th scope="col">
+                            Status
+                        </th>
+
+                        <th scope="col">
+                            Created
+                        </th>
+
+                        <th scope="col"
+                            class="data-table__action-heading">
+                            <span class="visually-hidden">
+                                Actions
+                            </span>
+                        </th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="website : ${websites}">
+                        <td>
+                            <strong th:text="${website.name}">
+                                Website Name
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="technical-value"
+                                  th:text="${website.domain}">
+                                example.com
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="|status-badge--${#strings.toLowerCase(website.status)}|"
+                                  th:text="${website.status}">
+                                ACTIVE
+                            </span>
+                        </td>
+
+                        <td th:text="${website.createdAt}">
+                            Created
+                        </td>
+
+                        <td class="data-table__action-cell">
+                            <a class="application-row-action"
+                               th:href="@{/websites/{id}(id=${website.id})}">
+                                Open
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</main>
 </body>
 </html>

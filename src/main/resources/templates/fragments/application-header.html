@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header class="application-header"
+        th:fragment="applicationHeader(activeSection)">
+
+    <div class="application-header__top-row">
+        <a class="application-brand"
+           href="/"
+           th:href="@{/}"
+           aria-label="SiteSentinel dashboard">
+
+            <span class="application-brand-mark"
+                  aria-hidden="true">
+                SS
+            </span>
+
+            <span class="application-brand-content">
+                <span class="application-brand-eyebrow">
+                    Website Trust Operations
+                </span>
+
+                <span class="application-brand-name">
+                    SiteSentinel
+                </span>
+            </span>
+        </a>
+
+        <form class="application-logout-form"
+              th:action="@{/logout}"
+              method="post">
+
+            <button class="application-logout-button"
+                    type="submit">
+                Sign out
+            </button>
+        </form>
+    </div>
+
+    <nav class="application-navigation"
+         aria-label="Primary navigation">
+
+        <a class="application-navigation__link"
+           th:classappend="${activeSection == 'dashboard'}
+                   ? ' application-navigation__link--active'
+                   : ''"
+           th:attr="aria-current=${activeSection == 'dashboard'}
+                   ? 'page'
+                   : null"
+           href="/"
+           th:href="@{/}">
+            Dashboard
+        </a>
+
+        <a class="application-navigation__link"
+           th:classappend="${activeSection == 'websites'}
+                   ? ' application-navigation__link--active'
+                   : ''"
+           th:attr="aria-current=${activeSection == 'websites'}
+                   ? 'page'
+                   : null"
+           href="/websites"
+           th:href="@{/websites}">
+            Websites
+        </a>
+
+        <a class="application-navigation__link"
+           th:classappend="${activeSection == 'notifications'}
+                   ? ' application-navigation__link--active'
+                   : ''"
+           th:attr="aria-current=${activeSection == 'notifications'}
+                   ? 'page'
+                   : null"
+           href="/notifications"
+           th:href="@{/notifications}">
+            Notifications
+        </a>
+
+        <a class="application-navigation__link"
+           th:classappend="${activeSection == 'delivery-settings'}
+                   ? ' application-navigation__link--active'
+                   : ''"
+           th:attr="aria-current=${activeSection == 'delivery-settings'}
+                   ? 'page'
+                   : null"
+           href="/notifications/delivery/settings"
+           th:href="@{/notifications/delivery/settings}">
+            Delivery Settings
+        </a>
+    </nav>
+</header>
+
+</body>
+</html>

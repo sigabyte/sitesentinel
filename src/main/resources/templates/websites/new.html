@@ -1,40 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add Website</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <title>Add Website | SiteSentinel</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/app.css}">
 </head>
-<body>
-<h1>Add Website</h1>
 
-<p>
-    <a href="/">Dashboard</a> |
-    <a href="/websites">Back to websites</a>
-</p>
+<body class="application-page">
+<main class="application-shell">
 
-<div th:if="${errorMessage}">
-    <p th:text="${errorMessage}" style="color: red;">Error message</p>
-</div>
-
-<form th:action="@{/websites}" th:object="${request}" method="post">
-    <div>
-        <label for="name">Website name</label><br>
-        <input id="name" type="text" th:field="*{name}" placeholder="Company website">
-        <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color: red;">Name error</p>
+    <div th:replace="~{fragments/application-header
+            :: applicationHeader('websites')}">
+        Application header
     </div>
 
-    <br>
+    <section class="page-heading"
+             aria-labelledby="add-website-heading">
 
-    <div>
-        <label for="domain">Domain</label><br>
-        <input id="domain" type="text" th:field="*{domain}" placeholder="example.com">
-        <p th:if="${#fields.hasErrors('domain')}" th:errors="*{domain}" style="color: red;">Domain error</p>
+        <div class="page-heading__content">
+            <p class="page-heading__eyebrow">
+                Monitoring Inventory
+            </p>
+
+            <h1 id="add-website-heading">
+                Add Website
+            </h1>
+
+            <p class="page-heading__description">
+                Register a website target to begin building its
+                monitoring, evidence and trust assessment history.
+            </p>
+        </div>
+
+        <div class="page-actions">
+            <a class="application-button application-button--secondary"
+               href="/websites"
+               th:href="@{/websites}">
+                Back to websites
+            </a>
+        </div>
+    </section>
+
+    <div class="form-layout">
+
+        <section class="application-panel form-panel"
+                 aria-labelledby="website-details-heading">
+
+            <header class="application-panel__header">
+                <div>
+                    <p class="application-panel__eyebrow">
+                        Website Configuration
+                    </p>
+
+                    <h2 id="website-details-heading">
+                        Website details
+                    </h2>
+
+                    <p class="application-panel__description">
+                        Enter the public identity of the website
+                        SiteSentinel should monitor.
+                    </p>
+                </div>
+            </header>
+
+            <div class="application-panel__body">
+
+                <div class="state-message state-message--failure"
+                     th:if="${errorMessage != null}"
+                     role="alert">
+
+                    <div class="state-message__icon"
+                         aria-hidden="true">
+                        !
+                    </div>
+
+                    <div class="state-message__content">
+                        <h3>Website could not be added</h3>
+
+                        <p th:text="${errorMessage}">
+                            Error message
+                        </p>
+                    </div>
+                </div>
+
+                <form class="application-form"
+                      th:action="@{/websites}"
+                      th:object="${request}"
+                      method="post">
+
+                    <div class="form-field">
+                        <label for="name">
+                            Website name
+                        </label>
+
+                        <p class="form-field__help"
+                           id="name-help">
+                            Use a clear name that will be easy to
+                            recognize in monitoring and report views.
+                        </p>
+
+                        <input class="form-control"
+                               th:classappend="${#fields.hasErrors('name')}
+                                       ? ' form-control--invalid'
+                                       : ''"
+                               id="name"
+                               type="text"
+                               th:field="*{name}"
+                               placeholder="Company website"
+                               autocomplete="organization"
+                               aria-describedby="name-help name-error"
+                               th:attr="aria-invalid=${#fields.hasErrors('name')}">
+
+                        <p class="field-error"
+                           id="name-error"
+                           th:if="${#fields.hasErrors('name')}"
+                           th:errors="*{name}">
+                            Name error
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="domain">
+                            Domain
+                        </label>
+
+                        <p class="form-field__help"
+                           id="domain-help">
+                            Enter the public domain without a path,
+                            for example example.com.
+                        </p>
+
+                        <input class="form-control"
+                               th:classappend="${#fields.hasErrors('domain')}
+                                       ? ' form-control--invalid'
+                                       : ''"
+                               id="domain"
+                               type="text"
+                               th:field="*{domain}"
+                               placeholder="example.com"
+                               inputmode="url"
+                               autocapitalize="none"
+                               spellcheck="false"
+                               aria-describedby="domain-help domain-error"
+                               th:attr="aria-invalid=${#fields.hasErrors('domain')}">
+
+                        <p class="field-error"
+                           id="domain-error"
+                           th:if="${#fields.hasErrors('domain')}"
+                           th:errors="*{domain}">
+                            Domain error
+                        </p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="application-button application-button--primary"
+                                type="submit">
+                            Add website
+                        </button>
+
+                        <a class="application-button application-button--secondary"
+                           href="/websites"
+                           th:href="@{/websites}">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside class="application-panel form-guidance"
+               aria-labelledby="website-guidance-heading">
+
+            <div class="application-panel__body">
+                <p class="application-panel__eyebrow">
+                    Before You Continue
+                </p>
+
+                <h2 id="website-guidance-heading">
+                    Target guidance
+                </h2>
+
+                <ul class="guidance-list">
+                    <li>
+                        Enter only a website you are authorized
+                        to monitor.
+                    </li>
+
+                    <li>
+                        Use the primary public domain without
+                        an individual page path.
+                    </li>
+
+                    <li>
+                        Confirm the spelling before creating
+                        the monitoring target.
+                    </li>
+                </ul>
+            </div>
+        </aside>
     </div>
 
-    <br>
-
-    <button type="submit">Add website</button>
-</form>
+</main>
 </body>
 </html>
