@@ -6467,3 +6467,795 @@ existing application data.
 
 The monitoring, recommendation, bilingual reporting, delivery, authentication
 and CSRF boundaries remain unchanged.
+
+
+---
+
+# Sprint 21 Architecture Review
+
+## Sprint 21 Closure
+
+Sprint 21 title:
+
+Premium Application Shell and Website Management Experience
+
+Final verification:
+
+- targeted UI tests run: 45;
+- targeted UI failures: 0;
+- targeted UI errors: 0;
+- targeted UI skipped: 0;
+- full regression tests run: 465;
+- full regression failures: 0;
+- full regression errors: 0;
+- full regression skipped: 0;
+- build: SUCCESS;
+- latest migration: V19;
+- checkpoint commit: `774752c`;
+- local and remote branches: synchronized;
+- working tree: clean.
+
+## Architecture Objective
+
+Sprint 21 extends the premium authenticated dashboard presentation established
+in Sprint 20 into a reusable application-wide presentation foundation and the
+website management surfaces.
+
+The implementation remains server-rendered through Thymeleaf.
+
+No client-side application architecture, JavaScript framework or frontend
+build pipeline is introduced.
+
+## Shared Application Shell Decision
+
+Sprint 21 introduces a reusable authenticated application header through:
+
+- `templates/fragments/application-header.html`;
+- shared application-shell styles in `static/css/app.css`.
+
+The shared header provides:
+
+- product identity;
+- primary application navigation;
+- active navigation state;
+- authenticated POST-based logout;
+- responsive horizontal navigation;
+- mobile-safe layout behavior;
+- visible keyboard focus.
+
+The logout boundary remains protected by the existing Spring Security and CSRF
+configuration.
+
+## Reusable Presentation Foundation
+
+Sprint 21 introduces reusable presentation components for:
+
+- application page shells;
+- responsive content containers;
+- premium panels;
+- page headings;
+- primary and secondary actions;
+- table containers;
+- data tables;
+- status badges;
+- technical values;
+- form layouts;
+- form controls;
+- validation states;
+- empty states;
+- detail summaries;
+- responsive mobile behavior.
+
+These components are presentation-only.
+
+They do not introduce application-domain state or persistence behavior.
+
+## Website Management Surface Decision
+
+Sprint 21 applies the shared presentation foundation to:
+
+- website list;
+- website creation;
+- website detail.
+
+The existing website controller, service, repository and entity behavior remain
+unchanged.
+
+The website pages continue to use the existing:
+
+- website registration flow;
+- website validation rules;
+- monitoring-run execution actions;
+- monitoring schedule controls;
+- report and traceability navigation;
+- CSRF-protected POST operations.
+
+## Responsive and Accessibility Decision
+
+Sprint 21 adds or preserves:
+
+- responsive viewport metadata;
+- semantic main content structure;
+- shared navigation labelling;
+- visible focus states;
+- readable status indicators;
+- mobile-safe form layouts;
+- contained table overflow;
+- accessible form labels;
+- validation messages;
+- text-based status communication;
+- reduced-motion behavior.
+
+Long technical values remain available in the rendered content and are
+presented through overflow-safe styling.
+
+## Dependency Decision
+
+Sprint 21 introduces no:
+
+- JavaScript framework;
+- CSS framework;
+- external font;
+- external icon dependency;
+- CDN dependency;
+- frontend build system;
+- client-side routing;
+- client-side state store.
+
+The application remains compatible with the existing Spring Boot static
+resource and Thymeleaf deployment model.
+
+## Test Architecture
+
+Sprint 21 adds focused presentation regression contracts through:
+
+- `ApplicationPremiumFoundationStylesheetTests.java`;
+- `ApplicationHeaderFragmentTemplateTests.java`;
+- `ApplicationHeaderStylesheetTests.java`;
+- `ApplicationContentComponentsStylesheetTests.java`;
+- `ApplicationFormComponentsStylesheetTests.java`;
+- `ApplicationDetailComponentsStylesheetTests.java`;
+- `WebsiteListPremiumTemplateTests.java`;
+- `WebsiteCreatePremiumTemplateTests.java`;
+- `WebsiteDetailPremiumShellTemplateTests.java`.
+
+The focused UI suite verifies 45 presentation contracts.
+
+The full regression verifies 465 tests without failure.
+
+## Preserved Domains
+
+Sprint 21 does not change:
+
+- website persistence;
+- monitoring execution;
+- evidence collection;
+- evidence analysis;
+- findings;
+- risks;
+- trust assessments;
+- comparison;
+- notification generation;
+- recommendation generation;
+- bilingual PDF generation;
+- PDF artifact persistence;
+- Telegram dispatch;
+- authentication;
+- authorization;
+- CSRF enforcement;
+- database schema.
+
+## Accepted Limitations
+
+Sprint 21 accepts:
+
+- server-rendered application pages;
+- one shared operator presentation;
+- no dark mode;
+- no user-specific theme preferences;
+- no client-side table sorting;
+- no client-side filtering;
+- no customizable navigation;
+- progressive application of the shared presentation foundation to remaining
+  pages in future work.
+
+## Architecture Decision
+
+Sprint 21 is architecturally approved.
+
+The application now has a reusable premium presentation foundation and a
+consistent website management experience while preserving all existing domain,
+security, monitoring, reporting and delivery boundaries.
+
+
+---
+
+# Sprint 22 Architecture Review
+
+## Sprint 22 Opening
+
+Sprint 22 title:
+
+Website Health and Active Problem Detection
+
+Opening baseline:
+
+- branch: `main`;
+- commit: `36db857`;
+- remote branch: synchronized with `origin/main`;
+- working tree: clean;
+- tests run: 465;
+- failures: 0;
+- errors: 0;
+- skipped: 0;
+- build: SUCCESS;
+- latest migration: V19;
+- architecture decision: ADR-0005 accepted;
+- premium UI checkpoint: `774752c`;
+- public IPv4 target classification fix: completed;
+- controlled runtime scan of `rbcborealis.com`: successful.
+
+## Architecture Objective
+
+Sprint 22 extends SiteSentinel from homepage-focused assessment into controlled
+website health and active problem detection.
+
+The scanner will detect concrete problems that are already present on the
+monitored website while preserving the authoritative lifecycle:
+
+Website
+↓
+MonitoringRun
+↓
+Evidence Collection
+↓
+CollectedEvidence
+↓
+NormalizedEvidence
+↓
+Finding / Detected Website Problem
+↓
+Risk
+↓
+TrustAssessment
+↓
+Recommendation
+↓
+Report and Notification
+
+`Finding` remains the canonical domain representation of a detected website
+problem.
+
+Sprint 22 does not introduce a separate `WebsiteIssue` entity, repository,
+service, table or processing pipeline.
+
+## Approved Detection Scope
+
+The approved initial detection scope includes:
+
+- controlled same-origin crawling;
+- broken internal links;
+- broken images and selected assets;
+- redirect failures and unsafe redirect outcomes;
+- mixed-content references;
+- robots.txt health and crawl limitations;
+- declared sitemap availability and structural health;
+- missing and multiple H1 elements;
+- images without an alt attribute;
+- basic HTTP response and resource performance signals;
+- TLS handshake and certificate health signals.
+
+The implementation must remain deterministic and evidence-first.
+
+Artificial Intelligence may explain persisted findings and risks but must not
+perform authoritative website problem detection.
+
+## Approved Safety Boundary
+
+The website health scanner must remain:
+
+- same-origin after the accepted homepage origin is established;
+- SSRF protected;
+- redirect aware;
+- request bounded;
+- page bounded;
+- asset bounded;
+- depth bounded;
+- duration bounded;
+- sequential during the initial baseline;
+- limited to safe retrieval methods;
+- unable to submit forms;
+- unable to issue state-changing HTTP requests;
+- unable to expand into unrestricted external crawling.
+
+Reaching a configured scan limit produces a partial scan outcome or scan
+limitation evidence.
+
+A scan limitation must not be presented as a confirmed website problem.
+
+## Outcome Classification
+
+Website health observations will be interpreted as:
+
+1. Confirmed problem
+2. Suspected problem
+3. Scan limitation
+
+A confirmed problem is directly supported by deterministic evidence.
+
+A suspected problem is supported by an incomplete but meaningful technical
+signal and must use an appropriately limited confidence score.
+
+A scan limitation records that SiteSentinel could not complete a check because
+of access control, rate limiting, robots policy, safety policy or scan budget.
+
+HTTP 401, 403 and 429 outcomes must not automatically be classified as broken
+resources.
+
+The absence of robots.txt or an undeclared `/sitemap.xml` resource must not
+automatically be classified as a website problem.
+
+An image with `alt=""` must not automatically be classified as a problem
+because it may represent a decorative image.
+
+## Sprint 22 Non-Goals
+
+Sprint 22 does not include:
+
+- a `WebsiteIssue` domain model;
+- JavaScript-rendered crawling;
+- headless browser execution;
+- Lighthouse;
+- Core Web Vitals;
+- authenticated crawling;
+- form submission;
+- POST, PUT, PATCH or DELETE scanning operations;
+- external website crawling;
+- vulnerability exploitation;
+- directory brute forcing;
+- port scanning;
+- CAPTCHA bypass;
+- unlimited sitemap traversal;
+- full WCAG auditing;
+- full SEO auditing;
+- distributed crawling;
+- high-concurrency crawling.
+
+
+## Approved Controlled Implementation Sequence
+
+Sprint 22 will be implemented through controlled and independently verified
+blocks.
+
+Each block must preserve the regression baseline established by the previous
+completed block.
+
+### Block 22A — Architecture Foundation
+
+Status: COMPLETED
+
+Scope:
+
+- define the canonical problem representation;
+- preserve `Finding` as the domain model;
+- reject a duplicate `WebsiteIssue` model;
+- define confirmed, suspected and limitation outcomes;
+- define the same-origin crawl boundary;
+- define SSRF and redirect safety;
+- define bounded scan behavior;
+- define the initial detection scope.
+
+Architecture artifact:
+
+- `ADR-0005-website-health-and-active-problem-detection.md`.
+
+Completion commit:
+
+- `36db857`.
+
+### Block 22B — Scanner Configuration and Budget Foundation
+
+Scope:
+
+- introduce health-scan enablement;
+- introduce page, depth, asset, request and duration limits;
+- define validated configuration defaults;
+- introduce an execution budget model;
+- verify limit accounting and exhaustion behavior;
+- ensure budget exhaustion does not become a confirmed website problem.
+
+No network crawling will be introduced in this block.
+
+### Block 22C — URL Normalization and Same-Origin Policy
+
+Scope:
+
+- normalize discovered HTTP and HTTPS URLs;
+- resolve relative references;
+- normalize default ports;
+- remove fragments;
+- reject embedded credentials;
+- reject unsupported schemes;
+- compare normalized origins;
+- deduplicate normalized targets;
+- preserve the existing configured-target validation behavior.
+
+No crawl queue or resource fetching will be introduced in this block.
+
+### Block 22D — Redirect-Aware Safe HTTP Retrieval
+
+Scope:
+
+- extract reusable safe request behavior from the existing collection boundary;
+- preserve explicit redirect handling;
+- validate every redirect destination;
+- capture redirect-hop evidence;
+- preserve adaptive response storage;
+- preserve streaming response analysis;
+- preserve response-body cleanup;
+- prevent unsafe cross-origin crawl expansion.
+
+No broad website crawl will be introduced in this block.
+
+### Block 22E — Controlled Same-Origin HTML Crawl
+
+Scope:
+
+- establish the accepted final homepage origin;
+- introduce a sequential crawl queue;
+- track page depth;
+- track visited URLs;
+- enforce page, request and duration budgets;
+- respect applicable robots rules;
+- record complete and partial scan outcomes;
+- collect page-level HTTP and HTML evidence.
+
+Asset verification and problem findings remain outside this block.
+
+### Block 22F — Internal Link and Asset Health Evidence
+
+Scope:
+
+- discover bounded internal link references;
+- discover bounded image, stylesheet and script references;
+- verify same-origin resource availability;
+- distinguish broken, unavailable, restricted and rate-limited outcomes;
+- record deterministic resource evidence;
+- avoid classifying HTTP 401, 403 or 429 as broken resources.
+
+### Block 22G — Redirect and Mixed-Content Detection
+
+Scope:
+
+- classify redirect loops;
+- classify redirect-limit exhaustion;
+- classify invalid redirect locations;
+- classify broken redirect destinations;
+- detect HTTPS-to-HTTP downgrade;
+- distinguish active and passive mixed content;
+- create evidence-backed findings through the analysis boundary.
+
+### Block 22H — Robots and Sitemap Health
+
+Scope:
+
+- preserve robots.txt as a crawl-policy input;
+- distinguish missing robots.txt from a robots failure;
+- discover declared sitemap locations;
+- inspect bounded sitemap and sitemap-index resources;
+- detect malformed declared sitemaps;
+- detect unavailable declared sitemaps;
+- avoid treating an undeclared missing `/sitemap.xml` as a problem.
+
+### Block 22I — HTML Structure and Image Alternative Text
+
+Scope:
+
+- collect H1 counts;
+- detect missing H1;
+- detect multiple H1 elements;
+- detect images without an alt attribute;
+- preserve `alt=""` as a potentially valid decorative-image value;
+- detect empty or malformed image source references;
+- avoid claiming full accessibility compliance.
+
+### Block 22J — Basic HTTP Performance Signals
+
+Scope:
+
+- collect response-header duration;
+- collect total response duration;
+- collect response size;
+- collect redirect count;
+- collect page resource count;
+- observe eligible response compression;
+- apply configurable thresholds;
+- avoid representing HTTP measurements as Core Web Vitals.
+
+### Block 22K — TLS and Certificate Health
+
+Scope:
+
+- capture available TLS session evidence;
+- capture certificate validity dates;
+- detect expired certificates;
+- detect certificates not yet valid;
+- detect approaching expiry;
+- classify supported handshake and identity failures;
+- avoid unsupported certificate conclusions from generic transport errors.
+
+### Block 22L — Finding, Risk and Trust Integration
+
+Scope:
+
+- introduce stable website-health evidence types;
+- introduce stable website-problem finding types;
+- map supported findings to risks;
+- preserve finding confidence separately from risk severity;
+- prevent duplicate logical findings and risks;
+- ensure scan limitations do not reduce trust as confirmed problems.
+
+### Block 22M — UI, Recommendation and Bilingual Report Integration
+
+Scope:
+
+- present findings as Detected Website Problems;
+- show affected page or resource;
+- show supporting evidence;
+- show confidence;
+- show associated risk;
+- include remediation and verification guidance;
+- preserve English and Turkish report separation;
+- preserve PDF artifact generation;
+- preserve Telegram report dispatch.
+
+### Block 22N — Runtime Verification and Sprint Closure
+
+Scope:
+
+- run targeted package regressions;
+- run the complete regression suite;
+- perform controlled runtime scanning;
+- verify request and duration limits;
+- verify same-origin enforcement;
+- verify SSRF rejection;
+- verify problem traceability;
+- verify bilingual reports;
+- verify that external providers are not called unintentionally;
+- update architecture and engineering documentation;
+- commit and synchronize the completed sprint.
+
+## Controlled Block Exit Rule
+
+A block is complete only when:
+
+- its defined scope is implemented;
+- its targeted tests pass;
+- the full regression passes when the block changes production behavior;
+- no unrelated files are modified;
+- `git diff --check` is clean;
+- its architecture boundaries remain preserved;
+- the result is reviewed before the next block begins.
+
+A later block must not be pulled into an earlier block merely because adjacent
+code is being edited.
+
+
+## Block 22B File-Level Implementation Contract
+
+Block 22B is limited to scanner configuration and an in-memory health-scan
+budget model.
+
+It introduces no HTTP requests, crawl queue, URL discovery, evidence records,
+findings, risks, migration or UI change.
+
+### Existing Production File to Modify
+
+#### `src/main/java/com/cigabyte/sitesentinel/scanner/ScannerProperties.java`
+
+Purpose:
+
+- own the externally configurable website-health scan limits;
+- provide safe defaults;
+- prevent invalid zero or negative limits;
+- enforce conservative hard maximum values;
+- preserve all existing scanner properties and behavior.
+
+Planned properties:
+
+- `healthScanEnabled`;
+- `maxCrawlPages`;
+- `maxCrawlDepth`;
+- `maxAssetChecks`;
+- `maxHealthScanRequests`;
+- `maxHealthScanDurationSeconds`;
+- `maxLinksPerPage`;
+- `maxAssetsPerPage`.
+
+Approved defaults:
+
+- health scan enabled: `true`;
+- maximum crawl pages: `25`;
+- maximum crawl depth: `2`;
+- maximum asset checks: `100`;
+- maximum health-scan requests: `150`;
+- maximum health-scan duration: `60` seconds;
+- maximum discovered links per page: `200`;
+- maximum discovered assets per page: `200`.
+
+Approved hard maximum values:
+
+- maximum crawl pages: `100`;
+- maximum crawl depth: `5`;
+- maximum asset checks: `500`;
+- maximum health-scan requests: `1000`;
+- maximum health-scan duration: `300` seconds;
+- maximum discovered links per page: `1000`;
+- maximum discovered assets per page: `1000`.
+
+The hard maximum values are safety boundaries.
+
+External configuration may lower the limits but must not silently create
+effectively unrestricted crawling.
+
+Existing properties, including timeout, redirect, private-target, adaptive-body
+and temporary-directory settings, must remain unchanged.
+
+#### `src/main/resources/application.properties`
+
+Purpose:
+
+- expose the approved website-health scanner defaults;
+- keep runtime configuration explicit;
+- preserve all existing property values.
+
+Planned entries:
+
+- `sitesentinel.scanner.health-scan-enabled=true`;
+- `sitesentinel.scanner.max-crawl-pages=25`;
+- `sitesentinel.scanner.max-crawl-depth=2`;
+- `sitesentinel.scanner.max-asset-checks=100`;
+- `sitesentinel.scanner.max-health-scan-requests=150`;
+- `sitesentinel.scanner.max-health-scan-duration-seconds=60`;
+- `sitesentinel.scanner.max-links-per-page=200`;
+- `sitesentinel.scanner.max-assets-per-page=200`.
+
+These properties do not activate network crawling until a later block wires the
+health-scan orchestrator.
+
+### New Production Files
+
+#### `src/main/java/com/cigabyte/sitesentinel/engine/collection/health/WebsiteHealthScanLimitReason.java`
+
+Purpose:
+
+- define stable reasons why a health scan cannot expand further.
+
+Initial values:
+
+- `PAGE_LIMIT_REACHED`;
+- `DEPTH_LIMIT_REACHED`;
+- `ASSET_LIMIT_REACHED`;
+- `REQUEST_LIMIT_REACHED`;
+- `DURATION_LIMIT_REACHED`.
+
+The enum represents scanner execution limits.
+
+It does not represent website problems or finding types.
+
+#### `src/main/java/com/cigabyte/sitesentinel/engine/collection/health/WebsiteHealthScanBudget.java`
+
+Purpose:
+
+- enforce per-run page, depth, asset, request and duration limits;
+- track acquired capacity in memory;
+- expose deterministic exhaustion reasons;
+- support partial scan outcomes in later blocks.
+
+The budget must:
+
+- be created separately for each health scan;
+- be independent of global application state;
+- accept validated limits;
+- use an injected `Clock` for deterministic duration testing;
+- record its start time;
+- reject expansion after the duration limit;
+- prevent page acquisition above the page limit;
+- prevent page admission above the depth limit;
+- prevent asset acquisition above the asset limit;
+- prevent request acquisition above the request limit;
+- expose the encountered limit reasons;
+- avoid negative counters;
+- avoid exceeding a limit by one operation;
+- remain sequential and non-concurrent in the Sprint 22 baseline.
+
+The budget must not:
+
+- perform HTTP requests;
+- normalize URLs;
+- create evidence;
+- create findings;
+- create risks;
+- persist state;
+- depend on repositories;
+- depend on Spring application context;
+- fail a complete monitoring run merely because a limit is reached.
+
+Approved acquisition semantics:
+
+- an operation succeeds only when capacity remains;
+- a rejected operation does not increment its counter;
+- reaching a limit records the corresponding limit reason;
+- duration exhaustion prevents additional acquisitions;
+- depth rejection does not consume page capacity;
+- page, asset and request capacities remain separately accounted.
+
+### New Test Files
+
+#### `src/test/java/com/cigabyte/sitesentinel/scanner/ScannerPropertiesTests.java`
+
+Required coverage:
+
+- approved default values;
+- health-scan enablement setter;
+- zero and negative values are clamped to safe minimums;
+- values above hard maximums are clamped to safety ceilings;
+- existing scanner property behavior remains preserved.
+
+#### `src/test/java/com/cigabyte/sitesentinel/engine/collection/health/WebsiteHealthScanBudgetTests.java`
+
+Required coverage:
+
+- valid page acquisition;
+- page limit exhaustion;
+- depth limit rejection;
+- depth rejection does not consume page capacity;
+- valid asset acquisition;
+- asset limit exhaustion;
+- valid request acquisition;
+- request limit exhaustion;
+- rejected acquisition does not exceed counters;
+- duration limit exhaustion using a deterministic clock;
+- duration exhaustion prevents later acquisitions;
+- encountered limit reasons are exposed;
+- budget instances do not share counters;
+- invalid constructor limits are rejected.
+
+### Files Explicitly Unchanged in Block 22B
+
+Block 22B must not modify:
+
+- `HttpEvidenceCollectionEngine.java`;
+- `MonitoringExecutionService.java`;
+- `RuleBasedEvidenceAnalysisEngine.java`;
+- `RuleBasedRiskEvaluationEngine.java`;
+- `WebsiteTargetValidator.java`;
+- evidence entities or repositories;
+- finding entities or repositories;
+- risk entities or repositories;
+- database migrations;
+- templates;
+- CSS;
+- reporting;
+- recommendations;
+- notifications.
+
+## Block 22B Verification Gate
+
+The initial expected production change set is exactly four files:
+
+- two existing files modified;
+- two new files created.
+
+The initial expected test change set is exactly two new files.
+
+Verification order:
+
+1. Run `ScannerPropertiesTests`.
+2. Run `WebsiteHealthScanBudgetTests`.
+3. Run both Block 22B test classes together.
+4. Run the complete regression suite.
+5. Run `git diff --check`.
+6. Confirm that no network call was introduced.
+7. Confirm that no migration was introduced.
+8. Review the file list before commit.
