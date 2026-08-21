@@ -208,7 +208,9 @@ public class WebsiteTargetValidator {
             return true;
         }
 
-        if (first == 192 && second == 0) {
+        if (first == 192
+                && second == 0
+                && octets[2] == 0) {
             return true;
         }
 
